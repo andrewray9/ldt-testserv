@@ -1679,7 +1679,6 @@ async function authSubmit() {
     await loadDJList();
     await loadHomeConfig();
     await loadDrewDJFreestyles();
-    loadFavoriteFriends();
     enterApp(finalUsername);
 
   } catch (err) {
@@ -1692,6 +1691,7 @@ async function authSubmit() {
 function enterApp(username){
   currentUser=username;isAdmin=username===ADMIN_USER;
   localStorage.setItem('ld_user',username);
+  loadFavoriteFriends();
   hideSplash();
   document.getElementById('auth-wrap').style.display='none';
   document.getElementById('app').style.display='block';
@@ -1843,7 +1843,6 @@ async function tryAutoLogin() {
       await loadDJList();
       await loadHomeConfig();
       await loadDrewDJFreestyles();
-      loadFavoriteFriends();
       enterApp(user);
       return true;
     }
