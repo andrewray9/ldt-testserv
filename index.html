@@ -821,10 +821,7 @@
   <div id="tab-bank" class="section">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:.75rem;">
       <p class="section-note" style="margin-bottom:0">Browse all dances</p>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        <button class="btn sm" onclick="openSpotifyModal()" style="background:#1DB954;color:#fff;border-color:#1DB954;display:inline-flex;align-items:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg> Create Playlist</button>
-        <button class="btn sm info" onclick="openSuggestModal()">&#43; Suggest a Dance</button>
-      </div>
+      <button class="btn sm info" onclick="openSuggestModal()">&#43; Suggest a Dance</button>
     </div>
     <div class="bank-controls">
       <div class="bank-search-row">
@@ -1206,7 +1203,6 @@
       <div class="sp-footer-actions">
         <span class="sp-count" id="sp-count">0 songs selected</span>
         <button class="btn" onclick="closeSpotifyModal()">Cancel</button>
-        <button class="btn sm danger" id="sp-disconnect-btn" onclick="spDisconnect()" style="display:none">Disconnect</button>
         <button class="sp-create-btn" id="sp-create-btn" onclick="spCreatePlaylist()" disabled>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
           Create in Spotify
@@ -4450,8 +4446,8 @@ window.addEventListener('pagehide', flushPendingSaves);
 // To use: register your redirect URI in the Spotify Developer
 // Dashboard and set SP_CLIENT_ID below.
 // ============================================================
-const SP_CLIENT_ID = '3b9f961bed9a4475bfb3a4eb3fdcaad3';
-const SP_SCOPES    = 'playlist-modify-public playlist-modify-private user-read-private user-read-email';
+const SP_CLIENT_ID = '';
+const SP_SCOPES    = 'playlist-modify-public playlist-modify-private';
 const SP_REDIRECT  = 'https://andrewray9.github.io/ldt-testserv/';
 
 let spSelectedIds = new Set(); // set of bank dance IDs that are selected
@@ -4488,7 +4484,6 @@ function openSpotifyModal(){
   // Show login area only if no token and client ID is configured
   const hasClientId = SP_CLIENT_ID && SP_CLIENT_ID !== 'YOUR_SPOTIFY_CLIENT_ID';
   document.getElementById('sp-login-area').style.display = (hasClientId && !spToken()) ? 'flex' : 'none';
-  document.getElementById('sp-disconnect-btn').style.display = (hasClientId && spToken()) ? 'inline-flex' : 'none';
   document.getElementById('sp-playlist-modal').style.display='flex';
   // Handle OAuth callback if we're returning from Spotify
   spHandleCallback();
@@ -4554,13 +4549,6 @@ function spUpdateFooter(){
 }
 
 // ---- OAuth PKCE ----
-function spDisconnect(){
-  spClearToken();
-  document.getElementById('sp-login-area').style.display='flex';
-  document.getElementById('sp-disconnect-btn').style.display='none';
-  spShowStatus('info','Disconnected. Connect again to use a different account.');
-}
-
 async function spStartLogin(){
   if(!SP_CLIENT_ID||SP_CLIENT_ID==='YOUR_SPOTIFY_CLIENT_ID'){
     spShowStatus('error','No Spotify Client ID configured. Ask the app admin to set SP_CLIENT_ID.');return;
@@ -4574,8 +4562,7 @@ async function spStartLogin(){
   sessionStorage.setItem('sp_pending_name',document.getElementById('sp-playlist-name').value||'My Line Dances');
   const params=new URLSearchParams({
     client_id:SP_CLIENT_ID, response_type:'code', redirect_uri:SP_REDIRECT,
-    code_challenge_method:'S256', code_challenge:challenge, scope:SP_SCOPES, state:'sp_oauth',
-    show_dialog:'true'
+    code_challenge_method:'S256', code_challenge:challenge, scope:SP_SCOPES, state:'sp_oauth'
   });
   const webUrl='https://accounts.spotify.com/authorize?'+params;
   // On iOS, try the spotify:// deep link first so the native app handles auth.
