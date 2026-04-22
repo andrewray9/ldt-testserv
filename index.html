@@ -35,7 +35,12 @@
         --pink-bg:#2a1020;--pink-border:#8a2050;--pink-text:#f07ab0;
       }
     }
-    html,body{min-height:100vh;background:var(--bg3);color:var(--t1);font-family:'DM Sans',sans-serif;}
+    html,body{min-height:100vh;background:var(--bg3);color:var(--t1);font-family:'DM Sans',sans-serif;overflow-x:hidden;}
+    @media(max-width:640px){
+      input,select,textarea{font-size:16px!important;}
+      .app{padding:1rem 1rem 5rem;}
+      h1{font-size:24px;}
+    }
 
     /* AUTH */
     .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem 1rem;}
@@ -642,7 +647,7 @@
   <div id="tab-home" class="section visible">
     <p class="home-greeting" id="home-greeting">Where would you like to go?</p>
     <div class="home-grid">
-      <button class="home-card hc-blue" id="home-card-bank" onclick="switchTab('bank')">
+      <button class="home-card hc-blue" id="home-card-bank" onclick="setBankView('all',document.getElementById('bank-view-all-pill'));switchTab('bank')">
         <span class="home-card-icon">🎵</span>
         <span class="home-card-title">Dance Bank</span>
         <span class="home-card-desc">Browse all dances, tutorials & demos</span>
@@ -734,6 +739,13 @@
       <button class="sort-btn active" id="know-sort-btn" onclick="toggleSort('know')">A–Z</button>
       <button class="sort-btn" id="know-fav-btn" onclick="toggleFavFilter()">&#9829; Favorites</button>
     </div>
+    <div class="bank-filter-row" id="know-diff-filters" style="margin-bottom:1rem;">
+      <span class="filter-pill active" onclick="setListFilter('know','all',this)">All</span>
+      <span class="filter-pill" onclick="setListFilter('know','Beginner',this)">Beginner</span>
+      <span class="filter-pill" onclick="setListFilter('know','Improver',this)">Improver</span>
+      <span class="filter-pill" onclick="setListFilter('know','Intermediate',this)">Intermediate</span>
+      <span class="filter-pill" onclick="setListFilter('know','Advanced',this)">Advanced</span>
+    </div>
     <div id="know-list" class="dance-list"></div>
   </div>
 
@@ -742,6 +754,13 @@
     <div class="search-sort-row">
       <input type="text" id="learn-search" placeholder="Search..." oninput="renderList('learn')">
       <button class="sort-btn active" id="learn-sort-btn" onclick="toggleSort('learn')">A–Z</button>
+    </div>
+    <div class="bank-filter-row" id="learn-diff-filters" style="margin-bottom:1rem;">
+      <span class="filter-pill active" onclick="setListFilter('learn','all',this)">All</span>
+      <span class="filter-pill" onclick="setListFilter('learn','Beginner',this)">Beginner</span>
+      <span class="filter-pill" onclick="setListFilter('learn','Improver',this)">Improver</span>
+      <span class="filter-pill" onclick="setListFilter('learn','Intermediate',this)">Intermediate</span>
+      <span class="filter-pill" onclick="setListFilter('learn','Advanced',this)">Advanced</span>
     </div>
     <div id="learn-list" class="dance-list"></div>
   </div>
@@ -1017,6 +1036,7 @@ let homeConfig={}; // admin-configurable home card gradients
 let selectedDate='',nightSelections={};
 let isSignUp=false,saveTimeout=null,nightSaveTimeout=null;
 let bankFilter='all';
+let listFilter={know:'all',learn:'all'};
 let bankView='all'; // 'all' | 'know' | 'learn'
 let sortState={bank:true,know:true,learn:true,pick:true};
 let favFilterActive=false;
@@ -1757,6 +1777,12 @@ function setBankFilter(diff,el){
   document.querySelectorAll('#bank-diff-filters .filter-pill').forEach(p=>p.classList.remove('active'));
   el.classList.add('active');renderBank();
 }
+function setListFilter(type,diff,el){
+  listFilter[type]=diff;
+  document.querySelectorAll(`#${type}-diff-filters .filter-pill`).forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  renderList(type);
+}
 function setBankView(view,el){
   bankView=view;
   // Update pill styles for view row
@@ -1769,9 +1795,9 @@ function setBankView(view,el){
   if(view==='all'){el.style.background='var(--t1)';el.style.color='var(--bg)';el.style.borderColor='var(--t1)';}
   else if(view==='know'){el.style.background='var(--green-bg)';el.style.color='var(--green-text)';el.style.borderColor='var(--green-border)';}
   else if(view==='learn'){el.style.background='var(--blue-bg)';el.style.color='var(--blue-text)';el.style.borderColor='var(--blue-border)';}
-  // Show/hide difficulty filters — only meaningful on 'all' view
+  // Show difficulty filters for all views (all, know, learn)
   const diffRow=document.getElementById('bank-diff-filters');
-  if(diffRow) diffRow.style.display=(view==='all')?'':'none';
+  if(diffRow) diffRow.style.display='';
   renderBank();
 }
 function isInList(name,type){return state[type].some(d=>d.name.toLowerCase()===name.toLowerCase());}
@@ -1783,6 +1809,12 @@ function renderBank(){
   if(bankView==='know'||bankView==='learn'){
     const listItems=[...state[bankView]];
     let filtered=listItems.filter(d=>!q||d.name.toLowerCase().includes(q.toLowerCase()));
+    if(bankFilter!=='all'){
+      filtered=filtered.filter(d=>{
+        const be=bank.find(b=>b.name.toLowerCase()===d.name.toLowerCase());
+        return be?.difficulty===bankFilter;
+      });
+    }
     if(sortState.bank) filtered.sort((a,b)=>a.name.localeCompare(b.name));
     if(!filtered.length){
       const label=bankView==='know'?'Dances I Know':'Want to Learn';
@@ -2088,6 +2120,13 @@ function renderList(type){
   const q=searchEl?searchEl.value:'';
   let items=applySortAndSearch(state[type],q,sortState[type]);
   if(type==='know'&&favFilterActive) items=items.filter(d=>isFav(d.id));
+  if(listFilter[type]&&listFilter[type]!=='all'){
+    const diff=listFilter[type];
+    items=items.filter(d=>{
+      const bankEntry=bank.find(b=>b.name.toLowerCase()===d.name.toLowerCase());
+      return bankEntry?.difficulty===diff;
+    });
+  }
   if(!items.length){
     el.innerHTML=`<div class="empty">${
       favFilterActive&&type==='know'?'No favorites yet — click the heart on any dance!'
@@ -2095,13 +2134,33 @@ function renderList(type){
       :'No dances on your wish list yet.'
     }</div>`;return;
   }
-  el.innerHTML=items.map(d=>`
-    <div class="dance-item">
-      ${type==='know'?`<button class="fav-btn ${isFav(d.id)?'active':''}" onclick="toggleFav('${d.id}')" title="${isFav(d.id)?'Unfavorite':'Favorite'}">&#9829;</button>`:''}
-      <span class="name">${esc(d.name)}</span>
-      ${type==='learn'?`<button class="btn sm success" onclick="moveToKnow('${d.id}')">I know it now!</button>`:''}
-      <button class="btn sm danger" onclick="removeDance('${type}','${d.id}')">Remove</button>
-    </div>`).join('');
+  el.innerHTML=items.map(d=>{
+    const bankEntry=bank.find(b=>b.name.toLowerCase()===d.name.toLowerCase());
+    const diffBadge=bankEntry?.difficulty?`<span class="diff-badge diff-${bankEntry.difficulty}" style="font-size:10px;">${bankEntry.difficulty}</span>`:'';
+    const demoBtn=bankEntry?.demo?`<a class="link-btn demo" href="${escA(bankEntry.demo)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">&#9654; Demo</a>`:'';
+    const tutBtn=bankEntry?.tutorial?`<a class="link-btn tutorial" href="${escA(bankEntry.tutorial)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">&#127891; Tutorial</a>`:'';
+    const statPills=bankEntry?[
+      bankEntry.counts!=null?`<span class="bank-detail-stat"><strong>${bankEntry.counts}</strong> counts</span>`:'',
+      bankEntry.walls!=null?`<span class="bank-detail-stat"><strong>${bankEntry.walls}</strong> walls</span>`:'',
+      bankEntry.tags!=null?`<span class="bank-detail-stat"><strong>${bankEntry.tags}</strong> tags</span>`:'',
+    ].filter(Boolean).join(''):'';
+    const hasDropdown=demoBtn||tutBtn||statPills;
+    const actionBtns=`${type==='learn'?`<button class="btn sm success" onclick="moveToKnow('${d.id}')">I know it now!</button>`:''}
+      <button class="btn sm danger" onclick="removeDance('${type}','${d.id}')">Remove</button>`;
+    return `<div class="bank-item" id="list-item-${d.id}">
+      <div class="bank-item-head" onclick="this.parentElement.classList.toggle('open')">
+        ${type==='know'?`<button class="fav-btn ${isFav(d.id)?'active':''}" onclick="event.stopPropagation();toggleFav('${d.id}')" title="${isFav(d.id)?'Unfavorite':'Favorite'}" style="font-size:16px;margin-right:2px;">&#9829;</button>`:''}
+        <span class="bank-item-name">${esc(d.name)}</span>
+        <div class="bank-item-meta">${diffBadge}</div>
+        <span class="bank-item-caret">&#9660;</span>
+      </div>
+      <div class="bank-item-body">
+        ${statPills?`<div class="bank-detail-row">${statPills}</div>`:''}
+        ${(demoBtn||tutBtn)?`<div class="bank-detail-links">${demoBtn}${tutBtn}</div>`:''}
+        <div class="bank-detail-actions">${actionBtns}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ---- Night (auto-save) ----
