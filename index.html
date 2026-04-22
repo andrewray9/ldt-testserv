@@ -4449,6 +4449,7 @@ window.addEventListener('pagehide', flushPendingSaves);
 // To use: register your redirect URI in the Spotify Developer
 // Dashboard and set SP_CLIENT_ID below.
 // ============================================================
+const SP_CLIENT_ID = '3b9f961bed9a4475bfb3a4eb3fdcaad3';
 const SP_SCOPES    = 'playlist-modify-public playlist-modify-private';
 const SP_REDIRECT  = location.origin + location.pathname; // same page
 
@@ -4480,7 +4481,7 @@ function openSpotifyModal(){
   renderSpModal();
   spUpdateFooter();
   // Show login area only if no token and client ID is configured
-  const hasClientId = SP_CLIENT_ID && SP_CLIENT_ID !== 'YOUR_SPOTIFY_CLIENT_ID';
+  const hasClientId = SP_CLIENT_ID && SP_CLIENT_ID !== '3b9f961bed9a4475bfb3a4eb3fdcaad3';
   document.getElementById('sp-login-area').style.display = (hasClientId && !spToken()) ? 'flex' : 'none';
   document.getElementById('sp-playlist-modal').style.display='flex';
   // Handle OAuth callback if we're returning from Spotify
@@ -4548,7 +4549,7 @@ function spUpdateFooter(){
 
 // ---- OAuth PKCE ----
 async function spStartLogin(){
-  if(!SP_CLIENT_ID||SP_CLIENT_ID==='YOUR_SPOTIFY_CLIENT_ID'){
+  if(!SP_CLIENT_ID||SP_CLIENT_ID==='3b9f961bed9a4475bfb3a4eb3fdcaad3'){
     spShowStatus('error','No Spotify Client ID configured. Ask the app admin to set SP_CLIENT_ID.');return;
   }
   const verifier=spRandStr(64);
@@ -4604,7 +4605,7 @@ async function spHandleCallback(){
 // ---- Create the playlist ----
 async function spCreatePlaylist(){
   const token=spToken();
-  const hasClientId=SP_CLIENT_ID&&SP_CLIENT_ID!=='YOUR_SPOTIFY_CLIENT_ID';
+  const hasClientId=SP_CLIENT_ID&&SP_CLIENT_ID!=='3b9f961bed9a4475bfb3a4eb3fdcaad3';
   // If no client ID configured, fall back to opening links
   if(!hasClientId){ spOpenLinksOnly(); return; }
   if(!token){ spShowStatus('info','Please connect your Spotify account first.');document.getElementById('sp-login-area').style.display='flex';return; }
