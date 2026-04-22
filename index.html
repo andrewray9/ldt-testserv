@@ -98,7 +98,7 @@
     }
     @keyframes tabIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
     .section{display:none;opacity:0;}
-    .section.visible{display:block;animation:tabIn 0.4s cubic-bezier(.25,.8,.25,1) both;}
+    .section.visible{display:block;animation:tabIn 0.7s cubic-bezier(.25,.8,.25,1) both;}
 
     /* HOME TAB */
     .home-greeting{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:6px;}
@@ -240,7 +240,17 @@
 
     /* ADMIN FORM */
     .admin-form{background:var(--amber-bg);border:0.5px solid var(--amber-border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;margin-bottom:1.5rem;}
-    .admin-form-title{font-size:13px;font-weight:500;color:var(--amber-text);margin-bottom:1rem;}
+    .admin-form-title{font-size:13px;font-weight:500;color:var(--amber-text);margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
+    .admin-form-title .admin-caret{font-size:11px;color:var(--amber-text);opacity:0.7;transition:transform 0.2s;flex-shrink:0;}
+    .admin-form.collapsed .admin-form-title{margin-bottom:0;}
+    .admin-form.collapsed .admin-form-title .admin-caret{transform:rotate(-90deg);}
+    .admin-form-body{overflow:hidden;transition:opacity 0.2s;}
+    .admin-form.collapsed .admin-form-body{display:none;}
+    .admin-section-collapsible{margin-bottom:1.5rem;}
+    .admin-section-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;font-size:12px;font-weight:500;color:var(--t2);letter-spacing:.05em;text-transform:uppercase;margin:1.5rem 0 .75rem;padding-bottom:.5rem;border-bottom:0.5px solid var(--b3);}
+    .admin-section-header .admin-caret{font-size:11px;transition:transform 0.2s;}
+    .admin-section-collapsible.collapsed .admin-section-header .admin-caret{transform:rotate(-90deg);}
+    .admin-section-collapsible.collapsed .admin-section-body{display:none;}
     .admin-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
     @media(max-width:540px){.admin-form-grid{grid-template-columns:1fr;}}
     .admin-form-grid input,.admin-form-grid select{padding:8px 12px;border:0.5px solid var(--amber-border);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;width:100%;}
@@ -980,42 +990,52 @@
 
   <!-- ADMIN -->
   <div id="tab-admin" class="section">
-    <div class="admin-form" style="margin-bottom:1.25rem;">
-      <div class="admin-form-title">&#127775; Home Card Gradients</div>
-      <p style="font-size:13px;color:var(--t2);margin-bottom:1rem;">Customize the gradient for each card on the home screen. Changes are saved instantly and affect all users.</p>
-      <div id="admin-home-gradients"></div>
+    <div class="admin-form" id="admin-gradients-form">
+      <div class="admin-form-title" onclick="toggleAdminSection('admin-gradients-form')">&#127775; Home Card Gradients <span class="admin-caret">&#9660;</span></div>
+      <div class="admin-form-body">
+        <p style="font-size:13px;color:var(--t2);margin-bottom:1rem;">Customize the gradient for each card on the home screen. Changes are saved instantly and affect all users.</p>
+        <div id="admin-home-gradients"></div>
+      </div>
     </div>
     <div class="admin-form" id="admin-dj-form">
-      <div class="admin-form-title">&#9835; Manage DJ List</div>
-      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-        <input type="text" id="admin-dj-input" placeholder="DJ name" style="flex:1;padding:8px 12px;border:0.5px solid var(--amber-border);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;">
-        <button class="btn amber" onclick="adminAddDJ()">Add DJ</button>
+      <div class="admin-form-title" onclick="toggleAdminSection('admin-dj-form')">&#9835; Manage DJ List <span class="admin-caret">&#9660;</span></div>
+      <div class="admin-form-body">
+        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+          <input type="text" id="admin-dj-input" placeholder="DJ name" style="flex:1;padding:8px 12px;border:0.5px solid var(--amber-border);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;">
+          <button class="btn amber" onclick="adminAddDJ()">Add DJ</button>
+        </div>
+        <div id="admin-dj-list" style="display:flex;flex-direction:column;gap:6px;"></div>
       </div>
-      <div id="admin-dj-list" style="display:flex;flex-direction:column;gap:6px;"></div>
     </div>
-    <div class="admin-form">
-      <div class="admin-form-title">&#9733; Add a new dance to the bank</div>
-      <div class="admin-form-grid">
-        <input type="text" id="bank-name" placeholder="Dance name" class="full">
-        <input type="url" id="bank-demo" placeholder="Demo link (YouTube URL)">
-        <input type="url" id="bank-tutorial" placeholder="Tutorial link (YouTube URL)">
-        <select id="bank-diff" class="full">
-          <option value="">Difficulty (optional)</option>
-          <option value="Beginner">Beginner</option>
-          <option value="Improver">Improver</option>
-          <option value="Intermediate">Intermediate</option>
-          <option value="Advanced">Advanced</option>
-        </select>
-        <input type="number" id="bank-counts" placeholder="Counts (e.g. 32)" min="0">
-        <input type="number" id="bank-walls" placeholder="Walls (e.g. 4)" min="0">
-        <input type="number" id="bank-tags" placeholder="Tags (e.g. 0)" min="0">
+    <div class="admin-form" id="admin-add-dance-form">
+      <div class="admin-form-title" onclick="toggleAdminSection('admin-add-dance-form')">&#9733; Add a new dance to the bank <span class="admin-caret">&#9660;</span></div>
+      <div class="admin-form-body">
+        <div class="admin-form-grid">
+          <input type="text" id="bank-name" placeholder="Dance name" class="full">
+          <input type="url" id="bank-demo" placeholder="Demo link (YouTube URL)">
+          <input type="url" id="bank-tutorial" placeholder="Tutorial link (YouTube URL)">
+          <select id="bank-diff" class="full">
+            <option value="">Difficulty (optional)</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Improver">Improver</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+          </select>
+          <input type="number" id="bank-counts" placeholder="Counts (e.g. 32)" min="0">
+          <input type="number" id="bank-walls" placeholder="Walls (e.g. 4)" min="0">
+          <input type="number" id="bank-tags" placeholder="Tags (e.g. 0)" min="0">
+        </div>
+        <div class="admin-form-row"><button class="btn amber" onclick="adminAddDance()">Add to bank</button></div>
       </div>
-      <div class="admin-form-row"><button class="btn amber" onclick="adminAddDance()">Add to bank</button></div>
     </div>
-    <div class="section-title">All dances in the bank</div>
-    <div id="admin-bank-list"></div>
-    <div class="section-title">Registered users</div>
-    <div id="admin-users-list"><p class="section-note">Loading...</p></div>
+    <div class="admin-section-collapsible" id="admin-bank-section">
+      <div class="admin-section-header" onclick="toggleAdminSection('admin-bank-section')">All dances in the bank <span class="admin-caret">&#9660;</span></div>
+      <div class="admin-section-body"><div id="admin-bank-list"></div></div>
+    </div>
+    <div class="admin-section-collapsible" id="admin-users-section">
+      <div class="admin-section-header" onclick="toggleAdminSection('admin-users-section')">Registered users <span class="admin-caret">&#9660;</span></div>
+      <div class="admin-section-body"><div id="admin-users-list"><p class="section-note">Loading...</p></div></div>
+    </div>
   </div>
 </div>
 
@@ -1780,6 +1800,10 @@ function setBankFilter(diff,el){
   bankFilter=diff;
   document.querySelectorAll('#bank-diff-filters .filter-pill').forEach(p=>p.classList.remove('active'));
   el.classList.add('active');renderBank();
+}
+function toggleAdminSection(id){
+  const el=document.getElementById(id);
+  if(el) el.classList.toggle('collapsed');
 }
 function setListFilter(type,diff,el){
   listFilter[type]=diff;
