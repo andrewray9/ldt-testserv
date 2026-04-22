@@ -4563,7 +4563,26 @@ async function spStartLogin(){
     client_id:SP_CLIENT_ID, response_type:'code', redirect_uri:SP_REDIRECT,
     code_challenge_method:'S256', code_challenge:challenge, scope:SP_SCOPES, state:'sp_oauth'
   });
-  location.href='https://accounts.spotify.com/authorize?'+params;
+  const webUrl='https://accounts.spotify.com/authorize?'+params;
+  // On iOS, try the spotify:// deep link first so the native app handles auth.
+  // If Spotify isn't installed, the iframe trick silently fails and we fall
+  // back to the normal web URL after a short delay.
+  const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(isIOS){
+    // Use a hidden iframe to attempt the custom scheme — if the app is
+    // installed iOS will intercept it; if not, nothing happens and we
+    // redirect to the web flow after 500ms.
+    const iframe=document.createElement('iframe');
+    iframe.style.display='none';
+    document.body.appendChild(iframe);
+    iframe.src='spotify://';
+    setTimeout(()=>{
+      document.body.removeChild(iframe);
+      location.href=webUrl;
+    },500);
+  } else {
+    location.href=webUrl;
+  }
 }
 
 async function spHandleCallback(){
