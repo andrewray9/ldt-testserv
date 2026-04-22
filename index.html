@@ -85,6 +85,7 @@
     .tab[data-tab="dj"].active{background:#F0FDF4;color:#166534;border-color:#86efac;}
     .tab.admin-tab{color:var(--amber-text);}
     .tab[data-tab="submissions"].active,.tab[data-tab="admin"].active,.tab[data-tab="editpeople"].active{background:#FAEEDA;color:#633806;border-color:#FAC775;}
+    .tab[data-tab="feedback"].active{background:#F0FDF4;color:#166534;border-color:#86efac;}
     @media(prefers-color-scheme:dark){
       .tab[data-tab="home"].active{background:#2d1f3d;color:#c084fc;border-color:#7e22ce;}
       .tab[data-tab="bank"].active{background:#0e1e2e;color:#6ab4f5;border-color:#1a5a9e;}
@@ -95,6 +96,7 @@
       .tab[data-tab="friends"].active{background:#0a1e2e;color:#38bdf8;border-color:#0284c7;}
       .tab[data-tab="dj"].active{background:#052e16;color:#4ade80;border-color:#16a34a;}
       .tab[data-tab="submissions"].active,.tab[data-tab="admin"].active,.tab[data-tab="editpeople"].active{background:#2a1d08;color:#f0a840;border-color:#7a4a0a;}
+      .tab[data-tab="feedback"].active{background:#052e16;color:#4ade80;border-color:#16a34a;}
     }
     @keyframes tabIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
     .section{display:none;opacity:0;}
@@ -104,7 +106,10 @@
     .home-greeting{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:6px;}
     .home-sub{font-size:14px;color:var(--t2);margin-bottom:2rem;}
     .home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
-    @media(max-width:480px){.home-grid{grid-template-columns:1fr 1fr;gap:10px;}}
+    @media(max-width:480px){
+      .home-grid{grid-template-columns:1fr 1fr;gap:10px;}
+      .home-grid .home-card:last-child:nth-child(odd){grid-column:1 / -1;max-width:calc(50% - 5px);margin:0 auto;width:100%;}
+    }
     .home-greeting{margin-bottom:1.5rem;}
     .home-grid{margin-top:1rem;}
     .home-card{border-radius:18px;padding:1.4rem 1.2rem;cursor:pointer;border:none;text-align:center;font-family:'Playfair Display',serif;position:relative;overflow:hidden;transition:transform 0.18s cubic-bezier(.34,1.56,.64,1),box-shadow 0.18s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:130px;}
@@ -124,6 +129,7 @@
     .hc-emerald{background:linear-gradient(135deg,#11998e,#38ef7d);}
     .hc-rose{background:linear-gradient(135deg,#fc5c7d,#6a82fb);}
     .hc-red{background:linear-gradient(135deg,#e52d27,#b31217);}
+    .hc-teal{background:linear-gradient(135deg,#11998e,#38ef7d);}
     /* Floating shape decoration */
     .home-card::before{content:'';position:absolute;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.12);top:-20px;right:-20px;}
     .home-card::after{content:'';position:absolute;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,0.08);bottom:10px;left:-10px;}
@@ -138,6 +144,7 @@
     .home-card:nth-child(6){animation-delay:0.3s;}
     .home-card:nth-child(7){animation-delay:0.35s;}
     .home-card:nth-child(8){animation-delay:0.4s;}
+    .home-card:nth-child(9){animation-delay:0.45s;}
 
     /* HAMBURGER MENU */
     .hamburger-btn{display:none;background:none;border:1.5px solid var(--b2);border-radius:var(--radius-md);padding:7px 10px;cursor:pointer;flex-direction:column;gap:4px;align-items:center;justify-content:center;}
@@ -163,6 +170,7 @@
     .mobile-tab[data-tab="friends"] .mtab-dot{background:#0ea5e9;}
     .mobile-tab[data-tab="dj"] .mtab-dot{background:#10b981;}
     .mobile-tab[data-tab="submissions"] .mtab-dot,.mobile-tab[data-tab="admin"] .mtab-dot,.mobile-tab[data-tab="editpeople"] .mtab-dot{background:#f59e0b;}
+    .mobile-tab[data-tab="feedback"] .mtab-dot{background:#10b981;}
     .mobile-menu-section{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);padding:12px 14px 4px;}
     @media(max-width:640px){
       .tab-row{display:none;}
@@ -566,6 +574,40 @@
   </div>
 </div>
 
+<!-- APP SUGGESTION MODAL -->
+<div class="friend-modal-overlay" id="app-suggestion-modal" style="display:none" onclick="if(event.target===this)closeAppSuggestionModal()">
+  <div class="friend-modal" style="max-width:440px">
+    <h2>App Suggestion</h2>
+    <p class="sub">Got an idea to make the app better? Share it with Drew!</p>
+    <div id="app-suggestion-error" style="display:none;font-size:13px;color:var(--red-text);background:var(--red-bg);border:0.5px solid var(--red-border);border-radius:var(--radius-md);padding:8px 12px;margin-bottom:14px;"></div>
+    <label>Suggestion title <span style="color:var(--red-text)">*</span></label>
+    <input type="text" id="app-suggestion-title" placeholder="e.g. Add a dark mode toggle">
+    <label style="margin-top:.75rem">Description <span style="color:var(--red-text)">*</span></label>
+    <textarea id="app-suggestion-desc" placeholder="Describe your idea in a bit more detail..." style="width:100%;padding:9px 13px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg2);color:var(--t1);font-size:14px;font-family:'DM Sans',sans-serif;resize:vertical;min-height:80px;margin-bottom:1.5rem;"></textarea>
+    <div class="fm-actions">
+      <button class="btn" onclick="closeAppSuggestionModal()">Cancel</button>
+      <button class="btn primary" onclick="submitAppSuggestion()">Submit suggestion</button>
+    </div>
+  </div>
+</div>
+
+<!-- BUG REPORT MODAL -->
+<div class="friend-modal-overlay" id="bug-modal" style="display:none" onclick="if(event.target===this)closeBugModal()">
+  <div class="friend-modal" style="max-width:440px">
+    <h2>Report a Bug</h2>
+    <p class="sub">Found something broken? Let Drew know so it can be fixed!</p>
+    <div id="bug-error" style="display:none;font-size:13px;color:var(--red-text);background:var(--red-bg);border:0.5px solid var(--red-border);border-radius:var(--radius-md);padding:8px 12px;margin-bottom:14px;"></div>
+    <label>Bug title <span style="color:var(--red-text)">*</span></label>
+    <input type="text" id="bug-title" placeholder="e.g. Night log not saving">
+    <label style="margin-top:.75rem">Description <span style="color:var(--red-text)">*</span></label>
+    <textarea id="bug-desc" placeholder="What happened? What were you trying to do? Steps to reproduce..." style="width:100%;padding:9px 13px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg2);color:var(--t1);font-size:14px;font-family:'DM Sans',sans-serif;resize:vertical;min-height:80px;margin-bottom:1.5rem;"></textarea>
+    <div class="fm-actions">
+      <button class="btn" onclick="closeBugModal()">Cancel</button>
+      <button class="btn danger" onclick="submitBugReport()">Submit bug report</button>
+    </div>
+  </div>
+</div>
+
 <!-- FRIEND DETAIL MODAL -->
 <div class="friend-modal-overlay" id="friend-detail-modal" style="display:none" onclick="if(event.target===this)closeFriendDetail()">
   <div class="friend-modal" id="friend-detail-content"></div>
@@ -632,6 +674,7 @@
     <button class="mobile-tab" data-tab="night" onclick="mobileSwitch('night')"><span class="mtab-dot"></span>My Night</button>
     <button class="mobile-tab" data-tab="log" onclick="mobileSwitch('log')"><span class="mtab-dot"></span>Analytics</button>
     <button class="mobile-tab" data-tab="friends" onclick="mobileSwitch('friends')"><span class="mtab-dot"></span>Friends</button>
+    <button class="mobile-tab" data-tab="feedback" onclick="mobileSwitch('feedback')"><span class="mtab-dot"></span>Suggestions &amp; Bugs</button>
     <div class="mobile-menu-section" id="mobile-admin-section" style="display:none">Admin</div>
     <button class="mobile-tab" data-tab="dj" id="mobile-tab-dj" style="display:none" onclick="mobileSwitch('dj')"><span class="mtab-dot"></span>Test Features</button>
     <button class="mobile-tab" data-tab="submissions" id="mobile-tab-submissions" style="display:none" onclick="mobileSwitch('submissions')"><span class="mtab-dot"></span>&#9888; Submissions</button>
@@ -648,6 +691,7 @@
     <button class="tab" data-tab="log" onclick="switchTab('log')">Analytics</button>
     <button class="tab" data-tab="dj" id="dj-tab-btn" style="display:none" onclick="switchTab('dj')">Test Features</button>
     <button class="tab" data-tab="friends" onclick="switchTab('friends')">Friends</button>
+    <button class="tab" data-tab="feedback" onclick="switchTab('feedback')">Suggestions &amp; Bugs</button>
     <button class="tab admin-tab" data-tab="submissions" id="submissions-tab" style="display:none" onclick="switchTab('submissions')">&#9888; Submissions <span id="submissions-badge" style="display:none;background:var(--red-text);color:#fff;font-size:10px;padding:1px 6px;border-radius:20px;margin-left:4px;"></span></button>
     <button class="tab admin-tab" data-tab="admin" id="admin-tab" style="display:none" onclick="switchTab('admin')">&#9733; Admin</button>
     <button class="tab admin-tab" data-tab="editpeople" id="editpeople-tab" style="display:none" onclick="switchTab('editpeople')">&#9998; Edit People</button>
@@ -691,6 +735,12 @@
         <span class="home-card-icon">👯</span>
         <span class="home-card-title">Friends</span>
         <span class="home-card-desc">See what your friends are dancing</span>
+        <span class="home-card-arrow">→</span>
+      </button>
+      <button class="home-card hc-teal" id="home-card-feedback" onclick="switchTab('feedback')">
+        <span class="home-card-icon">💬</span>
+        <span class="home-card-title">Suggestions &amp; Bugs</span>
+        <span class="home-card-desc">Suggest a dance, app idea, or report a bug</span>
         <span class="home-card-arrow">→</span>
       </button>
       <button class="home-card hc-emerald" id="home-card-dj" style="display:none" onclick="switchTab('dj')">
@@ -943,8 +993,11 @@
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:.75rem;">
       <div class="section-title" style="margin:0" id="friends-list-title">Everyone's cards</div>
     </div>
-    <div style="margin-bottom:1rem;">
+    <div style="margin-bottom:.75rem;">
       <input type="text" id="friends-search" placeholder="Search friends by name or username..." oninput="renderFriendsTab()" style="width:100%;padding:9px 13px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:14px;font-family:'DM Sans',sans-serif;">
+    </div>
+    <div style="margin-bottom:1rem;">
+      <button id="friends-fav-filter-btn" class="sort-btn" onclick="toggleFriendsFavFilter()" style="font-size:12px;">&#9733; Show only favorites</button>
     </div>
     <div class="friends-grid" id="friends-grid"></div>
   </div>
@@ -953,6 +1006,29 @@
   <div id="tab-submissions" class="section">
     <p class="section-note">User dance suggestions and manually-added dances not yet in the bank. Review and add them below.</p>
     <div id="submissions-list"></div>
+  </div>
+
+  <!-- SUGGESTIONS & BUGS (all users) -->
+  <div id="tab-feedback" class="section">
+    <p class="section-note" style="margin-bottom:1.5rem">Have an idea or spotted a problem? Let us know! Your feedback goes straight to Drew.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:2rem;">
+      <button class="btn info" onclick="openSuggestModal()" style="display:flex;align-items:center;gap:6px;padding:11px 20px;font-size:14px;">Suggest a Dance</button>
+      <button class="btn success" onclick="openAppSuggestionModal()" style="display:flex;align-items:center;gap:6px;padding:11px 20px;font-size:14px;">App Suggestion</button>
+      <button class="btn danger" onclick="openBugModal()" style="display:flex;align-items:center;gap:6px;padding:11px 20px;font-size:14px;">Report a Bug</button>
+    </div>
+    <div id="feedback-dance-section" style="display:none">
+      <div class="section-title" style="margin-top:0" id="feedback-dance-title">Dance Suggestions</div>
+      <div id="feedback-dance-list"></div>
+    </div>
+    <div id="feedback-app-section" style="display:none;margin-top:1.5rem;">
+      <div class="section-title" id="feedback-app-title">App Suggestions</div>
+      <div id="feedback-app-list"></div>
+    </div>
+    <div id="feedback-bug-section" style="display:none;margin-top:1.5rem;">
+      <div class="section-title" id="feedback-bug-title">Bug Reports</div>
+      <div id="feedback-bug-list"></div>
+    </div>
+    <div id="feedback-empty" class="empty" style="display:none;">No feedback submitted yet. Be the first!</div>
   </div>
 
   <!-- EDIT PEOPLE (admin only) -->
@@ -1341,13 +1417,14 @@ const HOME_CARD_DEFAULTS={
   'home-card-dj':          'linear-gradient(135deg,#11998e,#38ef7d)',
   'home-card-admin':       'linear-gradient(135deg,#fc5c7d,#6a82fb)',
   'home-card-submissions': 'linear-gradient(135deg,#e52d27,#b31217)',
+  'home-card-feedback':    'linear-gradient(135deg,#11998e,#38ef7d)',
 };
 const HOME_CARD_LABELS={
   'home-card-bank':'Dance Bank','home-card-know':'Dances I Know',
   'home-card-learn':'Want to Learn','home-card-night':'My Night',
   'home-card-log':'Analytics','home-card-friends':'Friends',
   'home-card-dj':'Test Features','home-card-admin':'Admin',
-  'home-card-submissions':'Submissions',
+  'home-card-submissions':'Submissions','home-card-feedback':'Suggestions & Bugs',
 };
 function applyHomeCardGradients(){
   Object.keys(HOME_CARD_DEFAULTS).forEach(id=>{
@@ -1595,6 +1672,7 @@ function logout() {
   }
   state = {know:[], learn:[], nights:{}, djFreestyles:{}, favorites:[]};
   bank = []; drewPicks = []; submissions = []; friendCards = []; favoriteFriends = [];
+  friendsFavFilterActive = false;
   
   document.getElementById('app').style.display = 'none';
   document.getElementById('auth-wrap').style.display = 'flex';
@@ -1769,6 +1847,7 @@ function switchTab(tab){
   if(tab==='picks') renderPicks();
   if(tab==='submissions') renderSubmissions();
   if(tab==='friends') renderFriendsTab();
+  if(tab==='feedback') renderFeedbackTab();
   if(tab==='editpeople') epRefreshUsers();
 }
 
@@ -2715,6 +2794,7 @@ let fcPickSelections=[]; // ordered array of dance ids, up to 5
 let fcSelectedGrad=0;
 let fcDragSrc=null;
 let favoriteFriends=[]; // array of usernames that current user has favorited
+let friendsFavFilterActive=false; // whether to show only favorited friends
 
 function myCard(){return friendCards.find(c=>c.username===currentUser)||null;}
 
@@ -2825,6 +2905,13 @@ function saveFriendCard(){
   renderFriendsTab();
 }
 
+function toggleFriendsFavFilter(){
+  friendsFavFilterActive=!friendsFavFilterActive;
+  const btn=document.getElementById('friends-fav-filter-btn');
+  if(btn) btn.classList.toggle('active',friendsFavFilterActive);
+  renderFriendsTab();
+}
+
 function renderFriendsTab(){
   const myCardEl=document.getElementById('my-card-section');
   const grid=document.getElementById('friends-grid');
@@ -2854,6 +2941,9 @@ function renderFriendsTab(){
     );
   }
   const favSet=new Set(favoriteFriends);
+  if(friendsFavFilterActive){
+    others=others.filter(c=>favSet.has(c.username));
+  }
   others.sort((a,b)=>{
     const af=favSet.has(a.username)?0:1;
     const bf=favSet.has(b.username)?0:1;
@@ -2861,7 +2951,7 @@ function renderFriendsTab(){
     return (a.displayName||'').localeCompare(b.displayName||'');
   });
   if(!others.length){
-    const msg=searchVal?'No friends match your search.':'No other cards yet — invite your friends!';
+    const msg=friendsFavFilterActive?'No favorite friends yet — star someone\'s card to add them!':searchVal?'No friends match your search.':'No other cards yet — invite your friends!';
     grid.innerHTML=`<div style="font-size:13px;color:var(--t3);grid-column:1/-1">${msg}</div>`;
   } else {
     grid.innerHTML=others.map(c=>buildCardHTML(c,false)).join('');
@@ -3023,7 +3113,115 @@ function submitSuggestion(){
   if(btn){const orig=btn.textContent;btn.textContent='✓ Suggested!';setTimeout(()=>btn.textContent=orig,2000);}
 }
 
-// ---- Submissions ----
+// ---- App Suggestion Modal ----
+function openAppSuggestionModal(){
+  document.getElementById('app-suggestion-title').value='';
+  document.getElementById('app-suggestion-desc').value='';
+  document.getElementById('app-suggestion-error').style.display='none';
+  document.getElementById('app-suggestion-modal').style.display='flex';
+  setTimeout(()=>document.getElementById('app-suggestion-title').focus(),100);
+}
+function closeAppSuggestionModal(){document.getElementById('app-suggestion-modal').style.display='none';}
+function submitAppSuggestion(){
+  const title=document.getElementById('app-suggestion-title').value.trim();
+  const desc=document.getElementById('app-suggestion-desc').value.trim();
+  const errEl=document.getElementById('app-suggestion-error');
+  if(!title){errEl.textContent='Please enter a suggestion title.';errEl.style.display='block';return;}
+  if(!desc){errEl.textContent='Please enter a description.';errEl.style.display='block';return;}
+  submissions.push({id:Date.now()+'_app',name:title,notes:desc,addedBy:currentUser,type:'app_suggestion',addedAt:new Date().toISOString()});
+  saveSubmissionsToCloud();
+  if(isAdmin) updateSubmissionsBadge();
+  closeAppSuggestionModal();
+  if(document.getElementById('tab-feedback').classList.contains('visible')) renderFeedbackTab();
+  const btn=document.querySelector('[onclick="openAppSuggestionModal()"]');
+  if(btn){const orig=btn.innerHTML;btn.innerHTML='✓ Submitted!';setTimeout(()=>btn.innerHTML=orig,2000);}
+}
+
+// ---- Bug Report Modal ----
+function openBugModal(){
+  document.getElementById('bug-title').value='';
+  document.getElementById('bug-desc').value='';
+  document.getElementById('bug-error').style.display='none';
+  document.getElementById('bug-modal').style.display='flex';
+  setTimeout(()=>document.getElementById('bug-title').focus(),100);
+}
+function closeBugModal(){document.getElementById('bug-modal').style.display='none';}
+function submitBugReport(){
+  const title=document.getElementById('bug-title').value.trim();
+  const desc=document.getElementById('bug-desc').value.trim();
+  const errEl=document.getElementById('bug-error');
+  if(!title){errEl.textContent='Please enter a bug title.';errEl.style.display='block';return;}
+  if(!desc){errEl.textContent='Please describe the bug.';errEl.style.display='block';return;}
+  submissions.push({id:Date.now()+'_bug',name:title,notes:desc,addedBy:currentUser,type:'bug_report',addedAt:new Date().toISOString()});
+  saveSubmissionsToCloud();
+  if(isAdmin) updateSubmissionsBadge();
+  closeBugModal();
+  if(document.getElementById('tab-feedback').classList.contains('visible')) renderFeedbackTab();
+  const btn=document.querySelector('[onclick="openBugModal()"]');
+  if(btn){const orig=btn.innerHTML;btn.innerHTML='✓ Submitted!';setTimeout(()=>btn.innerHTML=orig,2000);}
+}
+
+// ---- Render Feedback Tab ----
+function renderFeedbackTab(){
+  const danceSugs=submissions.filter(s=>s.type==='suggestion');
+  const appSugs=submissions.filter(s=>s.type==='app_suggestion');
+  const bugReports=submissions.filter(s=>s.type==='bug_report');
+  const hasAny=danceSugs.length||appSugs.length||bugReports.length;
+
+  document.getElementById('feedback-empty').style.display=hasAny?'none':'block';
+
+  // Dance suggestions
+  const danceSection=document.getElementById('feedback-dance-section');
+  const danceList=document.getElementById('feedback-dance-list');
+  const danceTitle=document.getElementById('feedback-dance-title');
+  danceSection.style.display=danceSugs.length?'block':'none';
+  if(danceSugs.length){
+    danceTitle.textContent=`Dance Suggestions (${danceSugs.length})`;
+    danceList.innerHTML=danceSugs.map(s=>buildFeedbackCard(s,'🎵','blue')).join('');
+  }
+
+  // App suggestions
+  const appSection=document.getElementById('feedback-app-section');
+  const appList=document.getElementById('feedback-app-list');
+  const appTitle=document.getElementById('feedback-app-title');
+  appSection.style.display=appSugs.length?'block':'none';
+  if(appSugs.length){
+    appTitle.textContent=`App Suggestions (${appSugs.length})`;
+    appList.innerHTML=appSugs.map(s=>buildFeedbackCard(s,'💡','green')).join('');
+  }
+
+  // Bug reports
+  const bugSection=document.getElementById('feedback-bug-section');
+  const bugList=document.getElementById('feedback-bug-list');
+  const bugTitle=document.getElementById('feedback-bug-title');
+  bugSection.style.display=bugReports.length?'block':'none';
+  if(bugReports.length){
+    bugTitle.textContent=`Bug Reports (${bugReports.length})`;
+    bugList.innerHTML=bugReports.map(s=>buildFeedbackCard(s,'🐛','red')).join('');
+  }
+}
+function buildFeedbackCard(s,icon,color){
+  const dateStr=s.addedAt?formatDate(s.addedAt.slice(0,10)):'';
+  const bgMap={blue:'var(--blue-bg)',green:'var(--green-bg)',red:'var(--red-bg)'};
+  const borderMap={blue:'var(--blue-border)',green:'var(--green-border)',red:'var(--red-border)'};
+  const textMap={blue:'var(--blue-text)',green:'var(--green-text)',red:'var(--red-text)'};
+  const typeLabel=color==='blue'?'Dance Suggestion':color==='green'?'App Suggestion':'Bug Report';
+  return `<div style="background:var(--bg);border:0.5px solid var(--b3);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:8px;">
+    <div style="display:flex;align-items:flex-start;gap:10px;">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:500;margin-bottom:4px">${esc(s.name)}</div>
+        ${s.notes?`<div style="font-size:13px;color:var(--t2);margin-bottom:8px;line-height:1.5">${esc(s.notes)}</div>`:''}
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <span style="font-size:11px;font-weight:500;padding:2px 9px;border-radius:20px;background:${bgMap[color]};color:${textMap[color]};border:0.5px solid ${borderMap[color]};">${typeLabel}</span>
+          ${dateStr?`<span style="font-size:11px;color:var(--t3);">${dateStr}</span>`:''}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+
+// ---- Submissions Badge ----
 function updateSubmissionsBadge(){
   const badge=document.getElementById('submissions-badge');
   const homeBadge=document.getElementById('home-sub-badge');
@@ -3069,28 +3267,36 @@ function renderSubmissions(){
     return;
   }
   const suggestions=submissions.filter(s=>s.type==='suggestion');
-  const autoQueued=submissions.filter(s=>s.type!=='suggestion');
+  const autoQueued=submissions.filter(s=>s.type!=='suggestion'&&s.type!=='app_suggestion'&&s.type!=='bug_report');
+  const appSugs=submissions.filter(s=>s.type==='app_suggestion');
+  const bugReports=submissions.filter(s=>s.type==='bug_report');
   function buildSubItem(s){
     const isSug=s.type==='suggestion';
-    const listLabel=isSug?'Dance Suggestion':s.list==='know'?'Dances I Know':'Want to Learn';
-    const badgeCls=isSug?'learn':s.list==='know'?'know':'learn';
+    const isApp=s.type==='app_suggestion';
+    const isBug=s.type==='bug_report';
+    let listLabel, badgeCls;
+    if(isSug){listLabel='Dance Suggestion';badgeCls='learn';}
+    else if(isApp){listLabel='💡 App Suggestion';badgeCls='know';}
+    else if(isBug){listLabel='🐛 Bug Report';badgeCls='learn';}
+    else{listLabel=s.list==='know'?'Dances I Know':'Want to Learn';badgeCls=s.list==='know'?'know':'learn';}
     const dateStr=s.addedAt?formatDate(s.addedAt.slice(0,10)):'';
-    const notesRow=isSug&&s.notes?`<div style="font-size:12px;color:var(--t2);padding:4px 15px 10px;font-style:italic">"${esc(s.notes)}"</div>`:'';
+    const notesRow=(isSug||isApp||isBug)&&s.notes?`<div style="font-size:12px;color:var(--t2);padding:4px 15px 10px;font-style:italic">"${esc(s.notes)}"</div>`:'';
+    const addToBankBtn=(isSug||(!isApp&&!isBug))?`<button class="btn xs success" onclick="toggleSubForm('${s.id}')">Add to Bank</button>`:'';
     return `
       <div class="sub-item">
         <div class="sub-item-head">
           <span class="sub-item-name">${esc(s.name)}</span>
           <div class="sub-item-meta">
             <span class="sub-badge ${badgeCls}">${listLabel}</span>
-            <span class="sub-who">${isSug?'Suggested':'Added'} by <strong>${esc(s.addedBy||'unknown')}</strong>${dateStr?' on '+dateStr:''}</span>
+            <span class="sub-who">${isSug?'Suggested':isApp?'Suggested by':isBug?'Reported by':'Added'} by <strong>${esc(s.addedBy||'unknown')}</strong>${dateStr?' on '+dateStr:''}</span>
           </div>
           <div class="sub-actions">
-            <button class="btn xs success" onclick="toggleSubForm('${s.id}')">Add to Bank</button>
+            ${addToBankBtn}
             <button class="btn xs danger" onclick="dismissSubmission('${s.id}')">Dismiss</button>
           </div>
         </div>
         ${notesRow}
-        <div class="sub-add-form" id="sub-form-${s.id}">
+        ${(isSug||(!isApp&&!isBug))?`<div class="sub-add-form" id="sub-form-${s.id}">
           <div style="font-size:12px;font-weight:500;color:var(--t2);margin-bottom:8px;">Fill in details before adding to the bank</div>
           <div class="sub-add-grid">
             <input type="text" id="sub-bn-${s.id}" value="${escA(s.name)}" placeholder="Dance name" class="full">
@@ -3111,7 +3317,7 @@ function renderSubmissions(){
             <button class="btn xs" onclick="toggleSubForm('${s.id}')">Cancel</button>
             <button class="btn xs amber" onclick="addSubmissionToBank('${s.id}')">Confirm &amp; Add</button>
           </div>
-        </div>
+        </div>`:''}
       </div>`;
   }
   let html='';
@@ -3122,6 +3328,14 @@ function renderSubmissions(){
   if(autoQueued.length){
     html+=`<div class="section-title" ${suggestions.length?'':'style="margin-top:0"'}>Auto-queued (added manually, not in bank) (${autoQueued.length})</div>`;
     html+=autoQueued.map(buildSubItem).join('');
+  }
+  if(appSugs.length){
+    html+=`<div class="section-title">App suggestions (${appSugs.length})</div>`;
+    html+=appSugs.map(buildSubItem).join('');
+  }
+  if(bugReports.length){
+    html+=`<div class="section-title">Bug reports (${bugReports.length})</div>`;
+    html+=bugReports.map(buildSubItem).join('');
   }
   el.innerHTML=html;
 }
