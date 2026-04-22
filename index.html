@@ -4629,7 +4629,6 @@ async function spHandleCallback(){
 async function spCreatePlaylist(){
   const token=spToken();
   const hasClientId=SP_CLIENT_ID&&SP_CLIENT_ID!=='YOUR_SPOTIFY_CLIENT_ID';
-  // If no client ID configured, fall back to opening links
   if(!hasClientId){ spOpenLinksOnly(); return; }
   if(!token){ spShowStatus('info','Please connect your Spotify account first.');document.getElementById('sp-login-area').style.display='flex';return; }
   if(spSelectedIds.size===0){ spShowStatus('error','Select at least one song.'); return; }
@@ -4640,48 +4639,54 @@ async function spCreatePlaylist(){
     const d=bank.find(x=>x.id===id);
     const u=d&&spUriFromLink(d.spotify);
     if(u) uris.push(u);
-    else if(d) skipped.push(d.name);
+    else if(d) skipped.push(d.name+' (raw: '+d.spotify+')');
   });
 
-  if(!uris.length){ spShowStatus('error','None of the selected dances have valid Spotify track links. Make sure the links are in the format: https://open.spotify.com/track/TRACK_ID'); return; }
-  if(skipped.length) spShowStatus('info',`Note: ${skipped.length} dance${skipped.length!==1?'s':''} skipped (invalid link): ${skipped.join(', ')}`);
+  // Show exactly what we're sending so we can debug
+  spShowStatus('info','URIs to send: '+uris.join(', ')+(skipped.length?' | Skipped: '+skipped.join(', '):''));
+
+  if(!uris.length){ spShowStatus('error','None of the selected dances have valid Spotify track links. Skipped: '+skipped.join(', ')); return; }
 
   const playlistName=(document.getElementById('sp-playlist-name').value.trim())||'My Line Dances';
   const btn=document.getElementById('sp-create-btn');
   btn.disabled=true;
-  spShowStatus('info','Creating playlist…');
 
   try{
     // 1. Get current user ID
     const meRes=await fetch('https://api.spotify.com/v1/me',{headers:{Authorization:'Bearer '+token}});
     if(meRes.status===401){ spClearToken(); spShowStatus('error','Spotify session expired. Please reconnect.'); document.getElementById('sp-login-area').style.display='flex'; btn.disabled=false; return; }
     const me=await meRes.json();
+    if(!me.id){ spShowStatus('error','Could not get Spotify user: '+JSON.stringify(me)); btn.disabled=false; return; }
     const userId=me.id;
+    spShowStatus('info','Got user: '+userId+'. Creating playlist…');
 
     // 2. Create playlist
     const plRes=await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`,{
       method:'POST', headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
       body:JSON.stringify({name:playlistName,description:'Created by Line Dance Tracker',public:false})
     });
-    const pl=await plRes.json();
-    if(!pl.id){ spShowStatus('error','Could not create playlist: '+(pl.error?.message||JSON.stringify(pl.error)||'Unknown error')); btn.disabled=false; return; }
+    const plText=await plRes.text();
+    let pl;
+    try{ pl=JSON.parse(plText); }catch(e){ spShowStatus('error','Bad response creating playlist: '+plText.slice(0,200)); btn.disabled=false; return; }
+    if(!pl.id){ spShowStatus('error','Could not create playlist: '+JSON.stringify(pl.error||pl)); btn.disabled=false; return; }
+    spShowStatus('info','Playlist created: '+pl.id+'. Adding '+uris.length+' tracks…');
 
-    // 3. Add tracks in batches of 100 (Spotify limit)
+    // 3. Add tracks in batches of 100
     for(let i=0;i<uris.length;i+=100){
       const batch=uris.slice(i,i+100);
       const addRes=await fetch(`https://api.spotify.com/v1/playlists/${pl.id}/tracks`,{
         method:'POST', headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
         body:JSON.stringify({uris:batch})
       });
+      const addText=await addRes.text();
       if(!addRes.ok){
-        const addData=await addRes.json().catch(()=>({}));
-        spShowStatus('error','Error adding tracks: '+(addData.error?.message||'Unknown error')+'. Playlist was created but may be incomplete. <a href="'+(pl.external_urls?.spotify||'https://open.spotify.com')+'" target="_blank" rel="noopener" style="color:inherit;font-weight:600;text-decoration:underline;">Open in Spotify →</a>');
+        spShowStatus('error','Error adding tracks (batch '+i+'): '+addText.slice(0,300)+' | URIs sent: '+batch.join(', '));
         btn.disabled=false; return;
       }
     }
 
     spShowStatus('success',`✓ Playlist "${esc(playlistName)}" created with ${uris.length} track${uris.length!==1?'s':''}!${skipped.length?' ('+skipped.length+' skipped)':''} <a href="${pl.external_urls?.spotify||'https://open.spotify.com'}" target="_blank" rel="noopener" style="color:inherit;font-weight:600;text-decoration:underline;">Open in Spotify →</a>`);
-  }catch(e){ spShowStatus('error','Something went wrong: '+e.message); }
+  }catch(e){ spShowStatus('error','Exception: '+e.message+' | Stack: '+e.stack); }
   btn.disabled=false;
 }
 
