@@ -87,6 +87,39 @@
     .tab.admin-tab{color:var(--amber-text);}
     .tab[data-tab="submissions"].active,.tab[data-tab="admin"].active,.tab[data-tab="editpeople"].active{background:#FAEEDA;color:#633806;border-color:#FAC775;}
     .tab[data-tab="feedback"].active{background:#F0FDF4;color:#166534;border-color:#86efac;}
+    .tab[data-tab="changelog"].active{background:#F5F0FF;color:#5B21B6;border-color:#C4B5FD;}
+
+    /* FOOTER */
+    .app-footer{max-width:880px;margin:0 auto;padding:1.5rem 1.25rem 2.5rem;border-top:0.5px solid var(--b3);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+    .app-footer .footer-brand{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--t2);}
+    .app-footer .footer-version{font-size:12px;color:var(--t3);cursor:pointer;transition:color 0.15s;}
+    .app-footer .footer-version:hover{color:var(--t1);}
+    .app-footer .footer-links{display:flex;gap:14px;}
+    .app-footer .footer-link{font-size:12px;color:var(--t3);cursor:pointer;transition:color 0.15s;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0;}
+    .app-footer .footer-link:hover{color:var(--t1);}
+
+    /* CHANGELOG */
+    .changelog-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:1.5rem;}
+    .changelog-version-badge{font-size:13px;font-weight:600;background:var(--purple-bg);color:var(--purple-text);border:0.5px solid var(--purple-border);border-radius:20px;padding:4px 14px;}
+    .changelog-entry{border:0.5px solid var(--b3);border-radius:var(--radius-lg);background:var(--bg);margin-bottom:12px;overflow:hidden;}
+    .changelog-entry-head{display:flex;align-items:center;gap:10px;padding:14px 18px;cursor:pointer;user-select:none;transition:background 0.1s;}
+    .changelog-entry-head:hover{background:var(--bg2);}
+    .changelog-entry.open .changelog-entry-head{background:var(--bg2);border-bottom:0.5px solid var(--b3);}
+    .changelog-entry-version{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--t1);min-width:60px;}
+    .changelog-entry-title{font-size:14px;font-weight:500;flex:1;color:var(--t1);}
+    .changelog-entry-date{font-size:12px;color:var(--t3);white-space:nowrap;}
+    .changelog-entry-caret{font-size:11px;color:var(--t3);transition:transform 0.2s;}
+    .changelog-entry.open .changelog-entry-caret{transform:rotate(180deg);}
+    .changelog-entry-body{display:none;padding:14px 18px;}
+    .changelog-entry.open .changelog-entry-body{display:block;}
+    .changelog-entry-body textarea{width:100%;min-height:100px;padding:10px 12px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg2);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;resize:vertical;line-height:1.6;}
+    .changelog-entry-body textarea:focus{outline:none;border-color:var(--b1);}
+    .changelog-entry-body .cl-notes{font-size:14px;color:var(--t1);line-height:1.7;white-space:pre-wrap;}
+    .changelog-entry-body .cl-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:10px;}
+    .changelog-add-row{display:flex;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap;align-items:flex-end;}
+    .changelog-add-row input{padding:9px 13px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:14px;font-family:'DM Sans',sans-serif;}
+    .changelog-add-row input:focus{outline:none;border-color:var(--b1);}
+    .changelog-add-row input::placeholder{color:var(--t3);}
     @media(prefers-color-scheme:dark){
       .tab[data-tab="home"].active{background:#2d1f3d;color:#c084fc;border-color:#7e22ce;}
       .tab[data-tab="bank"].active{background:#0e1e2e;color:#6ab4f5;border-color:#1a5a9e;}
@@ -99,6 +132,7 @@
       .tab[data-tab="drewsnight"].active{background:#2e1800;color:#ffaa66;border-color:#8B3A00;}
       .tab[data-tab="submissions"].active,.tab[data-tab="admin"].active,.tab[data-tab="editpeople"].active{background:#2a1d08;color:#f0a840;border-color:#7a4a0a;}
       .tab[data-tab="feedback"].active{background:#052e16;color:#4ade80;border-color:#16a34a;}
+      .tab[data-tab="changelog"].active{background:#1e1430;color:#a78bfa;border-color:#5B21B6;}
     }
     @keyframes tabIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
     .section{display:none;opacity:0;}
@@ -557,6 +591,54 @@
     .splash-spinner{width:28px;height:28px;border:2.5px solid var(--b3);border-top-color:var(--t1);border-radius:50%;animation:spin 0.75s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg)}}
 
+    /* RECOMMENDATION WIDGET */
+    #rec-widget{
+      background:var(--bg);
+      border:0.5px solid var(--b3);
+      border-radius:var(--radius-lg);
+      padding:1.25rem 1.5rem;
+      margin-bottom:1.5rem;
+      position:relative;
+      overflow:hidden;
+    }
+    #rec-widget::before{
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(135deg,rgba(99,56,6,0.04),rgba(63,52,137,0.04));
+      pointer-events:none;
+    }
+    .rec-eyebrow{
+      font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+      color:var(--amber-text);margin-bottom:6px;display:flex;align-items:center;gap:6px;
+    }
+    .rec-dance-name{
+      font-family:'Playfair Display',serif;font-size:22px;font-weight:700;
+      color:var(--t1);margin-bottom:6px;line-height:1.2;
+    }
+    .rec-reason{font-size:13px;color:var(--t2);margin-bottom:12px;line-height:1.5;}
+    .rec-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+    .rec-pill{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;}
+    .rec-pill.diff{background:var(--amber-bg);color:var(--amber-text);border:0.5px solid var(--amber-border);}
+    .rec-pill.rec-pill-beginner{background:var(--green-bg);color:var(--green-text);border:0.5px solid var(--green-border);}
+    .rec-pill.rec-pill-improver{background:var(--blue-bg);color:var(--blue-text);border:0.5px solid var(--blue-border);}
+    .rec-pill.rec-pill-intermediate{background:var(--amber-bg);color:var(--amber-text);border:0.5px solid var(--amber-border);}
+    .rec-pill.rec-pill-advanced{background:var(--red-bg);color:var(--red-text);border:0.5px solid var(--red-border);}
+    .rec-pill.hot{background:var(--red-bg);color:var(--red-text);border:0.5px solid var(--red-border);}
+    .rec-pill.warm{background:var(--green-bg);color:var(--green-text);border:0.5px solid var(--green-border);}
+    .rec-pill.cool{background:var(--bg2);color:var(--t2);border:0.5px solid var(--b3);}
+    .rec-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+    .rec-btn-add{padding:7px 16px;background:var(--t1);color:var(--bg);border:none;border-radius:var(--radius-md);font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity 0.12s;}
+    .rec-btn-add:hover{opacity:0.82;}
+    .rec-btn-skip{padding:7px 14px;background:none;color:var(--t2);border:0.5px solid var(--b2);border-radius:var(--radius-md);font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background 0.12s;}
+    .rec-btn-skip:hover{background:var(--bg2);}
+    .rec-links{display:flex;gap:6px;margin-left:auto;}
+    #rec-widget.loading .rec-dance-name{
+      background:var(--bg2);color:transparent;border-radius:6px;
+      animation:recShimmer 1.2s ease-in-out infinite;
+    }
+    @keyframes recShimmer{0%,100%{opacity:0.5}50%{opacity:1}}
+    #rec-widget.empty-state{border-style:dashed;}
+
+
     /* SWIPE NAVIGATION */
     #swipe-toast{
       position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(12px);
@@ -586,10 +668,22 @@
 
 <!-- SPLASH SCREEN (shown during auto-login check) -->
 <div id="splash-screen">
-  <img src="https://i.imgur.com/WDByZ1N.png" alt="Line Dance Tracker" class="splash-logo">
-  <div class="splash-title">Line Dance Tracker</div>
+  <img id="splash-logo-img" src="https://i.imgur.com/WDByZ1N.png" alt="Line Dance Tracker" class="splash-logo">
+  <div id="splash-title-text" class="splash-title">Line Dance Tracker</div>
   <div class="splash-spinner"></div>
 </div>
+
+<script>
+// 1-in-9 chance of alternate splash screen
+(function(){
+  if(Math.random() < 1/9){
+    var img = document.getElementById('splash-logo-img');
+    var title = document.getElementById('splash-title-text');
+    if(img) img.src = 'https://i.imgur.com/PbCiMps.png';
+    if(title) title.textContent = 'Line Dance Tracker';
+  }
+})();
+</script>
 
 <!-- HIGHLIGHTS MODAL -->
 <div class="modal-overlay" id="highlights-modal" style="display:none">
@@ -755,6 +849,7 @@
     <button class="mobile-tab" data-tab="log" onclick="mobileSwitch('log')"><span class="mtab-dot"></span>Analytics</button>
     <button class="mobile-tab" data-tab="friends" onclick="mobileSwitch('friends')"><span class="mtab-dot"></span>Friends</button>
     <button class="mobile-tab" data-tab="feedback" onclick="mobileSwitch('feedback')"><span class="mtab-dot"></span>Suggestions &amp; Bugs</button>
+    <button class="mobile-tab" data-tab="changelog" onclick="mobileSwitch('changelog')"><span class="mtab-dot" style="background:#8b5cf6;"></span>Changelog</button>
     <button class="mobile-tab" data-tab="drewsnight" id="mobile-tab-drewsnight" style="display:none" onclick="mobileSwitch('drewsnight')"><span class="mtab-dot" style="background:#ff8c42;"></span>Drew's Night</button>
     <div class="mobile-menu-section" id="mobile-admin-section" style="display:none">Admin</div>
     <button class="mobile-tab" data-tab="dj" id="mobile-tab-dj" style="display:none" onclick="mobileSwitch('dj')"><span class="mtab-dot"></span>Test Features</button>
@@ -775,6 +870,7 @@
     <button class="tab" data-tab="dj" id="dj-tab-btn" style="display:none" onclick="switchTab('dj')">Test Features</button>
     <button class="tab" data-tab="friends" onclick="switchTab('friends')">Friends</button>
     <button class="tab" data-tab="feedback" onclick="switchTab('feedback')">Suggestions &amp; Bugs</button>
+    <button class="tab" data-tab="changelog" onclick="switchTab('changelog')">Changelog</button>
     <button class="tab admin-tab" data-tab="submissions" id="submissions-tab" style="display:none" onclick="switchTab('submissions')">&#9888; Submissions <span id="submissions-badge" style="display:none;background:var(--red-text);color:#fff;font-size:10px;padding:1px 6px;border-radius:20px;margin-left:4px;"></span></button>
     <button class="tab admin-tab" data-tab="admin" id="admin-tab" style="display:none" onclick="switchTab('admin')">&#9733; Admin</button>
     <button class="tab admin-tab" data-tab="editpeople" id="editpeople-tab" style="display:none" onclick="switchTab('editpeople')">&#9998; Edit People</button>
@@ -827,6 +923,12 @@
         <span class="home-card-desc">Suggest a dance, app idea, or report a bug</span>
         <span class="home-card-arrow">→</span>
       </button>
+      <button class="home-card" id="home-card-changelog" onclick="switchTab('changelog')" style="background:linear-gradient(135deg,#7c3aed,#a855f7);">
+        <span class="home-card-icon">📋</span>
+        <span class="home-card-title">Changelog</span>
+        <span class="home-card-desc">App updates & version history</span>
+        <span class="home-card-arrow">→</span>
+      </button>
       <button class="home-card hc-rose" id="home-card-drewsnight" style="display:none" onclick="switchTab('drewsnight')">
         <span class="home-card-icon">🌟</span>
         <span class="home-card-title">Drew's Night</span>
@@ -864,7 +966,24 @@
   <div id="tab-bank" class="section">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:.75rem;">
       <p class="section-note" style="margin-bottom:0">Browse all dances</p>
-      <button class="btn sm info" onclick="openSuggestModal()">&#43; Suggest a Dance</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn sm" id="rec-toggle-btn" onclick="toggleRecWidget()" style="background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-border);">Need a Suggestion?</button>
+        <button class="btn sm info" onclick="openSuggestModal()">&#43; Suggest a Dance</button>
+      </div>
+    </div>
+    <!-- RECOMMENDATION WIDGET (collapsed by default) -->
+    <div id="rec-widget-wrap" style="display:none;margin-bottom:1.5rem;">
+      <div id="rec-widget" class="loading">
+        <div class="rec-eyebrow">Need a Dance Recommendation?</div>
+        <div class="rec-dance-name">Finding your next dance…</div>
+        <div class="rec-reason"></div>
+        <div class="rec-pills"></div>
+        <div class="rec-actions">
+          <button class="rec-btn-add" onclick="recAddToLearn()" style="display:none">＋ Add to Want to Learn</button>
+          <button class="rec-btn-skip" onclick="recRefresh()">↻ Different suggestion</button>
+          <div class="rec-links"></div>
+        </div>
+      </div>
     </div>
     <div class="bank-controls">
       <div class="bank-search-row">
@@ -877,6 +996,7 @@
         <span class="filter-pill" onclick="setBankFilter('Intermediate',this)">Intermediate</span>
         <span class="filter-pill" onclick="setBankFilter('Advanced',this)">Advanced</span>
         <button class="sort-btn active" id="bank-sort-btn" onclick="toggleSort('bank')">A–Z</button>
+        <button class="sort-btn" id="bank-fav-btn" onclick="toggleBankFavFilter()">&#9829; Favorites</button>
       </div>
       <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;">
         <span style="font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;padding:4px 2px;white-space:nowrap;">My Lists:</span>
@@ -1016,8 +1136,10 @@
     <div class="top5-list" id="top5-list"></div>
     <div class="section-title">All nights &amp; dance totals</div>
     <div id="log-list"></div>
-    <div class="section-title" id="dj-analytics-title" style="display:none">Freestyle records by DJ</div>
+    <div class="section-title" id="dj-analytics-title" style="display:none">Average Freestyle Times by DJ</div>
     <div id="dj-analytics-list" style="display:none"></div>
+    <div class="section-title" id="dj-favs-title">Which DJ Plays Your Favorites?</div>
+    <div id="tf-dj-favs"></div>
   </div>
 
   <!-- TEST FEATURES (formerly DJ Freestyle) -->
@@ -1289,7 +1411,63 @@
     <div id="debug-status" style="font-size:13px;color:var(--t2);margin-bottom:1rem;"></div>
     <div id="debug-night-output"></div>
   </div>
+
+  <!-- CHANGELOG SECTION -->
+  <div id="tab-changelog" class="section">
+    <div class="changelog-header">
+      <div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:4px;">Changelog</h2>
+        <p class="section-note" style="margin:0">App updates, fixes &amp; new features</p>
+      </div>
+      <span class="changelog-version-badge" id="changelog-current-version">v1.0</span>
+    </div>
+
+    <!-- Admin-only: add new entry -->
+    <div id="changelog-admin-panel" style="display:none;background:var(--bg2);border:0.5px solid var(--b3);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1.5rem;">
+      <div style="font-size:12px;font-weight:500;color:var(--t2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px;">Add New Entry</div>
+      <div class="changelog-add-row">
+        <input type="text" id="cl-input-version" placeholder="Version (e.g. 1.2)" style="width:130px;flex:none;">
+        <input type="text" id="cl-input-title" placeholder="Title (e.g. Night Improvements)" style="flex:1;min-width:180px;">
+        <input type="date" id="cl-input-date" style="padding:9px 13px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:14px;font-family:'DM Sans',sans-serif;">
+      </div>
+      <textarea id="cl-input-notes" placeholder="Describe the changes in this version..." style="width:100%;min-height:90px;padding:10px 12px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;resize:vertical;line-height:1.6;margin-bottom:10px;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+      <div style="display:flex;justify-content:flex-end;">
+        <button class="btn primary" onclick="clAddEntry()">+ Add Entry</button>
+      </div>
+    </div>
+
+    <div id="changelog-list"><div class="empty">No changelog entries yet.</div></div>
+  </div>
+
 </div>
+
+<!-- CHANGELOG POPUP MODAL -->
+<div class="modal-overlay" id="cl-modal" style="display:none;z-index:1100;align-items:flex-end;" onclick="if(event.target===this)clDismissModal()">
+  <div class="modal-card" style="max-width:500px;position:relative;width:100%;margin:0 auto;max-height:80vh;overflow-y:auto;border-bottom-left-radius:0;border-bottom-right-radius:0;">
+    <button onclick="clDismissModal()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:22px;line-height:1;cursor:pointer;color:var(--t3);padding:0;" aria-label="Close">&times;</button>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+      <span id="cl-modal-version" style="font-size:12px;font-weight:600;background:var(--purple-bg);color:var(--purple-text);border:0.5px solid var(--purple-border);border-radius:20px;padding:3px 11px;"></span>
+      <span style="font-size:11px;font-weight:500;background:var(--green-bg);color:var(--green-text);border:0.5px solid var(--green-border);border-radius:20px;padding:3px 9px;">New Update</span>
+    </div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px;" id="cl-modal-title"></h2>
+    <div class="modal-date" id="cl-modal-date"></div>
+    <div style="font-size:13px;color:var(--t1);line-height:1.7;white-space:pre-wrap;margin-bottom:1.25rem;" id="cl-modal-notes"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn" onclick="switchTab('changelog');clDismissModal()">See full changelog</button>
+      <button class="btn primary" onclick="clDismissModal()">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="app-footer" id="app-footer" style="display:none;">
+  <span class="footer-brand">Line Dance Tracker</span>
+  <div class="footer-links">
+    <button class="footer-link" onclick="switchTab('feedback')">Suggestions &amp; Bugs</button>
+    <button class="footer-link" onclick="switchTab('changelog')" id="footer-version-btn">v1.0</button>
+  </div>
+</footer>
+
 <div class="sp-modal-overlay" id="sp-playlist-modal" style="display:none" onclick="if(event.target===this)closeSpotifyModal()">
   <div class="sp-modal">
     <div class="sp-modal-header">
@@ -1355,6 +1533,7 @@ let listFilter={know:'all',learn:'all'};
 let bankView='all'; // 'all' | 'know' | 'learn'
 let sortState={bank:true,know:true,learn:true,pick:true};
 let favFilterActive=false;
+let bankFavFilterActive=false;
 
 // ---- Supabase ----
 async function sbFetch(path, options={}) {
@@ -1803,6 +1982,7 @@ async function authSubmit() {
     await loadDJList();
     await loadHomeConfig();
     await loadDrewDJFreestyles();
+    await clLoad();
     enterApp(finalUsername);
 
   } catch (err) {
@@ -1819,6 +1999,8 @@ function enterApp(username){
   hideSplash();
   document.getElementById('auth-wrap').style.display='none';
   document.getElementById('app').style.display='block';
+  showAppFooter();
+  clMaybeShowModal();
   document.getElementById('user-label').textContent=username;
   document.getElementById('admin-badge').style.display=isAdmin?'inline':'none';
   document.getElementById('admin-tab').style.display=isAdmin?'inline-block':'none';
@@ -1844,19 +2026,33 @@ function enterApp(username){
   const adminSection=document.getElementById('mobile-admin-section');
   if(adminSection) adminSection.style.display=isAdmin?'':'none';
   const greet=document.getElementById('home-greeting');
+  recRefresh();
   if(greet){greet.textContent='Where would you like to go?';}
-  // Check if there's a more recent locally-cached state (from a failed sync last session)
+  // Retrieve and remove the cloud timestamp stashed during login
+  const cloudUpdatedAt = state.__cloudUpdatedAt || null;
+  delete state.__cloudUpdatedAt;
+
+  // Check if there's a more recent locally-cached state (from a failed sync last session).
+  // Only use local if it is provably NEWER than the cloud — never blindly override cloud data,
+  // which would cause changes made on another device to be wiped out.
   const cached=loadLocalCache();
   if(cached && cached.state && cached.savedAt){
-    state=cached.state;
-    if(!state.djFreestyles) state.djFreestyles={};
-    if(!state.favorites) state.favorites=[];
-    if(!state.danceLog) state.danceLog=[];
-    if(!state.favoriteFriends) state.favoriteFriends=[];
-    if(!state.drewsNights) state.drewsNights={};
-    syncPending=true;
-    setSyncStatus('error','Unsynced changes found — syncing now...');
-    saveToCloud();
+    const localIsNewer = !cloudUpdatedAt || new Date(cached.savedAt) > new Date(cloudUpdatedAt);
+    if(localIsNewer){
+      state=cached.state;
+      if(!state.djFreestyles) state.djFreestyles={};
+      if(!state.favorites) state.favorites=[];
+      if(!state.danceLog) state.danceLog=[];
+      if(!state.favoriteFriends) state.favoriteFriends=[];
+      if(!state.drewsNights) state.drewsNights={};
+      syncPending=true;
+      setSyncStatus('error','Unsynced changes found — syncing now...');
+      saveToCloud();
+    } else {
+      // Cloud data is same age or newer — discard the stale local cache and trust the cloud
+      clearLocalCache();
+      setSyncStatus('synced','Synced');
+    }
   } else {
     setSyncStatus('synced','Synced');
   }
@@ -1963,7 +2159,7 @@ async function tryAutoLogin() {
   }
 
   async function finishLogin(user) {
-    const r = await sbFetch(`/rest/v1/dances?username=eq.${enc(user)}&select=data`);
+    const r = await sbFetch(`/rest/v1/dances?username=eq.${enc(user)}&select=data,updated_at`);
     if (r.ok && r.data && r.data.length > 0) {
       state = r.data[0].data || {know:[], learn:[], nights:{}, djFreestyles:{}, favorites:[], favoriteFriends:[]};
       if (!state.djFreestyles) state.djFreestyles = {};
@@ -1971,6 +2167,7 @@ async function tryAutoLogin() {
       if (!state.danceLog) state.danceLog = [];
       if (!state.favoriteFriends) state.favoriteFriends = [];
       if (!state.drewsNights) state.drewsNights = {};
+      state.__cloudUpdatedAt = r.data[0].updated_at || null;
       await loadBank();
       await loadPicks();
       await loadSubmissions();
@@ -1978,6 +2175,7 @@ async function tryAutoLogin() {
       await loadDJList();
       await loadHomeConfig();
       await loadDrewDJFreestyles();
+      await clLoad();
       enterApp(user);
       return true;
     }
@@ -2088,7 +2286,7 @@ function switchTab(tab,_fromSwipe=false){
   localStorage.setItem('ld_active_tab', tab);
   if(tab==='night') renderNight();
   if(tab==='drewsnight') renderDrewsNight();
-  if(tab==='log'){renderHistoryStats();renderTop5();renderLog();renderDJAnalytics();}
+  if(tab==='log'){renderHistoryStats();renderTop5();renderLog();renderDJAnalytics();renderTFDJFavs();}
   if(tab==='admin'){
     ['admin-gradients-form','admin-dj-form','admin-add-dance-form','admin-bank-section','admin-users-section'].forEach(id=>{
       const s=document.getElementById(id);if(s) s.classList.add('collapsed');
@@ -2098,6 +2296,7 @@ function switchTab(tab,_fromSwipe=false){
     renderAdminBank();renderAdminDJList();loadAdminUsers();renderAdminHomeGradients();
   }
   if(tab==='bank') renderBank();
+  if(tab==='home') recRefresh();
   if(tab==='dj'){renderDJRecords();nvPopulateDates();renderTFAnalytics();}
   if(tab==='picks') renderPicks();
   if(tab==='submissions') renderSubmissions();
@@ -2105,6 +2304,7 @@ function switchTab(tab,_fromSwipe=false){
   if(tab==='feedback') renderFeedbackTab();
   if(tab==='editpeople') epRefreshUsers();
   if(tab==='debug') renderDebugTab();
+  if(tab==='changelog') renderChangelog();
 }
 
 // ---- Sort helpers ----
@@ -2148,6 +2348,12 @@ function setListFilter(type,diff,el){
 }
 function setBankView(view,el){
   bankView=view;
+  // Reset fav filter when switching to learn view (favs are only for know list)
+  if(view==='learn'&&bankFavFilterActive){
+    bankFavFilterActive=false;
+    const favBtn=document.getElementById('bank-fav-btn');
+    if(favBtn) favBtn.classList.remove('active');
+  }
   // Update pill styles for view row
   ['bank-view-all-pill','bank-view-know-pill','bank-view-learn-pill'].forEach(id=>{
     const p=document.getElementById(id);
@@ -2178,10 +2384,13 @@ function renderBank(){
         return be?.difficulty===bankFilter;
       });
     }
+    if(bankView==='know'&&bankFavFilterActive){
+      filtered=filtered.filter(d=>isFav(d.id));
+    }
     if(sortState.bank) filtered.sort((a,b)=>a.name.localeCompare(b.name));
     if(!filtered.length){
       const label=bankView==='know'?'Dances I Know':'Want to Learn';
-      el.innerHTML=`<div class="empty">No dances in your "${label}" list yet${q?' matching your search.':'.'}</div>`;
+      el.innerHTML=`<div class="empty">No dances in your "${label}" list yet${q?' matching your search':bankView==='know'&&bankFavFilterActive?' — heart some dances to see them here':'.'}</div>`;
       return;
     }
     const headerColor=bankView==='know'?'var(--green-text)':'var(--blue-text)';
@@ -2202,10 +2411,12 @@ function renderBank(){
       // Remove button + promote button
       const removeBtn=`<button class="btn sm danger" onclick="removeFromList('${bankView}','${esc(d.name)}')">&#10005; Remove</button>`;
       const promoteBtn=bankView==='learn'?`<button class="btn sm success" onclick="addFromBank('know','${esc(d.name)}')">&#43; I Know It</button>`:'';
+      const favBtn=bankView==='know'?`<button class="fav-btn ${isFav(d.id)?'active':''}" onclick="event.stopPropagation();toggleFav('${d.id}')" title="${isFav(d.id)?'Unfavorite':'Favorite'}" style="font-size:16px;margin-right:2px;">&#9829;</button>`:'';
       const hasBody=demoBtn||tutBtn||spotifyBtn||statPills||removeBtn;
       const itemId='bview-'+d.id;
       return `<div class="bank-item" id="${itemId}">
         <div class="bank-item-head" onclick="this.parentElement.classList.toggle('open')">
+          ${favBtn}
           <span class="bank-item-name">${esc(d.name)}</span>
           <div class="bank-item-meta">${diffBadge}</div>
           <span class="bank-item-caret">&#9660;</span>
@@ -2223,10 +2434,19 @@ function renderBank(){
   // --- Default: all-dances view ---
   let items=bank.filter(d=>!q||d.name.toLowerCase().includes(q.toLowerCase()));
   if(bankFilter!=='all') items=items.filter(d=>d.difficulty===bankFilter);
+  if(bankFavFilterActive){
+    items=items.filter(d=>{
+      const knowEntry=state.know.find(k=>k.name.toLowerCase()===d.name.toLowerCase());
+      return knowEntry&&isFav(knowEntry.id);
+    });
+  }
   if(sortState.bank) items.sort((a,b)=>a.name.localeCompare(b.name));
-  if(!items.length){el.innerHTML=`<div class="empty">${bank.length===0?'No dances in the bank yet.':'No dances match your search.'}</div>`;return;}
+  if(!items.length){el.innerHTML=`<div class="empty">${bankFavFilterActive?'No favorite dances in the bank yet — heart some dances on the Dances I Know tab!':bank.length===0?'No dances in the bank yet.':'No dances match your search.'}</div>`;return;}
   el.innerHTML=items.map(d=>{
     const inKnow=isInList(d.name,'know'),inLearn=isInList(d.name,'learn');
+    const knowEntry=state.know.find(k=>k.name.toLowerCase()===d.name.toLowerCase());
+    const knowId=knowEntry?knowEntry.id:null;
+    const favBtn=inKnow&&knowId?`<button class="fav-btn ${isFav(knowId)?'active':''}" onclick="event.stopPropagation();toggleFav('${knowId}')" title="${isFav(knowId)?'Unfavorite':'Favorite'}" style="font-size:16px;margin-right:2px;">&#9829;</button>`:'';
     const diffBadge=d.difficulty?`<span class="diff-badge diff-${d.difficulty}">${d.difficulty}</span>`:'';
     const statusPill=inKnow?`<span class="diff-badge" style="background:var(--green-bg);color:var(--green-text);border:0.5px solid var(--green-border)">&#10003; I Know It</span>`:inLearn?`<span class="diff-badge" style="background:var(--blue-bg);color:var(--blue-text);border:0.5px solid var(--blue-border)">&#9733; Learning</span>`:'';
     const demoBtn=d.demo?`<a class="link-btn demo" href="${escA(d.demo)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">&#9654; Demo</a>`:'';
@@ -2243,6 +2463,7 @@ function renderBank(){
     const hasBody=demoBtn||tutBtn||spotifyBtn||statPills||addBtns;
     return `<div class="bank-item" id="bitem-${d.id}">
       <div class="bank-item-head" onclick="toggleBankItem('${d.id}')">
+        ${favBtn}
         <span class="bank-item-name">${esc(d.name)}</span>
         <div class="bank-item-meta">${diffBadge}${statusPill}</div>
         <span class="bank-item-caret">&#9660;</span>
@@ -2266,6 +2487,8 @@ function addFromBankById(type,bankId){
   state[other]=state[other].filter(x=>x.name.toLowerCase()!==name.toLowerCase());
   if(!isInList(name,type)) state[type].push({id:Date.now()+'',name,added:new Date().toISOString()});
   renderBank();renderList('know');renderList('learn');scheduleSave();syncMyCard();
+  // If fav filter is active and a dance was just added to know, keep filter consistent
+  if(bankFavFilterActive) renderBank();
 }
 function addFromBank(type,name){
   const other=type==='know'?'learn':'know';
@@ -2525,7 +2748,13 @@ function toggleFav(id){
   if(!state.favorites) state.favorites=[];
   if(isFav(id)) state.favorites=state.favorites.filter(f=>f!==id);
   else state.favorites.push(id);
-  renderList('know');scheduleSave();
+  renderList('know');renderBank();scheduleSave();
+}
+function toggleBankFavFilter(){
+  bankFavFilterActive=!bankFavFilterActive;
+  const btn=document.getElementById('bank-fav-btn');
+  if(btn) btn.classList.toggle('active',bankFavFilterActive);
+  renderBank();
 }
 function syncMyCard(){
   const idx=friendCards.findIndex(c=>c.username===currentUser);
@@ -2987,22 +3216,57 @@ function renderHistoryStats(){
   const now=new Date();
   const thisMonth=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   const thisYear=`${now.getFullYear()}`;
-  let monthCount=0,yearCount=0,totalNights=0;
-  const djNights={};
+  let monthCount=0,uniqueMonthCount=0,totalNights=0;
+  const uniqueMonthDances=new Set();
+  // Calculate one-month-ago cutoff for busiest hour
+  const oneMonthAgo=new Date(now);
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth()-1);
   Object.entries(state.nights).forEach(([date,val])=>{
-    const nd=Array.isArray(val)?{dances:val,dj:''}:val;
+    const nd=Array.isArray(val)?{dances:val}:val;
     const dc=(nd.dances||[]).length;
-    if(date.startsWith(thisMonth)) monthCount+=dc;
-    if(date.startsWith(thisYear)) yearCount+=dc;
+    if(date.startsWith(thisMonth)){
+      monthCount+=dc;
+      (nd.dances||[]).forEach(id=>uniqueMonthDances.add(id));
+    }
     if(dc>0) totalNights++;
-    if(nd.dj) djNights[nd.dj]=(djNights[nd.dj]||0)+1;
   });
-  const topDJ=Object.entries(djNights).sort((a,b)=>b[1]-a[1])[0];
+  uniqueMonthCount=uniqueMonthDances.size;
+  // Busiest Hour: look at danceLog entries from past month, exclude after 1:30 AM
+  const hourCounts={};
+  let hasTimeData=false;
+  (state.danceLog||[]).forEach(entry=>{
+    if(!entry.timestamp||entry.type==='palace_times'||entry.type==='not_performed') return;
+    const t=new Date(entry.timestamp);
+    if(t<oneMonthAgo) return;
+    if(t<new Date('2026-04-22T00:00:00')) return;
+    const h=t.getHours();
+    const m=t.getMinutes();
+    // Only allow 7:00 PM (19:00) through 1:30 AM
+    const afterStart=h>=19; // 7:00 PM or later
+    const beforeEnd=h===0||(h===1&&m<=30); // midnight–1:30 AM
+    if(!afterStart&&!beforeEnd) return;
+    hasTimeData=true;
+    hourCounts[h]=(hourCounts[h]||0)+1;
+  });
+  let busiestHourHTML;
+  if(!hasTimeData){
+    busiestHourHTML=`<div class="stat-card"><div class="stat-label">Busiest Hour</div><div class="stat-value" style="font-size:13px;color:var(--t2);line-height:1.4;padding-top:4px">Record a night to start tracking!</div></div>`;
+  } else {
+    const topEntry=Object.entries(hourCounts).sort((a,b)=>b[1]-a[1])[0];
+    let hourLabel='—';
+    if(topEntry){
+      const h=parseInt(topEntry[0]);
+      const suffix=h===0?'12 AM':h<12?h+' AM':h===12?'12 PM':(h-12)+' PM';
+      hourLabel=suffix;
+    }
+    const topCount=topEntry?topEntry[1]:0;
+    busiestHourHTML=`<div class="stat-card"><div class="stat-label">Busiest Hour</div><div class="stat-value" style="font-size:22px">${hourLabel}</div><div class="stat-sub">${topCount} dance${topCount!==1?'s':''} avg this month</div></div>`;
+  }
   el.innerHTML=`
     <div class="stat-card"><div class="stat-label">Dances This Month</div><div class="stat-value">${monthCount}</div></div>
-    <div class="stat-card"><div class="stat-label">Dances This Year</div><div class="stat-value">${yearCount}</div></div>
+    <div class="stat-card"><div class="stat-label">Unique Dances This Month</div><div class="stat-value">${uniqueMonthCount}</div></div>
     <div class="stat-card"><div class="stat-label">Nights Danced</div><div class="stat-value">${totalNights}</div></div>
-    <div class="stat-card"><div class="stat-label">Most Frequent DJ</div><div class="stat-value" style="font-size:18px">${topDJ?esc(topDJ[0]):'—'}</div><div class="stat-sub">${topDJ?topDJ[1]+' night'+(topDJ[1]!==1?'s':''):''}</div></div>`;
+    ${busiestHourHTML}`;
 }
 function renderTop5(){
   const el=document.getElementById('top5-list');
@@ -3068,7 +3332,8 @@ function renderLog(){
     const dances=(nd.dances||[]).map(id=>state.know.find(d=>d.id===id)).filter(Boolean);
     const pills=dances.map(d=>`<span class="log-pill">${esc(d.name)}</span>`).join('');
     const djLabel=nd.dj?`<span class="dj-name">DJ: ${esc(nd.dj)}</span>`:'';
-    const palaceLabel=(nd.arriveTime||nd.leaveTime)?`<span class="dj-name" style="color:var(--purple-text)">&#127968; ${nd.arriveTime?nd.arriveTime:'?'} – ${nd.leaveTime?nd.leaveTime:'?'}</span>`:'';
+    function fmt12(t){if(!t)return'?';const[hh,mm]=t.split(':').map(Number);const ampm=hh<12?'AM':'PM';const h=hh%12||12;return`${h}:${String(mm).padStart(2,'0')} ${ampm}`;}
+    const palaceLabel=(nd.arriveTime||nd.leaveTime)?`<span class="dj-name" style="color:var(--purple-text)">${fmt12(nd.arriveTime)} – ${fmt12(nd.leaveTime)}</span>`:'';
     return `
       <div class="day-log" onclick="this.classList.toggle('open')">
         <div class="day-log-head">
@@ -3095,12 +3360,12 @@ function renderLog(){
       </div>
       <div class="accordion-body">
         <div style="margin-bottom:1rem">
-          <div style="font-size:11px;font-weight:500;color:var(--t2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px">All-time dance totals</div>
-          <div class="all-dances-list">${totalsRows||'<div class="empty">No dances recorded yet.</div>'}</div>
-        </div>
-        <div style="border-top:0.5px solid var(--b3);padding-top:1rem">
           <div style="font-size:11px;font-weight:500;color:var(--t2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px">Individual nights</div>
           ${nightRows}
+        </div>
+        <div style="border-top:0.5px solid var(--b3);padding-top:1rem">
+          <div style="font-size:11px;font-weight:500;color:var(--t2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px">All-time dance totals</div>
+          <div class="all-dances-list">${totalsRows||'<div class="empty">No dances recorded yet.</div>'}</div>
         </div>
       </div>
     </div>`;
@@ -3207,7 +3472,7 @@ function renderDJRecords(){
           <span class="dj-record-name">${esc(name)}</span>
           <span class="dj-stat">Sessions: <strong>${sessions.length}</strong></span>
           <span class="dj-stat">Avg: <strong>${fmtSecs(avg)}</strong></span>
-          <span class="dj-stat">Nights DJ'd: <strong>${nights}</strong></span>
+          
           <span class="caret" style="font-size:11px;color:var(--t2)">&#9660;</span>
         </div>
         <div class="dj-sessions-body" id="dj-sessions-${sid}">${sessionRows}</div>
@@ -3235,25 +3500,11 @@ function renderDJAnalytics(){
   });
   const djs=Object.entries(drewDJFreestyles).filter(([k,arr])=>k!=='_nights'&&arr&&arr.length>0);
   if(!djs.length){listEl.innerHTML=`<div class="empty">No freestyle sessions logged yet.</div>`;return;}
-  listEl.innerHTML=djs.map(([name,sessions])=>{
+  listEl.innerHTML=`<div class="stats-grid">`+djs.map(([name,sessions])=>{
     const totalSecs=sessions.reduce((a,s)=>a+(s.secs||s),0);
     const avg=Math.round(totalSecs/sessions.length);
-    const nights=djNights[name]||0;
-    const sid=cssId(name)+'_a';
-    return `
-      <div class="dj-record-item" id="dj-a-item-${sid}">
-        <div class="dj-record-head" onclick="this.closest('.dj-record-item').classList.toggle('open')" style="cursor:pointer">
-          <span class="dj-record-name">${esc(name)}</span>
-          <span class="dj-stat">Sessions: <strong>${sessions.length}</strong></span>
-          <span class="dj-stat">Avg: <strong>${fmtSecs(avg)}</strong></span>
-          <span class="dj-stat">Nights DJ'd: <strong>${nights}</strong></span>
-          <span class="caret" style="font-size:11px;color:var(--t2)">&#9660;</span>
-        </div>
-        <div class="dj-sessions-body">
-          ${sessions.map((s,i)=>`<div class="dj-session-row"><span class="dj-session-num">${i+1}.</span><span class="dj-session-time">${fmtSecs(s.secs||s)}</span></div>`).join('')}
-        </div>
-      </div>`;
-  }).join('');
+    return `<div class="stat-card"><div class="stat-label">${esc(name)}</div><div class="stat-value" style="font-size:20px;font-weight:500;">${fmtSecs(avg)}</div><div class="stat-sub">${sessions.length} session${sessions.length!==1?'s':''}</div></div>`;
+  }).join('')+`</div>`;
 }
 
 // ---- Drew's Favs (drag-and-drop) ----
@@ -4626,6 +4877,110 @@ function renderTFTrending(){
     <style>@media(max-width:540px){#tf-trending>div:first-child{grid-template-columns:1fr!important;}}</style>`;
 }
 
+// ---- DJ Favorites Match ----
+async function renderTFDJFavs(){
+  const el=document.getElementById('tf-dj-favs');
+  if(!el) return;
+  el.innerHTML=`<div class="empty" style="color:var(--t3);font-size:13px;">Loading…</div>`;
+
+  // Collect the user's favorite dance names from both sources:
+  // 1. Hearted dances (state.favorites = array of IDs from state.know)
+  // 2. Friend card top-5 favs (card.favs = array of IDs, card.favNames = name strings)
+  const favNameSet = new Set();
+  const favIds = state.favorites || [];
+  favIds.forEach(id => {
+    const d = state.know.find(x => x.id === id);
+    if (d) favNameSet.add(d.name.toLowerCase().trim());
+  });
+  // Also pull from the user's own friend card
+  const myCard = friendCards.find(c => c.username === currentUser);
+  if (myCard) {
+    (myCard.favNames || []).forEach(n => favNameSet.add(n.toLowerCase().trim()));
+    (myCard.favs || []).forEach(id => {
+      const d = state.know.find(x => x.id === id);
+      if (d) favNameSet.add(d.name.toLowerCase().trim());
+    });
+  }
+
+  if (!favNameSet.size) {
+    el.innerHTML=`<div class="empty">Heart some dances on the Dances I Know tab, or set up your friend card, to see this!</div>`;
+    return;
+  }
+
+  // Load Drew's full data (nights + know list)
+  const drewData = await loadDrewFullData();
+  const drewKnow = drewData.know || [];
+  const drewNights = drewData.nights || {};
+
+  // Build a name→id map from Drew's know list for resolving night dance IDs
+  const drewIdToName = {};
+  drewKnow.forEach(d => { drewIdToName[d.id] = d.name.toLowerCase().trim(); });
+
+  // For each DJ, count how many times each of the user's favorites was played
+  // djData[djName] = { total: N, songs: { songName: count } }
+  const djData = {};
+
+  Object.entries(drewNights).forEach(([date, val]) => {
+    const nd = Array.isArray(val) ? { dances: val, notPerformed: [], dj: '' } : { notPerformed: [], ...val };
+    const dj = (nd.dj || '').trim();
+    if (!dj) return;
+    if (!djData[dj]) djData[dj] = { total: 0, songs: {} };
+
+    // Count both performed and not-performed (both were played)
+    const allDanced = [...(nd.dances || []), ...(nd.notPerformed || [])];
+    allDanced.forEach(id => {
+      const name = drewIdToName[id];
+      if (!name || !favNameSet.has(name)) return;
+      djData[dj].songs[name] = (djData[dj].songs[name] || 0) + 1;
+      djData[dj].total++;
+    });
+  });
+
+  // Filter to DJs who played at least one favorite, sort by total desc
+  const ranked = Object.entries(djData)
+    .filter(([, d]) => d.total > 0)
+    .sort((a, b) => b[1].total - a[1].total);
+
+  if (!ranked.length) {
+    el.innerHTML=`<div class="empty">Add dances to your favorite on the Dances I Know tab to see them here!</div>`;
+    return;
+  }
+
+  // Friendly display name for a song (title-case from the set)
+  const toDisplay = name => {
+    const orig = state.know.find(d => d.name.toLowerCase().trim() === name);
+    if (orig) return orig.name;
+    const fromCard = myCard && (myCard.favNames || []).find(n => n.toLowerCase().trim() === name);
+    if (fromCard) return fromCard;
+    return name.replace(/\b\w/g, c => c.toUpperCase());
+  };
+
+  const cards = ranked.map(([dj, data]) => {
+    const songs = Object.entries(data.songs).sort((a, b) => b[1] - a[1]);
+    const uniqueCount = songs.length;
+    const songRows = songs.map(([name, count]) =>
+      `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--b3);">
+        <span style="flex:1;font-size:13px;">${esc(toDisplay(name))}</span>
+        <span style="font-size:12px;color:var(--t2);white-space:nowrap;">${count}×</span>
+      </div>`
+    ).join('');
+
+    return `
+      <div style="background:var(--bg);border:0.5px solid var(--b3);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 15px;background:var(--bg2);cursor:pointer;user-select:none;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+          <span style="flex:1;font-size:14px;font-weight:500;">${esc(dj)}</span>
+          <span style="font-size:12px;background:var(--pink-bg);color:var(--pink-text);border:0.5px solid var(--pink-border);border-radius:20px;padding:2px 10px;">${uniqueCount} Favorite Song${uniqueCount!==1?'s':''} Played</span>
+          <span style="font-size:11px;color:var(--t3)">&#9660;</span>
+        </div>
+        <div style="display:none;padding:8px 15px;">
+          ${songRows}
+        </div>
+      </div>`;
+  }).join('');
+
+  el.innerHTML = cards;
+}
+
 // ---- Favorites vs Reality ----
 function renderTFFavsReality(){
   const el=document.getElementById('tf-favs-reality');
@@ -5533,6 +5888,360 @@ async function debugDeleteNight(date){
   },{passive:true});
 })();
 
+// ── Dance Recommendation Engine ──────────────────────────────────────────────
+let drewFullData = null; // cache Drew's full data (nights + danceLog + know)
+let recSkipped = new Set(); // dances skipped this session
+let recWidgetOpen = false;
+
+function toggleRecWidget() {
+  const wrap = document.getElementById('rec-widget-wrap');
+  const btn = document.getElementById('rec-toggle-btn');
+  if (!wrap) return;
+  recWidgetOpen = !recWidgetOpen;
+  wrap.style.display = recWidgetOpen ? 'block' : 'none';
+  if (btn) {
+    btn.style.background = recWidgetOpen ? 'var(--amber-text)' : 'var(--amber-bg)';
+    btn.style.color = recWidgetOpen ? '#fff' : 'var(--amber-text)';
+    btn.style.borderColor = recWidgetOpen ? 'var(--amber-text)' : 'var(--amber-border)';
+  }
+  if (recWidgetOpen) recRefresh();
+}
+
+async function loadDrewFullData() {
+  if (drewFullData) return drewFullData;
+  if (isAdmin) {
+    drewFullData = state;
+    return drewFullData;
+  }
+  const r = await sbFetch(`/rest/v1/dances?username=eq.${enc(ADMIN_USER)}&select=data`);
+  drewFullData = (r.ok && r.data && r.data.length > 0) ? (r.data[0].data || {}) : {};
+  return drewFullData;
+}
+
+function recGetDifficultyProfile() {
+  // Returns { Beginner, Improver, Intermediate, Advanced } counts from user's know list
+  const profile = { Beginner: 0, Improver: 0, Intermediate: 0, Advanced: 0, none: 0 };
+  (state.know || []).forEach(d => {
+    const entry = bank.find(b => b.name.toLowerCase() === d.name.toLowerCase());
+    const diff = entry?.difficulty || 'none';
+    profile[diff] = (profile[diff] || 0) + 1;
+  });
+  return profile;
+}
+
+function recTargetDifficulty(profile) {
+  // Determine what difficulty to recommend next.
+  // Logic: work out the "frontier" — the highest tier they have meaningful exposure to,
+  // then recommend one step up, or the same tier if they're still thin there.
+  // All tiers require 13 dances known before stepping up.
+  const order = ['Beginner', 'Improver', 'Intermediate', 'Advanced'];
+  const thresholds = { Beginner: 13, Improver: 13, Intermediate: 13, Advanced: 999 };
+  // Find the highest tier they've passed the threshold for
+  let frontier = 0;
+  for (let i = 0; i < order.length; i++) {
+    if ((profile[order[i]] || 0) >= thresholds[order[i]]) frontier = i;
+  }
+  // If they're thin on the frontier tier itself, stay there; otherwise step up
+  const frontierTier = order[frontier];
+  const frontierCount = profile[frontierTier] || 0;
+  if (frontierCount < thresholds[frontierTier] && frontier > 0) {
+    // Not yet saturated at frontier — recommend frontier
+    return [frontierTier];
+  }
+  // Step up, but keep frontier as fallback
+  const next = order[Math.min(frontier + 1, order.length - 1)];
+  return [next, frontierTier];
+}
+
+function recBuildScores(drewData) {
+  // Build a recency score for each dance name from Drew's dance log.
+  // Uses exponential decay: full score within 14 days, half at 30 days, fades after 90.
+  // Also accounts for dances Drew had on the setlist but didn't perform (notPerformed).
+  const log = drewData.danceLog || [];
+  const now = Date.now();
+  const DAY = 86400000;
+  const scores = {};
+  log.forEach(entry => {
+    if (!entry.danceName || entry.type === 'palace_times') return;
+    const name = entry.danceName.toLowerCase().trim();
+    const date = entry.date ? new Date(entry.date).getTime() : 0;
+    if (!date) return;
+    const daysAgo = (now - date) / DAY;
+    const decay = Math.exp(-daysAgo / 30);
+    if (entry.type === 'not_performed') {
+      // Dance was on the setlist but not performed — it was still played that night.
+      // Count at full 1.0 weight since it reflects a song that was played.
+      scores[name] = (scores[name] || 0) + decay;
+    } else {
+      scores[name] = (scores[name] || 0) + decay;
+    }
+  });
+  // Also count from nights directly (dances stored as IDs → map via Drew's know list)
+  const drewKnow = drewData.know || [];
+  const drewNights = drewData.nights || {};
+  Object.entries(drewNights).forEach(([date, val]) => {
+    const nd = Array.isArray(val) ? { dances: val, notPerformed: [] } : val;
+    const dateMs = new Date(date).getTime();
+    if (!dateMs) return;
+    const daysAgo = (now - dateMs) / DAY;
+    const decay = Math.exp(-daysAgo / 30);
+    // Performed dances
+    (nd.dances || []).forEach(id => {
+      const dk = drewKnow.find(d => d.id === id);
+      if (!dk) return;
+      const name = dk.name.toLowerCase().trim();
+      scores[name] = (scores[name] || 0) + decay * 0.5; // nights count less than log
+    });
+    // Not-performed dances — still played that night, count at 0.5 weight same as performed night entries
+    (nd.notPerformed || []).forEach(id => {
+      const dk = drewKnow.find(d => d.id === id);
+      if (!dk) return;
+      const name = dk.name.toLowerCase().trim();
+      scores[name] = (scores[name] || 0) + decay * 0.5;
+    });
+  });
+  return scores;
+}
+
+function recGetHotLabel(score) {
+  if (score >= 3) return 'hot';   // played a lot recently
+  if (score >= 1) return 'warm';  // played somewhat recently
+  return 'cool';
+}
+
+function recHotLabelText(score) {
+  if (score >= 3) return '🔥 Played a lot recently';
+  if (score >= 1) return '✓ Played recently';
+  return '💤 Hasn\'t been played lately';
+}
+
+let recCurrentResult = null;
+
+async function recRefresh() {
+  const widget = document.getElementById('rec-widget');
+  if (!widget) return;
+  widget.classList.add('loading');
+  widget.classList.remove('empty-state');
+  widget.querySelector('.rec-dance-name').textContent = 'Finding your next dance…';
+  widget.querySelector('.rec-reason').textContent = '';
+  widget.querySelector('.rec-pills').innerHTML = '';
+  widget.querySelector('.rec-btn-add').style.display = 'none';
+  widget.querySelector('.rec-links').innerHTML = '';
+
+  if (!state.know || state.know.length < 2) {
+    recShowEmpty('Add a few dances you know to get a personalised recommendation!');
+    return;
+  }
+  if (!bank || !bank.length) {
+    recShowEmpty('Dance bank is loading…');
+    return;
+  }
+
+  const drewData = await loadDrewFullData();
+  const scores = recBuildScores(drewData);
+  const profile = recGetDifficultyProfile();
+  const targetDiffs = recTargetDifficulty(profile);
+
+  // Known names set (lowercase)
+  const knownNames = new Set((state.know || []).map(d => d.name.toLowerCase().trim()));
+  const learnNames = new Set((state.learn || []).map(d => d.name.toLowerCase().trim()));
+
+  // HOT_LEARN_THRESHOLD: if a dance is on the learn list but has a high recency score
+  // (i.e. it's being played a lot), still allow it as a recommendation candidate.
+  const HOT_LEARN_THRESHOLD = 3; // matches the "hot" label threshold (score >= 3)
+
+  // If the dancer knows more than 60 dances, shift priority to hot Intermediate/Advanced songs
+  const totalKnown = (state.know || []).length;
+  const expertMode = totalKnown > 60;
+
+  // Tier order for "above" logic
+  const tierOrder = ['Beginner', 'Improver', 'Intermediate', 'Advanced'];
+  const primaryTier = targetDiffs[0];
+  const primaryIdx = tierOrder.indexOf(primaryTier);
+  // "Same level or below" = primaryTier and below
+  const atOrBelowTiers = new Set(tierOrder.slice(0, primaryIdx + 1));
+  // "One above" tier
+  const aboveTier = primaryIdx < tierOrder.length - 1 ? tierOrder[primaryIdx + 1] : null;
+  // Expert mode: hot Intermediate/Advanced songs get top billing
+  const expertTiers = new Set(['Intermediate', 'Advanced']);
+
+  // 2-in-10 chance of recommending a tier-above dance
+  const rollAbove = aboveTier && Math.random() < 0.2;
+
+  // Build candidates
+  const allCandidates = bank
+    .filter(b => {
+      const n = b.name.toLowerCase().trim();
+      if (knownNames.has(n) || recSkipped.has(n)) return false;
+      // Allow learn-list dances only if they're "hot" (played a lot recently)
+      if (learnNames.has(n) && (scores[n] || 0) < HOT_LEARN_THRESHOLD) return false;
+      return true;
+    })
+    .map(b => {
+      const n = b.name.toLowerCase().trim();
+      const recency = scores[n] || 0;
+      const diff = b.difficulty || 'none';
+      const isAtOrBelow = atOrBelowTiers.has(diff);
+      const isAbove = diff === aboveTier;
+      const isExpertTier = expertTiers.has(diff);
+
+      let diffScore;
+      if (expertMode && isExpertTier) {
+        // 60+ dances known: hot Intermediate/Advanced songs are top priority.
+        // The heavier the play score, the more it dominates.
+        diffScore = 1.5 + Math.min(recency, 10) * 1.0; // up to 11.5 for very hot songs
+      } else if (isAtOrBelow) {
+        // Heavy boost for frequently played songs at same level or below.
+        diffScore = 1.0 + Math.min(recency, 10) * 0.8; // up to 9.0 for very frequently played
+      } else if (isAbove) {
+        diffScore = 0.3;
+      } else {
+        diffScore = 0.05;
+      }
+
+      const finalScore = (recency + 0.1) * diffScore;
+      return { b, recency, diff, finalScore, isAtOrBelow, isAbove, isExpertTier };
+    })
+    .filter(c => c.finalScore > 0)
+    .sort((a, b) => b.finalScore - a.finalScore);
+
+  if (!allCandidates.length) {
+    // Widen search: ignore difficulty filter
+    const widenCandidates = bank
+      .filter(b => {
+        const n = b.name.toLowerCase().trim();
+        if (knownNames.has(n) || recSkipped.has(n)) return false;
+        if (learnNames.has(n) && (scores[n] || 0) < HOT_LEARN_THRESHOLD) return false;
+        return true;
+      })
+      .map(b => {
+        const n = b.name.toLowerCase().trim();
+        const recency = scores[n] || 0;
+        return { b, recency, diff: b.difficulty || 'none', finalScore: recency + 0.05 };
+      })
+      .sort((a, b) => b.finalScore - a.finalScore);
+    if (!widenCandidates.length) {
+      recSkipped.clear();
+      recShowEmpty('You\'ve seen all suggestions! Refreshing the pool…');
+      setTimeout(recRefresh, 800);
+      return;
+    }
+    const pool = widenCandidates.slice(0, 10);
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    recCurrentResult = pick;
+    recShowResult(pick, profile, targetDiffs);
+    return;
+  }
+
+  let pool;
+  if (expertMode) {
+    // Expert mode: prefer hot Intermediate/Advanced candidates first
+    const expertCandidates = allCandidates.filter(c => c.isExpertTier);
+    if (expertCandidates.length > 0) {
+      pool = expertCandidates.slice(0, 10);
+    } else {
+      pool = allCandidates.slice(0, 10);
+    }
+  } else if (rollAbove) {
+    // Pick from above-tier candidates (top 10 of those)
+    const aboveCandidates = allCandidates.filter(c => c.isAbove);
+    if (aboveCandidates.length > 0) {
+      pool = aboveCandidates.slice(0, 10);
+    } else {
+      // No above-tier dances available, fall back to at-or-below
+      const atOrBelowCandidates = allCandidates.filter(c => c.isAtOrBelow);
+      pool = (atOrBelowCandidates.length > 0 ? atOrBelowCandidates : allCandidates).slice(0, 10);
+    }
+  } else {
+    // Prioritize at-or-below, often-played dances
+    const atOrBelowCandidates = allCandidates.filter(c => c.isAtOrBelow);
+    if (atOrBelowCandidates.length > 0) {
+      pool = atOrBelowCandidates.slice(0, 10);
+    } else {
+      pool = allCandidates.slice(0, 10);
+    }
+  }
+
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  recCurrentResult = pick;
+  recShowResult(pick, profile, targetDiffs);
+}
+
+function recShowResult(pick, profile, targetDiffs) {
+  const widget = document.getElementById('rec-widget');
+  if (!widget) return;
+  widget.classList.remove('loading', 'empty-state');
+
+  const { b, recency, diff } = pick;
+  const hotLabel = recGetHotLabel(recency);
+  const hotText = recHotLabelText(recency);
+
+  widget.querySelector('.rec-dance-name').textContent = b.name;
+  widget.querySelector('.rec-reason').textContent = '';
+
+  // Pills
+  const pillsEl = widget.querySelector('.rec-pills');
+  let pillsHTML = '';
+  if (diff && diff !== 'none') {
+    const diffClass = diff === 'Beginner' ? 'rec-pill-beginner'
+      : diff === 'Improver' ? 'rec-pill-improver'
+      : diff === 'Intermediate' ? 'rec-pill-intermediate'
+      : diff === 'Advanced' ? 'rec-pill-advanced'
+      : 'diff';
+    pillsHTML += `<span class="rec-pill ${diffClass}">${diff}</span>`;
+  }
+  pillsHTML += `<span class="rec-pill ${hotLabel}">${hotText}</span>`;
+  if (b.counts) pillsHTML += `<span class="rec-pill cool">${b.counts} counts</span>`;
+  if (b.walls) pillsHTML += `<span class="rec-pill cool">${b.walls} walls</span>`;
+  // Flag if the dance is already on the user's learn list (recommended because it's hot)
+  const learnNamesCheck = new Set((state.learn || []).map(d => d.name.toLowerCase().trim()));
+  if (learnNamesCheck.has(b.name.toLowerCase().trim())) {
+    pillsHTML += `<span class="rec-pill" style="background:var(--purple-bg);color:var(--purple-text);border-color:var(--purple-border);">📌 On your learn list</span>`;
+  }
+  pillsEl.innerHTML = pillsHTML;
+
+  // Links
+  const linksEl = widget.querySelector('.rec-links');
+  let linksHTML = '';
+  if (b.demo) linksHTML += `<a href="${escA(b.demo)}" target="_blank" rel="noopener" class="link-btn demo" style="font-size:12px">▶ Demo</a>`;
+  if (b.tutorial) linksHTML += `<a href="${escA(b.tutorial)}" target="_blank" rel="noopener" class="link-btn tutorial" style="font-size:12px">🎓 Tutorial</a>`;
+  linksEl.innerHTML = linksHTML;
+
+  widget.querySelector('.rec-btn-add').style.display = '';
+}
+
+function recShowEmpty(msg) {
+  const widget = document.getElementById('rec-widget');
+  if (!widget) return;
+  widget.classList.remove('loading');
+  widget.classList.add('empty-state');
+  widget.querySelector('.rec-dance-name').textContent = msg;
+  widget.querySelector('.rec-reason').textContent = '';
+  widget.querySelector('.rec-pills').innerHTML = '';
+  widget.querySelector('.rec-btn-add').style.display = 'none';
+  widget.querySelector('.rec-links').innerHTML = '';
+}
+
+function recAddToLearn() {
+  if (!recCurrentResult) return;
+  const name = recCurrentResult.b.name;
+  const already = (state.learn || []).some(d => d.name.toLowerCase() === name.toLowerCase());
+  if (!already) {
+    if (!state.learn) state.learn = [];
+    state.learn.push({ id: Date.now() + '', name, added: new Date().toISOString() });
+    renderList('learn');
+    scheduleSave();
+    syncMyCard();
+  }
+  recSkipped.add(name.toLowerCase().trim());
+  recCurrentResult = null;
+  recRefresh();
+}
+
+// Expose for the skip button
+window.recAddToLearn = recAddToLearn;
+window.recRefresh = recRefresh;
+
 tryAutoLogin();
 
 // Refresh the Supabase token every 45 minutes while the app is open,
@@ -5541,6 +6250,157 @@ setInterval(async()=>{
   if(!currentUser) return;
   await tryRefreshToken();
 }, 45 * 60 * 1000);
+
+// ---- CHANGELOG ----
+let changelog = [];
+
+async function clLoad() {
+  const r = await sbFetch(`/rest/v1/dances?username=eq.__changelog__&select=data`);
+  changelog = (r.ok && r.data && r.data.length > 0) ? (r.data[0].data.entries || []) : [];
+  clUpdateVersionUI();
+  renderChangelog();
+}
+
+function clMaybeShowModal() {
+  if (!changelog.length) return;
+  const latest = changelog.slice().sort((a,b) => (parseFloat(b.version)||0) - (parseFloat(a.version)||0))[0];
+  if (!latest) return;
+  // Check cloud state first, fall back to localStorage
+  const seenId = (state.clSeenId) || localStorage.getItem('cl_seen_' + currentUser);
+  if (seenId === latest.id) return;
+  document.getElementById('cl-modal-version').textContent = 'v' + latest.version;
+  document.getElementById('cl-modal-title').textContent = latest.title;
+  document.getElementById('cl-modal-date').textContent = latest.date || '';
+  document.getElementById('cl-modal-notes').textContent = latest.notes || '';
+  document.getElementById('cl-modal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function clDismissModal() {
+  document.getElementById('cl-modal').style.display = 'none';
+  document.body.style.overflow = '';
+  if (!changelog.length) return;
+  const latest = changelog.slice().sort((a,b) => (parseFloat(b.version)||0) - (parseFloat(a.version)||0))[0];
+  if (!latest) return;
+  // Save to both cloud state and localStorage
+  state.clSeenId = latest.id;
+  localStorage.setItem('cl_seen_' + currentUser, latest.id);
+  scheduleSave();
+}
+
+async function clSave() {
+  const check = await sbFetch(`/rest/v1/dances?username=eq.__changelog__&select=username`);
+  if (check.ok && check.data && check.data.length > 0) {
+    await sbFetch(`/rest/v1/dances?username=eq.__changelog__`, {method:'PATCH', prefer:'return=minimal', body:JSON.stringify({data:{entries:changelog}, updated_at:new Date().toISOString()})});
+  } else {
+    await sbFetch('/rest/v1/dances', {method:'POST', prefer:'return=minimal', body:JSON.stringify({username:'__changelog__', password:'__changelog__', data:{entries:changelog}})});
+  }
+}
+
+function clUpdateVersionUI() {
+  // Find the latest version (first entry after sorting by version desc)
+  const latest = changelog.slice().sort((a,b) => {
+    const av = parseFloat(a.version) || 0;
+    const bv = parseFloat(b.version) || 0;
+    return bv - av;
+  })[0];
+  const label = latest ? 'v' + latest.version : 'v1.0';
+  const badge = document.getElementById('changelog-current-version');
+  const footerBtn = document.getElementById('footer-version-btn');
+  if (badge) badge.textContent = label;
+  if (footerBtn) footerBtn.textContent = label;
+}
+
+async function clAddEntry() {
+  const version = document.getElementById('cl-input-version').value.trim();
+  const title = document.getElementById('cl-input-title').value.trim();
+  const date = document.getElementById('cl-input-date').value;
+  const notes = document.getElementById('cl-input-notes').value.trim();
+  if (!version || !title) { alert('Please fill in at least a version and title.'); return; }
+  changelog.unshift({ id: Date.now() + '', version, title, date: date || new Date().toISOString().slice(0,10), notes });
+  document.getElementById('cl-input-version').value = '';
+  document.getElementById('cl-input-title').value = '';
+  document.getElementById('cl-input-date').value = '';
+  document.getElementById('cl-input-notes').value = '';
+  await clSave();
+  clUpdateVersionUI();
+  renderChangelog();
+}
+
+async function clDeleteEntry(id) {
+  if (!confirm('Delete this changelog entry?')) return;
+  changelog = changelog.filter(e => e.id !== id);
+  await clSave();
+  clUpdateVersionUI();
+  renderChangelog();
+}
+
+async function clSaveEdit(id) {
+  const entry = changelog.find(e => e.id === id);
+  if (!entry) return;
+  entry.version = document.getElementById('cl-edit-version-' + id).value.trim() || entry.version;
+  entry.title = document.getElementById('cl-edit-title-' + id).value.trim() || entry.title;
+  entry.date = document.getElementById('cl-edit-date-' + id).value || entry.date;
+  entry.notes = document.getElementById('cl-edit-notes-' + id).value;
+  await clSave();
+  clUpdateVersionUI();
+  renderChangelog();
+}
+
+function renderChangelog() {
+  const adminPanel = document.getElementById('changelog-admin-panel');
+  if (adminPanel) adminPanel.style.display = isAdmin ? '' : 'none';
+
+  const el = document.getElementById('changelog-list');
+  if (!el) return;
+  if (!changelog.length) {
+    el.innerHTML = '<div class="empty">No changelog entries yet.</div>';
+    return;
+  }
+
+  const sorted = changelog.slice().sort((a,b) => {
+    const av = parseFloat(a.version) || 0;
+    const bv = parseFloat(b.version) || 0;
+    return bv - av;
+  });
+
+  el.innerHTML = sorted.map((entry, i) => {
+    const isFirst = i === 0;
+    return `
+    <div class="changelog-entry${isFirst ? ' open' : ''}" id="cl-entry-${entry.id}">
+      <div class="changelog-entry-head" onclick="this.closest('.changelog-entry').classList.toggle('open')">
+        <span class="changelog-entry-version">v${esc(entry.version)}</span>
+        <span class="changelog-entry-title">${esc(entry.title)}</span>
+        ${isFirst ? '<span style="font-size:11px;font-weight:600;background:var(--purple-bg);color:var(--purple-text);border:0.5px solid var(--purple-border);border-radius:20px;padding:2px 9px;white-space:nowrap;">Latest</span>' : ''}
+        <span class="changelog-entry-date">${entry.date || ''}</span>
+        <span class="changelog-entry-caret">&#9660;</span>
+      </div>
+      <div class="changelog-entry-body">
+        ${isAdmin ? `
+          <div style="display:grid;grid-template-columns:100px 1fr auto;gap:8px;margin-bottom:10px;align-items:center;">
+            <input id="cl-edit-version-${entry.id}" value="${esc(entry.version)}" placeholder="Version" style="padding:7px 10px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg2);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;">
+            <input id="cl-edit-title-${entry.id}" value="${esc(entry.title)}" placeholder="Title" style="padding:7px 10px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg2);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;">
+            <input type="date" id="cl-edit-date-${entry.id}" value="${entry.date||''}" style="padding:7px 10px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg2);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;">
+          </div>
+          <textarea id="cl-edit-notes-${entry.id}" style="width:100%;min-height:90px;padding:10px 12px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg2);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;resize:vertical;line-height:1.6;margin-bottom:10px;">${esc(entry.notes||'')}</textarea>
+          <div class="cl-actions">
+            <button class="btn xs danger" onclick="clDeleteEntry('${entry.id}')">Delete</button>
+            <button class="btn xs primary" onclick="clSaveEdit('${entry.id}')">Save Changes</button>
+          </div>
+        ` : `
+          <div class="cl-notes">${esc(entry.notes || 'No notes for this version.')}</div>
+        `}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Show footer once logged in
+function showAppFooter() {
+  const footer = document.getElementById('app-footer');
+  if (footer) footer.style.display = '';
+}
+
 </script>
 </body>
 </html>
