@@ -1188,14 +1188,14 @@
 
   <!-- ADMIN -->
   <div id="tab-admin" class="section">
-    <div class="admin-form collapsed" id="admin-gradients-form">
+    <div class="admin-form" id="admin-gradients-form">
       <div class="admin-form-title" onclick="toggleAdminSection('admin-gradients-form')">&#127775; Home Card Gradients <span class="admin-caret">&#9660;</span></div>
       <div class="admin-form-body">
         <p style="font-size:13px;color:var(--t2);margin-bottom:1rem;">Customize the gradient for each card on the home screen. Changes are saved instantly and affect all users.</p>
         <div id="admin-home-gradients"></div>
       </div>
     </div>
-    <div class="admin-form collapsed" id="admin-dj-form">
+    <div class="admin-form" id="admin-dj-form">
       <div class="admin-form-title" onclick="toggleAdminSection('admin-dj-form')">&#9835; Manage DJ List <span class="admin-caret">&#9660;</span></div>
       <div class="admin-form-body">
         <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
@@ -1205,7 +1205,7 @@
         <div id="admin-dj-list" style="display:flex;flex-direction:column;gap:6px;"></div>
       </div>
     </div>
-    <div class="admin-form collapsed" id="admin-add-dance-form">
+    <div class="admin-form" id="admin-add-dance-form">
       <div class="admin-form-title" onclick="toggleAdminSection('admin-add-dance-form')">&#9733; Add a new dance to the bank <span class="admin-caret">&#9660;</span></div>
       <div class="admin-form-body">
         <div class="admin-form-grid">
@@ -1227,19 +1227,13 @@
         <div class="admin-form-row"><button class="btn amber" onclick="adminAddDance()">Add to bank</button></div>
       </div>
     </div>
-    <div class="admin-section-collapsible collapsed" id="admin-bank-section">
+    <div class="admin-section-collapsible" id="admin-bank-section">
       <div class="admin-section-header" onclick="toggleAdminSection('admin-bank-section')">All dances in the bank <span class="admin-caret">&#9660;</span></div>
-      <div class="admin-section-body">
-        <div style="margin-bottom:10px;"><input type="text" id="admin-bank-search" placeholder="Search dances..." oninput="renderAdminBank()" style="width:100%;padding:8px 12px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;"></div>
-        <div id="admin-bank-list"></div>
-      </div>
+      <div class="admin-section-body"><div id="admin-bank-list"></div></div>
     </div>
-    <div class="admin-section-collapsible collapsed" id="admin-users-section">
+    <div class="admin-section-collapsible" id="admin-users-section">
       <div class="admin-section-header" onclick="toggleAdminSection('admin-users-section')">Registered users <span class="admin-caret">&#9660;</span></div>
-      <div class="admin-section-body">
-        <div style="margin-bottom:10px;"><input type="text" id="admin-users-search" placeholder="Search users..." oninput="filterAdminUsers()" style="width:100%;padding:8px 12px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;"></div>
-        <div id="admin-users-list"><p class="section-note">Loading...</p></div>
-      </div>
+      <div class="admin-section-body"><div id="admin-users-list"><p class="section-note">Loading...</p></div></div>
     </div>
   </div>
 
@@ -2047,15 +2041,7 @@ function switchTab(tab){
   if(tab==='night') renderNight();
   if(tab==='drewsnight') renderDrewsNight();
   if(tab==='log'){renderHistoryStats();renderTop5();renderLog();renderDJAnalytics();}
-  if(tab==='admin'){
-    // Collapse all sections each time the admin tab is opened
-    ['admin-gradients-form','admin-dj-form','admin-add-dance-form','admin-bank-section','admin-users-section'].forEach(id=>{
-      const s=document.getElementById(id);if(s) s.classList.add('collapsed');
-    });
-    const bs=document.getElementById('admin-bank-search');if(bs) bs.value='';
-    const us=document.getElementById('admin-users-search');if(us) us.value='';
-    renderAdminBank();renderAdminDJList();loadAdminUsers();renderAdminHomeGradients();
-  }
+  if(tab==='admin'){renderAdminBank();renderAdminDJList();loadAdminUsers();renderAdminHomeGradients();}
   if(tab==='bank') renderBank();
   if(tab==='dj'){renderDJRecords();nvPopulateDates();renderTFAnalytics();}
   if(tab==='picks') renderPicks();
@@ -2342,9 +2328,7 @@ function adminSaveEdit(id){
 function renderAdminBank(){
   const el=document.getElementById('admin-bank-list');
   if(!bank.length){el.innerHTML=`<div class="empty">No dances in the bank yet.</div>`;return;}
-  const q=(document.getElementById('admin-bank-search')?.value||'').trim().toLowerCase();
-  const sorted=[...bank].sort((a,b)=>a.name.localeCompare(b.name)).filter(d=>!q||d.name.toLowerCase().includes(q));
-  if(!sorted.length){el.innerHTML=`<div class="empty">No dances match "${esc(q)}".</div>`;return;}
+  const sorted=[...bank].sort((a,b)=>a.name.localeCompare(b.name));
   el.innerHTML=sorted.map(d=>{
     const diffBadge=d.difficulty?`<span class="diff-badge diff-${d.difficulty}">${d.difficulty}</span>`:'';
     const demoLink=d.demo?`<a class="link-btn demo" href="${escA(d.demo)}" target="_blank" rel="noopener">&#9654; Demo</a>`:`<span style="font-size:12px;color:var(--t3)">No demo</span>`;
@@ -2394,79 +2378,18 @@ function renderAdminBank(){
       </div>`;
   }).join('');
 }
-let adminUsersData=[];
 async function loadAdminUsers(){
   const el=document.getElementById('admin-users-list');el.innerHTML='<p class="section-note">Loading...</p>';
-  const r=await sbFetch(`/rest/v1/dances?username=neq.__bank__&username=neq.__picks__&username=neq.__submissions__&username=neq.__friendcards__&select=username,updated_at,data&order=username.asc`);
+  const r=await sbFetch(`/rest/v1/dances?username=neq.__bank__&username=neq.__picks__&select=username,updated_at&order=username.asc`);
   if(!r.ok||!r.data){el.innerHTML='<p class="section-note">Could not load users.</p>';return;}
-  adminUsersData=r.data.filter(u=>!['__bank__','__picks__','__submissions__','__friendcards__'].includes(u.username));
-  renderAdminUsers();
-}
-function filterAdminUsers(){renderAdminUsers();}
-function renderAdminUsers(){
-  const el=document.getElementById('admin-users-list');
-  if(!adminUsersData.length){el.innerHTML='<div class="empty">No users yet.</div>';return;}
-  const q=(document.getElementById('admin-users-search')?.value||'').trim().toLowerCase();
-  const filtered=adminUsersData.filter(u=>!q||u.username.toLowerCase().includes(q));
-  if(!filtered.length){el.innerHTML=`<div class="empty">No users match "${esc(q)}".</div>`;return;}
-  el.innerHTML=filtered.map(u=>{
-    const d=u.data||{};
-    const knowCount=(d.know||[]).length;
-    const learnCount=(d.learn||[]).length;
-    const nightCount=Object.keys(d.nights||{}).length;
-    const lastActive=u.updated_at?formatDate(u.updated_at.slice(0,10)):'—';
-    const safeId='adminuser-'+u.username.replace(/[^a-zA-Z0-9]/g,'_');
-    // Know pills (up to 10)
-    const knowSorted=(d.know||[]).slice().sort((a,b)=>(a.name||a).localeCompare(b.name||b));
-    const knowPills=knowSorted.slice(0,10).map(dk=>`<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:var(--green-bg);border:0.5px solid var(--green-border);color:var(--green-text);font-weight:500">${esc(dk.name||dk)}</span>`).join('');
-    const knowMore=knowCount>10?`<span style="font-size:11px;color:var(--t3)">+${knowCount-10} more</span>`:'';
-    // Learn pills (up to 8)
-    const learnSorted=(d.learn||[]).slice().sort((a,b)=>(a.name||a).localeCompare(b.name||b));
-    const learnPills=learnSorted.slice(0,8).map(dl=>`<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:var(--blue-bg);border:0.5px solid var(--blue-border);color:var(--blue-text);font-weight:500">${esc(dl.name||dl)}</span>`).join('');
-    const learnMore=learnCount>8?`<span style="font-size:11px;color:var(--t3)">+${learnCount-8} more</span>`:'';
-    // Night list (last 5)
-    const nightDates=Object.keys(d.nights||{}).sort((a,b)=>b.localeCompare(a));
-    const nightRows=nightDates.slice(0,5).map(nd=>{
-      const ni=d.nights[nd]||{};
-      const danceCount=(ni.dances||[]).length;
-      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--b3)">
-        <span style="font-size:12px;font-weight:500;flex:1">${formatDate(nd)}</span>
-        ${ni.dj?`<span style="font-size:11px;color:var(--t2)">DJ: ${esc(ni.dj)}</span>`:''}
-        <span style="font-size:11px;color:var(--t3)">${danceCount} dance${danceCount!==1?'s':''}</span>
-      </div>`;
-    }).join('');
-    const nightMore=nightCount>5?`<div style="font-size:11px;color:var(--t3);margin-top:4px">+${nightCount-5} more nights</div>`:'';
-    return `
-    <div style="border:0.5px solid var(--b3);border-radius:var(--radius-lg);background:var(--bg);margin-bottom:6px;overflow:hidden;">
-      <div class="user-row" style="cursor:pointer;margin-bottom:0;border:none;border-radius:0" onclick="toggleAdminUserDetail('${safeId}')">
-        <span class="uname">${esc(u.username)}</span>
-        ${u.username===ADMIN_USER?'<span class="admin-badge">Admin</span>':''}
-        <span style="display:flex;gap:5px;flex-shrink:0">
-          <span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:var(--green-bg);border:0.5px solid var(--green-border);color:var(--green-text)">${knowCount} know</span>
-          <span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:var(--blue-bg);border:0.5px solid var(--blue-border);color:var(--blue-text)">${learnCount} learning</span>
-          <span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:var(--bg2);border:0.5px solid var(--b3);color:var(--t2)">${nightCount} nights</span>
-        </span>
-        <span class="udate">Last active: ${lastActive}</span>
-        <span style="font-size:11px;color:var(--t3);transition:transform 0.2s" id="${safeId}-caret">&#9660;</span>
-      </div>
-      <div id="${safeId}" style="display:none;padding:12px 15px;border-top:0.5px solid var(--b3);background:var(--bg2)">
-        ${knowCount?`<div style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Dances they know (${knowCount})</div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">${knowPills}${knowMore}</div>`:''}
-        ${learnCount?`<div style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Want to learn (${learnCount})</div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">${learnPills}${learnMore}</div>`:''}
-        ${nightCount?`<div style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Recent nights (${nightCount} total)</div>
-        <div style="margin-bottom:4px">${nightRows}</div>${nightMore}`:'<div style="font-size:13px;color:var(--t3)">No nights logged yet.</div>'}
-      </div>
-    </div>`;
-  }).join('');
-}
-function toggleAdminUserDetail(id){
-  const el=document.getElementById(id);
-  const caret=document.getElementById(id+'-caret');
-  if(!el) return;
-  const open=el.style.display==='none'||el.style.display==='';
-  el.style.display=open?'block':'none';
-  if(caret) caret.style.transform=open?'rotate(180deg)':'';
+  const users=r.data.filter(u=>u.username!=='__bank__'&&u.username!=='__picks__');
+  if(!users.length){el.innerHTML='<div class="empty">No users yet.</div>';return;}
+  el.innerHTML=users.map(u=>`
+    <div class="user-row">
+      <span class="uname">${esc(u.username)}</span>
+      ${u.username===ADMIN_USER?'<span class="admin-badge">Admin</span>':''}
+      <span class="udate">Last active: ${u.updated_at?formatDate(u.updated_at.slice(0,10)):'—'}</span>
+    </div>`).join('');
 }
 
 // ---- My lists ----
@@ -3493,7 +3416,6 @@ function buildCardHTML(card,isMe){
       ${isFaved&&!isMe?`<div style="position:absolute;bottom:8px;right:10px;font-size:10px;font-weight:600;color:rgba(255,255,255,0.85);letter-spacing:.04em;text-transform:uppercase;text-shadow:0 1px 2px rgba(0,0,0,0.3)">&#9733; Favorite</div>`:''}
     </div>
     <div class="fc-body">
-      ${mutualBadge}
       <div class="fc-section-label">Top favorites</div>
       <div class="fc-fav-list">${favHTML}</div>
       ${knowPills?`<div class="fc-section-label">Dances they know (${knowCount})</div><div class="fc-pills" style="margin-bottom:10px">${knowPills}${knowCount>8?`<span class="fc-pill">+${knowCount-8} more</span>`:''}</div>`:''}
@@ -3602,11 +3524,11 @@ function openFriendDetail(username){
       <div style="font-size:12px;color:rgba(255,255,255,0.75);margin-top:2px">@${esc(card.username)}</div>
       <button onclick="closeFriendDetail()" style="position:absolute;top:12px;right:14px;background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:28px;height:28px;color:#fff;font-size:16px;cursor:pointer;line-height:1">&#215;</button>
     </div>
-    <div class="section-title" style="margin-top:0">Mutual dances</div>
-    ${mutualHTML}
-    ${favNames.length?`<div class="section-title">Top favorites</div><div style="display:flex;flex-direction:column;gap:6px;margin-bottom:1.25rem">${favNames.map((n,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:0.5px solid var(--b3);border-radius:var(--radius-md);background:var(--bg2)"><span style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--t3);min-width:20px">${i+1}</span><span style="font-size:14px;font-weight:500">${esc(n)}</span></div>`).join('')}</div>`:''}
+    ${favNames.length?`<div class="section-title" style="margin-top:0">Top favorites</div><div style="display:flex;flex-direction:column;gap:6px;margin-bottom:1.25rem">${favNames.map((n,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:0.5px solid var(--b3);border-radius:var(--radius-md);background:var(--bg2)"><span style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--t3);min-width:20px">${i+1}</span><span style="font-size:14px;font-weight:500">${esc(n)}</span></div>`).join('')}</div>`:''}
     ${knowList?`<div class="section-title">Dances they know (${friendKnow.length}) <span style="font-size:11px;font-weight:400;color:var(--green-text)"></span></div><div class="fc-pills" style="margin-bottom:1.25rem">${knowList}</div>`:''}
-    ${learnList?`<div class="section-title">Want to learn (${friendLearn.length})</div><div class="fc-pills">${learnList}</div>`:''}
+    ${learnList?`<div class="section-title">Want to learn (${friendLearn.length})</div><div class="fc-pills" style="margin-bottom:1.25rem">${learnList}</div>`:''}
+    <div class="section-title">Mutual dances</div>
+    ${mutualHTML}
   `;
   document.getElementById('friend-detail-modal').style.display='flex';
 }
