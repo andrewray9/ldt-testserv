@@ -556,9 +556,33 @@
     .splash-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--t1);letter-spacing:-0.5px;}
     .splash-spinner{width:28px;height:28px;border:2.5px solid var(--b3);border-top-color:var(--t1);border-radius:50%;animation:spin 0.75s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* SWIPE NAVIGATION */
+    #swipe-toast{
+      position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(12px);
+      background:var(--t1);color:var(--bg);
+      font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;
+      padding:8px 18px;border-radius:999px;
+      box-shadow:0 4px 18px rgba(0,0,0,0.18);
+      opacity:0;pointer-events:none;
+      transition:opacity 0.18s,transform 0.18s;
+      z-index:9999;white-space:nowrap;
+    }
+    #swipe-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+    #swipe-edge-indicator{
+      position:fixed;top:0;bottom:0;width:4px;
+      border-radius:0 4px 4px 0;
+      background:linear-gradient(180deg,var(--green-border),var(--blue-border));
+      opacity:0;pointer-events:none;
+      transition:opacity 0.12s;
+      z-index:9998;
+    }
+    #swipe-edge-indicator.show{opacity:1;}
   </style>
 </head>
 <body>
+<div id="swipe-toast"></div>
+<div id="swipe-edge-indicator"></div>
 
 <!-- SPLASH SCREEN (shown during auto-login check) -->
 <div id="splash-screen">
@@ -1188,14 +1212,14 @@
 
   <!-- ADMIN -->
   <div id="tab-admin" class="section">
-    <div class="admin-form" id="admin-gradients-form">
+    <div class="admin-form collapsed" id="admin-gradients-form">
       <div class="admin-form-title" onclick="toggleAdminSection('admin-gradients-form')">&#127775; Home Card Gradients <span class="admin-caret">&#9660;</span></div>
       <div class="admin-form-body">
         <p style="font-size:13px;color:var(--t2);margin-bottom:1rem;">Customize the gradient for each card on the home screen. Changes are saved instantly and affect all users.</p>
         <div id="admin-home-gradients"></div>
       </div>
     </div>
-    <div class="admin-form" id="admin-dj-form">
+    <div class="admin-form collapsed" id="admin-dj-form">
       <div class="admin-form-title" onclick="toggleAdminSection('admin-dj-form')">&#9835; Manage DJ List <span class="admin-caret">&#9660;</span></div>
       <div class="admin-form-body">
         <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
@@ -1205,7 +1229,7 @@
         <div id="admin-dj-list" style="display:flex;flex-direction:column;gap:6px;"></div>
       </div>
     </div>
-    <div class="admin-form" id="admin-add-dance-form">
+    <div class="admin-form collapsed" id="admin-add-dance-form">
       <div class="admin-form-title" onclick="toggleAdminSection('admin-add-dance-form')">&#9733; Add a new dance to the bank <span class="admin-caret">&#9660;</span></div>
       <div class="admin-form-body">
         <div class="admin-form-grid">
@@ -1227,13 +1251,23 @@
         <div class="admin-form-row"><button class="btn amber" onclick="adminAddDance()">Add to bank</button></div>
       </div>
     </div>
-    <div class="admin-section-collapsible" id="admin-bank-section">
+    <div class="admin-section-collapsible collapsed" id="admin-bank-section">
       <div class="admin-section-header" onclick="toggleAdminSection('admin-bank-section')">All dances in the bank <span class="admin-caret">&#9660;</span></div>
-      <div class="admin-section-body"><div id="admin-bank-list"></div></div>
+      <div class="admin-section-body">
+        <div style="margin-bottom:10px;">
+          <input type="text" id="admin-bank-search" placeholder="Search dances..." oninput="renderAdminBank()" style="width:100%;padding:8px 12px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;">
+        </div>
+        <div id="admin-bank-list"></div>
+      </div>
     </div>
-    <div class="admin-section-collapsible" id="admin-users-section">
+    <div class="admin-section-collapsible collapsed" id="admin-users-section">
       <div class="admin-section-header" onclick="toggleAdminSection('admin-users-section')">Registered users <span class="admin-caret">&#9660;</span></div>
-      <div class="admin-section-body"><div id="admin-users-list"><p class="section-note">Loading...</p></div></div>
+      <div class="admin-section-body">
+        <div style="margin-bottom:10px;">
+          <input type="text" id="admin-users-search" placeholder="Search users..." oninput="renderAdminUsers()" style="width:100%;padding:8px 12px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;">
+        </div>
+        <div id="admin-users-list"><p class="section-note">Loading...</p></div>
+      </div>
     </div>
   </div>
 
@@ -2020,7 +2054,21 @@ function mobileSwitch(tab){
   closeMobileMenu();
 }
 
-function switchTab(tab){
+// ── Swipe history ──────────────────────────────────────────
+let swipeHistory=['home'];   // stack of visited tabs
+let swipeForward=[];         // forward stack (filled when going back)
+let currentTabName='home';
+
+function switchTab(tab,_fromSwipe=false){
+  if(!_fromSwipe){
+    // Normal navigation: push current onto history, clear forward stack
+    if(currentTabName && currentTabName!==tab){
+      swipeHistory.push(currentTabName);
+      if(swipeHistory.length>50) swipeHistory.shift();
+      swipeForward=[];
+    }
+  }
+  currentTabName=tab;
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
   document.querySelectorAll('.mobile-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
   // Hide all sections
@@ -2041,7 +2089,14 @@ function switchTab(tab){
   if(tab==='night') renderNight();
   if(tab==='drewsnight') renderDrewsNight();
   if(tab==='log'){renderHistoryStats();renderTop5();renderLog();renderDJAnalytics();}
-  if(tab==='admin'){renderAdminBank();renderAdminDJList();loadAdminUsers();renderAdminHomeGradients();}
+  if(tab==='admin'){
+    ['admin-gradients-form','admin-dj-form','admin-add-dance-form','admin-bank-section','admin-users-section'].forEach(id=>{
+      const s=document.getElementById(id);if(s) s.classList.add('collapsed');
+    });
+    const bs=document.getElementById('admin-bank-search');if(bs) bs.value='';
+    const us=document.getElementById('admin-users-search');if(us) us.value='';
+    renderAdminBank();renderAdminDJList();loadAdminUsers();renderAdminHomeGradients();
+  }
   if(tab==='bank') renderBank();
   if(tab==='dj'){renderDJRecords();nvPopulateDates();renderTFAnalytics();}
   if(tab==='picks') renderPicks();
@@ -2328,7 +2383,9 @@ function adminSaveEdit(id){
 function renderAdminBank(){
   const el=document.getElementById('admin-bank-list');
   if(!bank.length){el.innerHTML=`<div class="empty">No dances in the bank yet.</div>`;return;}
-  const sorted=[...bank].sort((a,b)=>a.name.localeCompare(b.name));
+  const q=(document.getElementById('admin-bank-search')?.value||'').trim().toLowerCase();
+  const sorted=[...bank].sort((a,b)=>a.name.localeCompare(b.name)).filter(d=>!q||d.name.toLowerCase().includes(q));
+  if(!sorted.length){el.innerHTML=`<div class="empty">No dances match your search.</div>`;return;}
   el.innerHTML=sorted.map(d=>{
     const diffBadge=d.difficulty?`<span class="diff-badge diff-${d.difficulty}">${d.difficulty}</span>`:'';
     const demoLink=d.demo?`<a class="link-btn demo" href="${escA(d.demo)}" target="_blank" rel="noopener">&#9654; Demo</a>`:`<span style="font-size:12px;color:var(--t3)">No demo</span>`;
@@ -2378,18 +2435,88 @@ function renderAdminBank(){
       </div>`;
   }).join('');
 }
+let adminUsersCache=[];
 async function loadAdminUsers(){
-  const el=document.getElementById('admin-users-list');el.innerHTML='<p class="section-note">Loading...</p>';
-  const r=await sbFetch(`/rest/v1/dances?username=neq.__bank__&username=neq.__picks__&select=username,updated_at&order=username.asc`);
+  const el=document.getElementById('admin-users-list');
+  el.innerHTML='<p class="section-note">Loading...</p>';
+  const r=await sbFetch(`/rest/v1/dances?username=neq.__bank__&username=neq.__picks__&username=neq.__submissions__&username=neq.__friendcards__&select=username,updated_at,data&order=username.asc`);
   if(!r.ok||!r.data){el.innerHTML='<p class="section-note">Could not load users.</p>';return;}
-  const users=r.data.filter(u=>u.username!=='__bank__'&&u.username!=='__picks__');
-  if(!users.length){el.innerHTML='<div class="empty">No users yet.</div>';return;}
-  el.innerHTML=users.map(u=>`
-    <div class="user-row">
-      <span class="uname">${esc(u.username)}</span>
-      ${u.username===ADMIN_USER?'<span class="admin-badge">Admin</span>':''}
-      <span class="udate">Last active: ${u.updated_at?formatDate(u.updated_at.slice(0,10)):'—'}</span>
-    </div>`).join('');
+  adminUsersCache=r.data.filter(u=>!u.username.startsWith('__'));
+  renderAdminUsers();
+}
+function renderAdminUsers(){
+  const el=document.getElementById('admin-users-list');
+  if(!adminUsersCache.length){el.innerHTML='<div class="empty">No users yet.</div>';return;}
+  const q=(document.getElementById('admin-users-search')?.value||'').trim().toLowerCase();
+  const filtered=q?adminUsersCache.filter(u=>u.username.toLowerCase().includes(q)):adminUsersCache;
+  if(!filtered.length){el.innerHTML=`<div class="empty">No users match your search.</div>`;return;}
+  el.innerHTML=filtered.map(u=>{
+    const d=u.data||{};
+    const knowCount=(d.know||[]).length;
+    const learnCount=(d.learn||[]).length;
+    const nightCount=Object.keys(d.nights||{}).length;
+    const lastActive=u.updated_at?formatDate(u.updated_at.slice(0,10)):'—';
+    const safeId='auser_'+u.username.replace(/[^a-zA-Z0-9]/g,'_');
+    // Know pills preview (up to 8)
+    const knowSorted=(d.know||[]).slice().sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+    const knowPills=knowSorted.slice(0,8).map(dk=>`<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:var(--green-bg);border:0.5px solid var(--green-border);color:var(--green-text);font-weight:500">${esc(dk.name||dk)}</span>`).join('');
+    const knowExtra=knowCount>8?`<span style="font-size:11px;color:var(--t3)">+${knowCount-8} more</span>`:'';
+    // Learn pills preview (up to 6)
+    const learnSorted=(d.learn||[]).slice().sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+    const learnPills=learnSorted.slice(0,6).map(dl=>`<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:var(--blue-bg);border:0.5px solid var(--blue-border);color:var(--blue-text);font-weight:500">${esc(dl.name||dl)}</span>`).join('');
+    const learnExtra=learnCount>6?`<span style="font-size:11px;color:var(--t3)">+${learnCount-6} more</span>`:'';
+    // Last 4 nights
+    const nightDates=Object.keys(d.nights||{}).sort((a,b)=>b.localeCompare(a));
+    const nightRows=nightDates.slice(0,4).map(nd=>{
+      const ni=d.nights[nd]||{};
+      const dc=(ni.dances||[]).length;
+      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--b3);">
+        <span style="font-size:12px;font-weight:500;flex:1">${formatDate(nd)}</span>
+        ${ni.dj?`<span style="font-size:11px;color:var(--t2)">DJ: ${esc(ni.dj)}</span>`:''}
+        <span style="font-size:11px;color:var(--t3)">${dc} dance${dc!==1?'s':''}</span>
+      </div>`;
+    }).join('');
+    const nightExtra=nightCount>4?`<div style="font-size:11px;color:var(--t3);margin-top:4px">+${nightCount-4} more nights</div>`:'';
+    return `
+    <div style="border:0.5px solid var(--b3);border-radius:var(--radius-lg);background:var(--bg);margin-bottom:6px;overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 15px;cursor:pointer;transition:background 0.1s;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''" onclick="adminToggleUser('${safeId}')">
+        <span style="flex:1;font-size:14px;font-weight:500;">${esc(u.username)}</span>
+        ${u.username===ADMIN_USER?'<span class="admin-badge">Admin</span>':''}
+        <span style="display:flex;gap:4px;flex-shrink:0;">
+          <span style="font-size:11px;font-weight:500;padding:2px 7px;border-radius:20px;background:var(--green-bg);border:0.5px solid var(--green-border);color:var(--green-text)">${knowCount} know</span>
+          <span style="font-size:11px;font-weight:500;padding:2px 7px;border-radius:20px;background:var(--blue-bg);border:0.5px solid var(--blue-border);color:var(--blue-text)">${learnCount} learning</span>
+          <span style="font-size:11px;font-weight:500;padding:2px 7px;border-radius:20px;background:var(--bg2);border:0.5px solid var(--b3);color:var(--t2)">${nightCount} nights</span>
+        </span>
+        <span style="font-size:12px;color:var(--t2);flex-shrink:0;">Last active: ${lastActive}</span>
+        <span id="${safeId}-caret" style="font-size:11px;color:var(--t3);transition:transform 0.2s;flex-shrink:0;">&#9660;</span>
+      </div>
+      <div id="${safeId}" style="display:none;padding:12px 15px;border-top:0.5px solid var(--b3);background:var(--bg2);">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+          <button class="btn sm amber" onclick="adminEditUser('${escA(u.username)}')">&#9998; Edit this user</button>
+        </div>
+        ${knowCount?`<div style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Dances they know (${knowCount})</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;">${knowPills}${knowExtra}</div>`:''}
+        ${learnCount?`<div style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Want to learn (${learnCount})</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;">${learnPills}${learnExtra}</div>`:''}
+        ${nightCount?`<div style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Recent nights (${nightCount} total)</div>${nightRows}${nightExtra}`:'<div style="font-size:13px;color:var(--t3)">No nights logged yet.</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+function adminToggleUser(safeId){
+  const el=document.getElementById(safeId);
+  const caret=document.getElementById(safeId+'-caret');
+  if(!el)return;
+  const opening=el.style.display==='none'||!el.style.display;
+  el.style.display=opening?'block':'none';
+  if(caret) caret.style.transform=opening?'rotate(180deg)':'rotate(0deg)';
+}
+function adminEditUser(username){
+  // Switch to editpeople tab with this user pre-selected
+  switchTab('editpeople');
+  const sel=document.getElementById('ep-user-select');
+  if(sel){
+    sel.value=username;
+    epLoadUser();
+  }
 }
 
 // ---- My lists ----
@@ -5300,6 +5427,111 @@ async function debugDeleteNight(date){
   if(out) out.innerHTML=`<div class="empty">Night of ${formatDate(date)} deleted successfully.</div>`;
   if(status) status.textContent=`Viewing: ${esc(debugUsername)} · ${Object.keys(debugUserState.nights||{}).length} night(s) remaining.`;
 }
+
+// ── Swipe-to-navigate ───────────────────────────────────────
+(function(){
+  // Tab display names for the toast
+  const TAB_LABELS={
+    home:'Home',bank:'Dance Bank',know:'Dances I Know',learn:'Want to Learn',
+    night:'My Night',log:'Analytics',friends:'Friends',feedback:'Suggestions & Bugs',
+    submissions:'Submissions',admin:'Admin',editpeople:'Edit People',
+    dj:'Test Features',drewsnight:"Drew's Night",debug:'Debug',picks:'Picks'
+  };
+
+  const MIN_DIST=60;      // px horizontal travel required
+  const MAX_VERT=80;      // px vertical allowed before we give up (scrolling)
+  const EDGE_ZONE=30;     // px from left edge to show indicator
+
+  let tx0=0,ty0=0,swiping=false,edgeSwipe=false;
+  let toastTimer=null;
+
+  const toast=document.getElementById('swipe-toast');
+  const edge=document.getElementById('swipe-edge-indicator');
+
+  function anyModalOpen(){
+    const ids=['highlights-modal','friend-setup-modal','suggest-modal',
+               'app-suggestion-modal','bug-modal','friend-detail-modal',
+               'sp-playlist-modal'];
+    if(ids.some(id=>{const m=document.getElementById(id);return m&&m.style.display!=='none';})) return true;
+    const mmo=document.getElementById('mobile-menu-overlay');
+    if(mmo&&mmo.classList.contains('open')) return true;
+    return false;
+  }
+
+  function showToast(label,dir){
+    if(!toast)return;
+    const arrow=dir==='back'?'← ':'→ ';
+    toast.textContent=arrow+label;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>toast.classList.remove('show'),1400);
+  }
+
+  function tabVisible(tabId){
+    const el=document.getElementById('tab-'+tabId);
+    return el && el.style.display!=='none';
+  }
+
+  document.addEventListener('touchstart',function(e){
+    if(anyModalOpen()){swiping=false;return;}
+    const t=e.touches[0];
+    tx0=t.clientX; ty0=t.clientY; swiping=true;
+    // Show edge indicator when touch starts near left edge
+    edgeSwipe=tx0<=EDGE_ZONE;
+    if(edgeSwipe&&edge){
+      edge.style.left='0';
+      edge.classList.add('show');
+    }
+  },{passive:true});
+
+  document.addEventListener('touchmove',function(e){
+    if(!swiping)return;
+    const dx=e.touches[0].clientX-tx0;
+    const dy=e.touches[0].clientY-ty0;
+    // Abort if movement is more vertical than horizontal
+    if(Math.abs(dy)>MAX_VERT&&Math.abs(dy)>Math.abs(dx)){
+      swiping=false;
+      if(edge) edge.classList.remove('show');
+      return;
+    }
+    // Move edge indicator with finger if it's a back-swipe from edge
+    if(edgeSwipe&&edge&&dx>0){
+      const prog=Math.min(dx/MIN_DIST,1);
+      edge.style.width=(4+prog*8)+'px';
+      edge.style.opacity=String(0.4+prog*0.6);
+    }
+  },{passive:true});
+
+  document.addEventListener('touchend',function(e){
+    if(!edge) return;
+    edge.classList.remove('show');
+    edge.style.width='';
+    edge.style.opacity='';
+    if(!swiping){swiping=false;return;}
+    swiping=false;
+    const dx=e.changedTouches[0].clientX-tx0;
+    const dy=e.changedTouches[0].clientY-ty0;
+    if(Math.abs(dy)>Math.abs(dx)||Math.abs(dx)<MIN_DIST) return;
+
+    if(dx>0){
+      // Swipe RIGHT → go back
+      if(swipeHistory.length===0) return;
+      const prev=swipeHistory.pop();
+      if(!tabVisible(prev)&&prev!=='home') return; // tab hidden (non-admin etc) — skip
+      swipeForward.push(currentTabName);
+      switchTab(prev,true);
+      showToast(TAB_LABELS[prev]||prev,'back');
+    } else {
+      // Swipe LEFT → go forward
+      if(swipeForward.length===0) return;
+      const next=swipeForward.pop();
+      if(!tabVisible(next)&&next!=='home') return;
+      swipeHistory.push(currentTabName);
+      switchTab(next,true);
+      showToast(TAB_LABELS[next]||next,'fwd');
+    }
+  },{passive:true});
+})();
 
 tryAutoLogin();
 
