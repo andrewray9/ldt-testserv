@@ -83,6 +83,7 @@
     .tab[data-tab="log"].active{background:#FAEEDA;color:#633806;border-color:#FAC775;}
     .tab[data-tab="friends"].active{background:#E0F5FF;color:#0369a1;border-color:#7dd3fc;}
     .tab[data-tab="dj"].active{background:#F0FDF4;color:#166534;border-color:#86efac;}
+    .tab[data-tab="drewsnight"].active{background:#FFF0E6;color:#8B3A00;border-color:#FFAA66;}
     .tab.admin-tab{color:var(--amber-text);}
     .tab[data-tab="submissions"].active,.tab[data-tab="admin"].active,.tab[data-tab="editpeople"].active{background:#FAEEDA;color:#633806;border-color:#FAC775;}
     .tab[data-tab="feedback"].active{background:#F0FDF4;color:#166534;border-color:#86efac;}
@@ -95,6 +96,7 @@
       .tab[data-tab="log"].active{background:#2a1d08;color:#f0a840;border-color:#7a4a0a;}
       .tab[data-tab="friends"].active{background:#0a1e2e;color:#38bdf8;border-color:#0284c7;}
       .tab[data-tab="dj"].active{background:#052e16;color:#4ade80;border-color:#16a34a;}
+      .tab[data-tab="drewsnight"].active{background:#2e1800;color:#ffaa66;border-color:#8B3A00;}
       .tab[data-tab="submissions"].active,.tab[data-tab="admin"].active,.tab[data-tab="editpeople"].active{background:#2a1d08;color:#f0a840;border-color:#7a4a0a;}
       .tab[data-tab="feedback"].active{background:#052e16;color:#4ade80;border-color:#16a34a;}
     }
@@ -335,7 +337,8 @@
     .night-top input[type=date],.night-top input[type=text]{padding:8px 12px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;}
     .night-top input[type=date]:focus,.night-top input[type=text]:focus{outline:none;}
     .night-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-    @media(max-width:540px){.night-grid{grid-template-columns:1fr;}}
+    .drewsnight-grid{grid-template-columns:1fr 1fr 1fr;}
+    @media(max-width:540px){.night-grid{grid-template-columns:1fr;}.drewsnight-grid{grid-template-columns:1fr;}}
     .night-panel{border:0.5px solid var(--b3);border-radius:var(--radius-lg);background:var(--bg);overflow:hidden;}
     .night-panel-head{padding:10px 15px;border-bottom:0.5px solid var(--b3);font-size:13px;font-weight:500;color:var(--t2);background:var(--bg2);}
     .night-panel-search{padding:8px 10px;border-bottom:0.5px solid var(--b3);}
@@ -728,11 +731,13 @@
     <button class="mobile-tab" data-tab="log" onclick="mobileSwitch('log')"><span class="mtab-dot"></span>Analytics</button>
     <button class="mobile-tab" data-tab="friends" onclick="mobileSwitch('friends')"><span class="mtab-dot"></span>Friends</button>
     <button class="mobile-tab" data-tab="feedback" onclick="mobileSwitch('feedback')"><span class="mtab-dot"></span>Suggestions &amp; Bugs</button>
+    <button class="mobile-tab" data-tab="drewsnight" id="mobile-tab-drewsnight" style="display:none" onclick="mobileSwitch('drewsnight')"><span class="mtab-dot" style="background:#ff8c42;"></span>Drew's Night</button>
     <div class="mobile-menu-section" id="mobile-admin-section" style="display:none">Admin</div>
     <button class="mobile-tab" data-tab="dj" id="mobile-tab-dj" style="display:none" onclick="mobileSwitch('dj')"><span class="mtab-dot"></span>Test Features</button>
     <button class="mobile-tab" data-tab="submissions" id="mobile-tab-submissions" style="display:none" onclick="mobileSwitch('submissions')"><span class="mtab-dot"></span>&#9888; Submissions</button>
     <button class="mobile-tab" data-tab="admin" id="mobile-tab-admin" style="display:none" onclick="mobileSwitch('admin')"><span class="mtab-dot"></span>&#9733; Admin</button>
     <button class="mobile-tab" data-tab="editpeople" id="mobile-tab-editpeople" style="display:none" onclick="mobileSwitch('editpeople')"><span class="mtab-dot"></span>&#9998; Edit People</button>
+    <button class="mobile-tab" data-tab="debug" id="mobile-tab-debug" style="display:none" onclick="mobileSwitch('debug')"><span class="mtab-dot" style="background:#6366f1;"></span>&#128269; Debug</button>
   </div>
 
   <div class="tab-row">
@@ -742,12 +747,14 @@
     <button class="tab" data-tab="learn" onclick="switchTab('learn')" style="display:none">Want to Learn</button>
     <button class="tab" data-tab="night" onclick="switchTab('night')">My Night</button>
     <button class="tab" data-tab="log" onclick="switchTab('log')">Analytics</button>
+    <button class="tab" data-tab="drewsnight" id="drewsnight-tab-btn" style="display:none" onclick="switchTab('drewsnight')">🌟 Drew's Night</button>
     <button class="tab" data-tab="dj" id="dj-tab-btn" style="display:none" onclick="switchTab('dj')">Test Features</button>
     <button class="tab" data-tab="friends" onclick="switchTab('friends')">Friends</button>
     <button class="tab" data-tab="feedback" onclick="switchTab('feedback')">Suggestions &amp; Bugs</button>
     <button class="tab admin-tab" data-tab="submissions" id="submissions-tab" style="display:none" onclick="switchTab('submissions')">&#9888; Submissions <span id="submissions-badge" style="display:none;background:var(--red-text);color:#fff;font-size:10px;padding:1px 6px;border-radius:20px;margin-left:4px;"></span></button>
     <button class="tab admin-tab" data-tab="admin" id="admin-tab" style="display:none" onclick="switchTab('admin')">&#9733; Admin</button>
     <button class="tab admin-tab" data-tab="editpeople" id="editpeople-tab" style="display:none" onclick="switchTab('editpeople')">&#9998; Edit People</button>
+    <button class="tab admin-tab" data-tab="debug" id="debug-tab" style="display:none" onclick="switchTab('debug')">&#128269; Debug</button>
   </div>
 
   <!-- HOME -->
@@ -796,6 +803,12 @@
         <span class="home-card-desc">Suggest a dance, app idea, or report a bug</span>
         <span class="home-card-arrow">→</span>
       </button>
+      <button class="home-card hc-rose" id="home-card-drewsnight" style="display:none" onclick="switchTab('drewsnight')">
+        <span class="home-card-icon">🌟</span>
+        <span class="home-card-title">Drew's Night</span>
+        <span class="home-card-desc">Log dances performed &amp; not performed</span>
+        <span class="home-card-arrow">→</span>
+      </button>
       <button class="home-card hc-emerald" id="home-card-dj" style="display:none" onclick="switchTab('dj')">
         <span class="home-card-icon">🎛️</span>
         <span class="home-card-title">Test Features</span>
@@ -812,6 +825,12 @@
         <span class="home-card-icon">⚠️</span>
         <span class="home-card-title">Submissions <span id="home-sub-badge" style="display:none;background:rgba(255,255,255,0.35);color:#fff;font-size:11px;padding:1px 7px;border-radius:20px;margin-left:4px;vertical-align:middle;"></span></span>
         <span class="home-card-desc">Review user dance suggestions</span>
+        <span class="home-card-arrow">→</span>
+      </button>
+      <button class="home-card" id="home-card-debug" style="display:none;background:linear-gradient(135deg,#4f46e5,#7c3aed);" onclick="switchTab('debug')">
+        <span class="home-card-icon">🔍</span>
+        <span class="home-card-title">Debug</span>
+        <span class="home-card-desc">Inspect raw night data</span>
         <span class="home-card-arrow">→</span>
       </button>
     </div>
@@ -915,6 +934,55 @@
       <button class="btn info" onclick="openHighlightsModal()">&#9733; Night Highlights</button>
     </div>
     <div id="highlights-display"></div>
+  </div>
+
+  <!-- DREW'S NIGHT -->
+  <div id="tab-drewsnight" class="section">
+    <div class="night-top">
+      <label>Date:</label>
+      <input type="date" id="drewsnight-date">
+      <label>DJ:</label>
+      <select id="drewsnight-dj" style="min-width:160px;padding:8px 12px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;" onchange="scheduleDrewsNightSave()">
+        <option value="">— Select DJ (optional) —</option>
+      </select>
+    </div>
+    <div class="night-top" style="margin-bottom:1.25rem;">
+      <label style="white-space:nowrap;">Arrived at Palace:</label>
+      <input type="time" id="drewsnight-arrive" style="padding:8px 12px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;" onchange="scheduleDrewsNightSave()" title="Optional — time you arrived at Palace">
+      <label style="white-space:nowrap;">Left Palace:</label>
+      <input type="time" id="drewsnight-leave" style="padding:8px 12px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;" onchange="scheduleDrewsNightSave()" title="Optional — time you left Palace">
+    </div>
+    <div class="night-grid drewsnight-grid">
+      <div class="night-panel">
+        <div class="night-panel-head">Dances Performed</div>
+        <div class="night-panel-search">
+          <input type="text" id="drewsnight-pick-search" placeholder="Search..." oninput="renderDrewsPickList()">
+        </div>
+        <div style="display:flex;gap:6px;padding:6px 10px;border-bottom:0.5px solid var(--b3);">
+          <button class="sort-btn active" id="drewsnight-pick-sort-btn" onclick="toggleDrewsNightSort('pick')" style="font-size:11px;padding:4px 10px;">A–Z</button>
+        </div>
+        <div class="night-panel-body" id="drewsnight-pick-list"></div>
+      </div>
+      <div class="night-panel">
+        <div class="night-panel-head">Dances Not Performed</div>
+        <div class="night-panel-search">
+          <input type="text" id="drewsnight-notperf-search" placeholder="Search..." oninput="renderDrewsNotPerfList()">
+        </div>
+        <div style="display:flex;gap:6px;padding:6px 10px;border-bottom:0.5px solid var(--b3);">
+          <button class="sort-btn active" id="drewsnight-notperf-sort-btn" onclick="toggleDrewsNightSort('notperf')" style="font-size:11px;padding:4px 10px;">A–Z</button>
+        </div>
+        <div class="night-panel-body" id="drewsnight-notperf-list"></div>
+      </div>
+      <div class="night-panel">
+        <div class="night-panel-head">Tonight's dances</div>
+        <div class="night-panel-body" id="drewsnight-did-list"></div>
+      </div>
+    </div>
+    <div class="save-row">
+      <span class="save-msg" id="drewsnight-save-msg"></span>
+      <button class="btn info" onclick="openDrewsHighlightsModal()">&#9733; Night Highlights</button>
+    </div>
+    <div id="drewsnight-highlights-display"></div>
   </div>
 
   <!-- HISTORY -->
@@ -1120,14 +1188,14 @@
 
   <!-- ADMIN -->
   <div id="tab-admin" class="section">
-    <div class="admin-form" id="admin-gradients-form">
+    <div class="admin-form collapsed" id="admin-gradients-form">
       <div class="admin-form-title" onclick="toggleAdminSection('admin-gradients-form')">&#127775; Home Card Gradients <span class="admin-caret">&#9660;</span></div>
       <div class="admin-form-body">
         <p style="font-size:13px;color:var(--t2);margin-bottom:1rem;">Customize the gradient for each card on the home screen. Changes are saved instantly and affect all users.</p>
         <div id="admin-home-gradients"></div>
       </div>
     </div>
-    <div class="admin-form" id="admin-dj-form">
+    <div class="admin-form collapsed" id="admin-dj-form">
       <div class="admin-form-title" onclick="toggleAdminSection('admin-dj-form')">&#9835; Manage DJ List <span class="admin-caret">&#9660;</span></div>
       <div class="admin-form-body">
         <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
@@ -1137,7 +1205,7 @@
         <div id="admin-dj-list" style="display:flex;flex-direction:column;gap:6px;"></div>
       </div>
     </div>
-    <div class="admin-form" id="admin-add-dance-form">
+    <div class="admin-form collapsed" id="admin-add-dance-form">
       <div class="admin-form-title" onclick="toggleAdminSection('admin-add-dance-form')">&#9733; Add a new dance to the bank <span class="admin-caret">&#9660;</span></div>
       <div class="admin-form-body">
         <div class="admin-form-grid">
@@ -1159,18 +1227,41 @@
         <div class="admin-form-row"><button class="btn amber" onclick="adminAddDance()">Add to bank</button></div>
       </div>
     </div>
-    <div class="admin-section-collapsible" id="admin-bank-section">
+    <div class="admin-section-collapsible collapsed" id="admin-bank-section">
       <div class="admin-section-header" onclick="toggleAdminSection('admin-bank-section')">All dances in the bank <span class="admin-caret">&#9660;</span></div>
-      <div class="admin-section-body"><div id="admin-bank-list"></div></div>
+      <div class="admin-section-body">
+        <div style="margin-bottom:10px;"><input type="text" id="admin-bank-search" placeholder="Search dances..." oninput="renderAdminBank()" style="width:100%;padding:8px 12px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;"></div>
+        <div id="admin-bank-list"></div>
+      </div>
     </div>
-    <div class="admin-section-collapsible" id="admin-users-section">
+    <div class="admin-section-collapsible collapsed" id="admin-users-section">
       <div class="admin-section-header" onclick="toggleAdminSection('admin-users-section')">Registered users <span class="admin-caret">&#9660;</span></div>
-      <div class="admin-section-body"><div id="admin-users-list"><p class="section-note">Loading...</p></div></div>
+      <div class="admin-section-body">
+        <div style="margin-bottom:10px;"><input type="text" id="admin-users-search" placeholder="Search users..." oninput="filterAdminUsers()" style="width:100%;padding:8px 12px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;"></div>
+        <div id="admin-users-list"><p class="section-note">Loading...</p></div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- SPOTIFY PLAYLIST MODAL -->
+  <!-- DEBUG -->
+  <div id="tab-debug" class="section">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;flex-wrap:wrap;">
+      <p class="section-note" style="margin-bottom:0;flex:1">Inspect raw night data for any user</p>
+      <select id="debug-user-select" style="padding:8px 12px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;min-width:160px;" onchange="debugLoadUser()">
+        <option value="">— Select a user —</option>
+      </select>
+      <button class="btn sm" onclick="debugLoadUsers()">&#8635; Load Users</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap;" id="debug-night-row" style="display:none">
+      <select id="debug-date-select" style="padding:8px 12px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;min-width:180px;" onchange="renderDebugNight()">
+        <option value="">— Select a night —</option>
+      </select>
+      <button class="btn sm" onclick="renderDebugNight()">&#8635; Refresh</button>
+    </div>
+    <div id="debug-status" style="font-size:13px;color:var(--t2);margin-bottom:1rem;"></div>
+    <div id="debug-night-output"></div>
+  </div>
+</div>
 <div class="sp-modal-overlay" id="sp-playlist-modal" style="display:none" onclick="if(event.target===this)closeSpotifyModal()">
   <div class="sp-modal">
     <div class="sp-modal-header">
@@ -1218,7 +1309,7 @@ const SUPABASE_KEY='sb_publishable_1k44O83Uhj5OABd-VB_wLQ_fFJb1woU';
 const ADMIN_USER='drew';
 
 let currentUser=null,isAdmin=false;
-let state={know:[],learn:[],nights:{},djFreestyles:{},favorites:[]};
+let state={know:[],learn:[],nights:{},djFreestyles:{},favorites:[],favoriteFriends:[]};
 let drewDJFreestyles={}; // Drew's DJ freestyle data, loaded for all users
 let bank=[];
 let drewPicks=[];
@@ -1227,6 +1318,9 @@ let friendCards=[]; // shared list of friend profile cards
 let djList=[]; // shared list of DJs managed by admin
 let homeConfig={}; // admin-configurable home card gradients
 let selectedDate='',nightSelections={};
+let drewsSelectedDate='',drewsNightSelections={},drewsNotPerfSelections={};
+let drewsNightSaveTimeout=null;
+let drewsNightSortState={pick:true,notperf:true};
 let isSignUp=false,saveTimeout=null,nightSaveTimeout=null;
 let bankFilter='all';
 let listFilter={know:'all',learn:'all'};
@@ -1671,6 +1765,8 @@ async function authSubmit() {
     if (!state.djFreestyles) state.djFreestyles = {};
     if (!state.favorites) state.favorites = [];
     if (!state.danceLog) state.danceLog = [];
+    if (!state.favoriteFriends) state.favoriteFriends = [];
+    if (!state.drewsNights) state.drewsNights = {};
 
     await loadBank();
     await loadPicks();
@@ -1700,7 +1796,9 @@ function enterApp(username){
   document.getElementById('admin-tab').style.display=isAdmin?'inline-block':'none';
   document.getElementById('submissions-tab').style.display=isAdmin?'inline-block':'none';
   document.getElementById('editpeople-tab').style.display=isAdmin?'inline-block':'none';
+  document.getElementById('debug-tab').style.display=isAdmin?'inline-block':'none';
   document.getElementById('dj-tab-btn').style.display=isAdmin?'inline-block':'none';
+  document.getElementById('drewsnight-tab-btn').style.display=isAdmin?'inline-block':'none';
   document.getElementById('picks-admin-panel').style.display=isAdmin?'block':'none';
   const homeAdminCard=document.getElementById('home-card-admin');
   const homeDJCard=document.getElementById('home-card-dj');
@@ -1708,7 +1806,11 @@ function enterApp(username){
   if(homeAdminCard) homeAdminCard.style.display=isAdmin?'':'none';
   if(homeDJCard) homeDJCard.style.display=isAdmin?'':'none';
   if(homeSubCard) homeSubCard.style.display=isAdmin?'':'none';
-  ['mobile-tab-dj','mobile-tab-submissions','mobile-tab-admin','mobile-tab-editpeople'].forEach(id=>{
+  const homeDrawNightCard=document.getElementById('home-card-drewsnight');
+  if(homeDrawNightCard) homeDrawNightCard.style.display=isAdmin?'':'none';
+  const homeDebugCard=document.getElementById('home-card-debug');
+  if(homeDebugCard) homeDebugCard.style.display=isAdmin?'':'none';
+  ['mobile-tab-dj','mobile-tab-submissions','mobile-tab-admin','mobile-tab-editpeople','mobile-tab-drewsnight','mobile-tab-debug'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.style.display=isAdmin?'':'none';
   });
   const adminSection=document.getElementById('mobile-admin-section');
@@ -1722,6 +1824,8 @@ function enterApp(username){
     if(!state.djFreestyles) state.djFreestyles={};
     if(!state.favorites) state.favorites=[];
     if(!state.danceLog) state.danceLog=[];
+    if(!state.favoriteFriends) state.favoriteFriends=[];
+    if(!state.drewsNights) state.drewsNights={};
     syncPending=true;
     setSyncStatus('error','Unsynced changes found — syncing now...');
     saveToCloud();
@@ -1739,9 +1843,10 @@ function enterApp(username){
   updateSubmissionsBadge();
   renderDJDropdown();
   renderBank();renderList('know');renderList('learn');initNightDate();renderDJRecords();renderPicks();
+  if(isAdmin) initDrewsNightDate();
   // Restore the tab the user was on before the last refresh, default to home
   const savedTab = localStorage.getItem('ld_active_tab') || 'home';
-  const adminTabs = ['submissions','admin','editpeople','dj'];
+  const adminTabs = ['submissions','admin','editpeople','dj','drewsnight','debug'];
   if(savedTab && !(adminTabs.includes(savedTab) && !isAdmin)){
     switchTab(savedTab);
   } else {
@@ -1767,7 +1872,7 @@ function logout() {
   if(localStorage.getItem('ld_remember_me')!=='1'){
     localStorage.removeItem('ld_remembered_email');
   }
-  state = {know:[], learn:[], nights:{}, djFreestyles:{}, favorites:[]};
+  state = {know:[], learn:[], nights:{}, djFreestyles:{}, favorites:[], favoriteFriends:[]};
   bank = []; drewPicks = []; submissions = []; friendCards = []; favoriteFriends = [];
   friendsFavFilterActive = false;
   
@@ -1832,10 +1937,12 @@ async function tryAutoLogin() {
   async function finishLogin(user) {
     const r = await sbFetch(`/rest/v1/dances?username=eq.${enc(user)}&select=data`);
     if (r.ok && r.data && r.data.length > 0) {
-      state = r.data[0].data || {know:[], learn:[], nights:{}, djFreestyles:{}, favorites:[]};
+      state = r.data[0].data || {know:[], learn:[], nights:{}, djFreestyles:{}, favorites:[], favoriteFriends:[]};
       if (!state.djFreestyles) state.djFreestyles = {};
       if (!state.favorites) state.favorites = [];
       if (!state.danceLog) state.danceLog = [];
+      if (!state.favoriteFriends) state.favoriteFriends = [];
+      if (!state.drewsNights) state.drewsNights = {};
       await loadBank();
       await loadPicks();
       await loadSubmissions();
@@ -1889,6 +1996,8 @@ async function tryAutoLogin() {
       if (!state.djFreestyles) state.djFreestyles = {};
       if (!state.favorites) state.favorites = [];
       if (!state.danceLog) state.danceLog = [];
+      if (!state.favoriteFriends) state.favoriteFriends = [];
+      if (!state.drewsNights) state.drewsNights = {};
       enterApp(savedUser);
       setSyncStatus('error', 'Offline — using cached data');
     } else {
@@ -1936,8 +2045,17 @@ function switchTab(tab){
   });
   localStorage.setItem('ld_active_tab', tab);
   if(tab==='night') renderNight();
+  if(tab==='drewsnight') renderDrewsNight();
   if(tab==='log'){renderHistoryStats();renderTop5();renderLog();renderDJAnalytics();}
-  if(tab==='admin'){renderAdminBank();renderAdminDJList();loadAdminUsers();renderAdminHomeGradients();}
+  if(tab==='admin'){
+    // Collapse all sections each time the admin tab is opened
+    ['admin-gradients-form','admin-dj-form','admin-add-dance-form','admin-bank-section','admin-users-section'].forEach(id=>{
+      const s=document.getElementById(id);if(s) s.classList.add('collapsed');
+    });
+    const bs=document.getElementById('admin-bank-search');if(bs) bs.value='';
+    const us=document.getElementById('admin-users-search');if(us) us.value='';
+    renderAdminBank();renderAdminDJList();loadAdminUsers();renderAdminHomeGradients();
+  }
   if(tab==='bank') renderBank();
   if(tab==='dj'){renderDJRecords();nvPopulateDates();renderTFAnalytics();}
   if(tab==='picks') renderPicks();
@@ -1945,6 +2063,7 @@ function switchTab(tab){
   if(tab==='friends') renderFriendsTab();
   if(tab==='feedback') renderFeedbackTab();
   if(tab==='editpeople') epRefreshUsers();
+  if(tab==='debug') renderDebugTab();
 }
 
 // ---- Sort helpers ----
@@ -2129,6 +2248,14 @@ function renderDJDropdown(){
     sorted.forEach(dj=>{const opt=document.createElement('option');opt.value=dj;opt.textContent=dj;sel.appendChild(opt);});
     if(current&&djList.includes(current)) sel.value=current;
   }
+  // Drew's Night dropdown
+  const dsel=document.getElementById('drewsnight-dj');
+  if(dsel){
+    const dcurrent=dsel.value;
+    dsel.innerHTML='<option value="">— Select DJ (optional) —</option>';
+    sorted.forEach(dj=>{const opt=document.createElement('option');opt.value=dj;opt.textContent=dj;dsel.appendChild(opt);});
+    if(dcurrent&&djList.includes(dcurrent)) dsel.value=dcurrent;
+  }
   // DJ Freestyle / Test Features dropdown
   const fsel=document.getElementById('dj-entry-name');
   if(fsel){
@@ -2215,7 +2342,9 @@ function adminSaveEdit(id){
 function renderAdminBank(){
   const el=document.getElementById('admin-bank-list');
   if(!bank.length){el.innerHTML=`<div class="empty">No dances in the bank yet.</div>`;return;}
-  const sorted=[...bank].sort((a,b)=>a.name.localeCompare(b.name));
+  const q=(document.getElementById('admin-bank-search')?.value||'').trim().toLowerCase();
+  const sorted=[...bank].sort((a,b)=>a.name.localeCompare(b.name)).filter(d=>!q||d.name.toLowerCase().includes(q));
+  if(!sorted.length){el.innerHTML=`<div class="empty">No dances match "${esc(q)}".</div>`;return;}
   el.innerHTML=sorted.map(d=>{
     const diffBadge=d.difficulty?`<span class="diff-badge diff-${d.difficulty}">${d.difficulty}</span>`:'';
     const demoLink=d.demo?`<a class="link-btn demo" href="${escA(d.demo)}" target="_blank" rel="noopener">&#9654; Demo</a>`:`<span style="font-size:12px;color:var(--t3)">No demo</span>`;
@@ -2265,18 +2394,79 @@ function renderAdminBank(){
       </div>`;
   }).join('');
 }
+let adminUsersData=[];
 async function loadAdminUsers(){
   const el=document.getElementById('admin-users-list');el.innerHTML='<p class="section-note">Loading...</p>';
-  const r=await sbFetch(`/rest/v1/dances?username=neq.__bank__&username=neq.__picks__&select=username,updated_at&order=username.asc`);
+  const r=await sbFetch(`/rest/v1/dances?username=neq.__bank__&username=neq.__picks__&username=neq.__submissions__&username=neq.__friendcards__&select=username,updated_at,data&order=username.asc`);
   if(!r.ok||!r.data){el.innerHTML='<p class="section-note">Could not load users.</p>';return;}
-  const users=r.data.filter(u=>u.username!=='__bank__'&&u.username!=='__picks__');
-  if(!users.length){el.innerHTML='<div class="empty">No users yet.</div>';return;}
-  el.innerHTML=users.map(u=>`
-    <div class="user-row">
-      <span class="uname">${esc(u.username)}</span>
-      ${u.username===ADMIN_USER?'<span class="admin-badge">Admin</span>':''}
-      <span class="udate">Last active: ${u.updated_at?formatDate(u.updated_at.slice(0,10)):'—'}</span>
-    </div>`).join('');
+  adminUsersData=r.data.filter(u=>!['__bank__','__picks__','__submissions__','__friendcards__'].includes(u.username));
+  renderAdminUsers();
+}
+function filterAdminUsers(){renderAdminUsers();}
+function renderAdminUsers(){
+  const el=document.getElementById('admin-users-list');
+  if(!adminUsersData.length){el.innerHTML='<div class="empty">No users yet.</div>';return;}
+  const q=(document.getElementById('admin-users-search')?.value||'').trim().toLowerCase();
+  const filtered=adminUsersData.filter(u=>!q||u.username.toLowerCase().includes(q));
+  if(!filtered.length){el.innerHTML=`<div class="empty">No users match "${esc(q)}".</div>`;return;}
+  el.innerHTML=filtered.map(u=>{
+    const d=u.data||{};
+    const knowCount=(d.know||[]).length;
+    const learnCount=(d.learn||[]).length;
+    const nightCount=Object.keys(d.nights||{}).length;
+    const lastActive=u.updated_at?formatDate(u.updated_at.slice(0,10)):'—';
+    const safeId='adminuser-'+u.username.replace(/[^a-zA-Z0-9]/g,'_');
+    // Know pills (up to 10)
+    const knowSorted=(d.know||[]).slice().sort((a,b)=>(a.name||a).localeCompare(b.name||b));
+    const knowPills=knowSorted.slice(0,10).map(dk=>`<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:var(--green-bg);border:0.5px solid var(--green-border);color:var(--green-text);font-weight:500">${esc(dk.name||dk)}</span>`).join('');
+    const knowMore=knowCount>10?`<span style="font-size:11px;color:var(--t3)">+${knowCount-10} more</span>`:'';
+    // Learn pills (up to 8)
+    const learnSorted=(d.learn||[]).slice().sort((a,b)=>(a.name||a).localeCompare(b.name||b));
+    const learnPills=learnSorted.slice(0,8).map(dl=>`<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:var(--blue-bg);border:0.5px solid var(--blue-border);color:var(--blue-text);font-weight:500">${esc(dl.name||dl)}</span>`).join('');
+    const learnMore=learnCount>8?`<span style="font-size:11px;color:var(--t3)">+${learnCount-8} more</span>`:'';
+    // Night list (last 5)
+    const nightDates=Object.keys(d.nights||{}).sort((a,b)=>b.localeCompare(a));
+    const nightRows=nightDates.slice(0,5).map(nd=>{
+      const ni=d.nights[nd]||{};
+      const danceCount=(ni.dances||[]).length;
+      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--b3)">
+        <span style="font-size:12px;font-weight:500;flex:1">${formatDate(nd)}</span>
+        ${ni.dj?`<span style="font-size:11px;color:var(--t2)">DJ: ${esc(ni.dj)}</span>`:''}
+        <span style="font-size:11px;color:var(--t3)">${danceCount} dance${danceCount!==1?'s':''}</span>
+      </div>`;
+    }).join('');
+    const nightMore=nightCount>5?`<div style="font-size:11px;color:var(--t3);margin-top:4px">+${nightCount-5} more nights</div>`:'';
+    return `
+    <div style="border:0.5px solid var(--b3);border-radius:var(--radius-lg);background:var(--bg);margin-bottom:6px;overflow:hidden;">
+      <div class="user-row" style="cursor:pointer;margin-bottom:0;border:none;border-radius:0" onclick="toggleAdminUserDetail('${safeId}')">
+        <span class="uname">${esc(u.username)}</span>
+        ${u.username===ADMIN_USER?'<span class="admin-badge">Admin</span>':''}
+        <span style="display:flex;gap:5px;flex-shrink:0">
+          <span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:var(--green-bg);border:0.5px solid var(--green-border);color:var(--green-text)">${knowCount} know</span>
+          <span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:var(--blue-bg);border:0.5px solid var(--blue-border);color:var(--blue-text)">${learnCount} learning</span>
+          <span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:var(--bg2);border:0.5px solid var(--b3);color:var(--t2)">${nightCount} nights</span>
+        </span>
+        <span class="udate">Last active: ${lastActive}</span>
+        <span style="font-size:11px;color:var(--t3);transition:transform 0.2s" id="${safeId}-caret">&#9660;</span>
+      </div>
+      <div id="${safeId}" style="display:none;padding:12px 15px;border-top:0.5px solid var(--b3);background:var(--bg2)">
+        ${knowCount?`<div style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Dances they know (${knowCount})</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">${knowPills}${knowMore}</div>`:''}
+        ${learnCount?`<div style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Want to learn (${learnCount})</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">${learnPills}${learnMore}</div>`:''}
+        ${nightCount?`<div style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Recent nights (${nightCount} total)</div>
+        <div style="margin-bottom:4px">${nightRows}</div>${nightMore}`:'<div style="font-size:13px;color:var(--t3)">No nights logged yet.</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleAdminUserDetail(id){
+  const el=document.getElementById(id);
+  const caret=document.getElementById(id+'-caret');
+  if(!el) return;
+  const open=el.style.display==='none'||el.style.display==='';
+  el.style.display=open?'block':'none';
+  if(caret) caret.style.transform=open?'rotate(180deg)':'';
 }
 
 // ---- My lists ----
@@ -2494,6 +2684,14 @@ function saveHighlights(){
   const h1=document.getElementById('hl-pick-1').value;
   const h2=document.getElementById('hl-pick-2').value;
   const h3=document.getElementById('hl-pick-3').value;
+  const modal=document.getElementById('highlights-modal');
+  if(modal.dataset.source==='drewsnight'){
+    const existing=getDrewsNightData(drewsSelectedDate);
+    state.nights[drewsSelectedDate]={...existing,highlights:[h1,h2,h3]};
+    scheduleSave();closeHighlightsModal();renderDrewsHighlightsDisplay();
+    modal.dataset.source='';
+    return;
+  }
   const existing=getNightData(selectedDate);
   state.nights[selectedDate]={...existing,highlights:[h1,h2,h3]};
   scheduleSave();closeHighlightsModal();renderHighlightsDisplay();
@@ -2520,6 +2718,208 @@ function renderHighlightsDisplay(){
       <hr class="highlights-divider">
       <div class="highlights-total"><strong>${allDances.length}</strong> total dances tonight</div>
       <div class="highlights-all">${allDances.map(d=>`<span class="log-pill">${esc(d.name)}</span>`).join('')}</div>
+    </div>`;
+}
+
+// ---- Drew's Night ----
+function getDrewsNightData(date){
+  // Drew's Night reads/writes from the same state.nights as My Night
+  const n=state.nights[date];
+  if(!n) return{dances:[],notPerformed:[],dj:'',highlights:null,arriveTime:'',leaveTime:''};
+  if(Array.isArray(n)) return{dances:n,notPerformed:[],dj:'',highlights:null,arriveTime:'',leaveTime:''};
+  return{highlights:null,arriveTime:'',leaveTime:'',notPerformed:[],...n};
+}
+function initDrewsNightDate(){
+  const inp=document.getElementById('drewsnight-date');
+  if(!inp) return;
+  const today=localDateStr();
+  inp.value=today; drewsSelectedDate=today;
+  loadDrewsNightSelections();
+  renderDrewsPickList();renderDrewsNotPerfList();renderDrewsDidList();
+  loadDrewsNightDJ();renderDrewsHighlightsDisplay();
+  inp.onchange=()=>{
+    drewsSelectedDate=inp.value;
+    loadDrewsNightSelections();
+    renderDrewsPickList();renderDrewsNotPerfList();renderDrewsDidList();
+    loadDrewsNightDJ();renderDrewsHighlightsDisplay();
+  };
+}
+function loadDrewsNightSelections(){
+  drewsNightSelections={};drewsNotPerfSelections={};
+  const nd=getDrewsNightData(drewsSelectedDate);
+  nd.dances.forEach(id=>drewsNightSelections[id]=true);
+  nd.notPerformed.forEach(id=>drewsNotPerfSelections[id]=true);
+}
+function loadDrewsNightDJ(){
+  const nd=getDrewsNightData(drewsSelectedDate);
+  const djEl=document.getElementById('drewsnight-dj');
+  const arrEl=document.getElementById('drewsnight-arrive');
+  const lvEl=document.getElementById('drewsnight-leave');
+  if(djEl) djEl.value=nd.dj||'';
+  if(arrEl) arrEl.value=nd.arriveTime||'';
+  if(lvEl) lvEl.value=nd.leaveTime||'';
+}
+function renderDrewsNight(){
+  if(!drewsSelectedDate) initDrewsNightDate();
+  drewsSelectedDate=document.getElementById('drewsnight-date').value||localDateStr();
+  loadDrewsNightSelections();
+  renderDrewsPickList();renderDrewsNotPerfList();renderDrewsDidList();
+  loadDrewsNightDJ();renderDrewsHighlightsDisplay();
+}
+function toggleDrewsNightSort(panel){
+  drewsNightSortState[panel]=!drewsNightSortState[panel];
+  const btn=document.getElementById('drewsnight-'+panel+'-sort-btn');
+  if(btn) btn.textContent=drewsNightSortState[panel]?'A–Z':'Z–A';
+  if(panel==='pick') renderDrewsPickList();
+  else renderDrewsNotPerfList();
+}
+function renderDrewsPickList(){
+  const el=document.getElementById('drewsnight-pick-list');
+  if(!el) return;
+  if(!state.know.length){el.innerHTML=`<div class="empty" style="padding:1.5rem .5rem">Add dances to "Dances I Know" first</div>`;return;}
+  const q=(document.getElementById('drewsnight-pick-search')?.value||'').toLowerCase();
+  let items=state.know.slice();
+  if(q) items=items.filter(d=>d.name.toLowerCase().includes(q));
+  if(drewsNightSortState.pick) items.sort((a,b)=>a.name.localeCompare(b.name));
+  else items.sort((a,b)=>b.name.localeCompare(a.name));
+  el.innerHTML=items.map(d=>`
+    <div class="pick-item ${drewsNightSelections[d.id]?'selected':''}" onclick="toggleDrewsPick('${d.id}')">
+      <div class="check">${drewsNightSelections[d.id]?'&#10003;':''}</div>
+      <span class="pname">${esc(d.name)}</span>
+    </div>`).join('');
+}
+function renderDrewsNotPerfList(){
+  const el=document.getElementById('drewsnight-notperf-list');
+  if(!el) return;
+  if(!bank.length){el.innerHTML=`<div class="empty" style="padding:1.5rem .5rem">No dances in the bank yet</div>`;return;}
+  const q=(document.getElementById('drewsnight-notperf-search')?.value||'').toLowerCase();
+  let items=bank.slice();
+  if(q) items=items.filter(d=>d.name.toLowerCase().includes(q));
+  if(drewsNightSortState.notperf) items.sort((a,b)=>a.name.localeCompare(b.name));
+  else items.sort((a,b)=>b.name.localeCompare(a.name));
+  el.innerHTML=items.map(d=>`
+    <div class="pick-item ${drewsNotPerfSelections[d.id]?'selected':''}" onclick="toggleDrewsNotPerf('${d.id}')">
+      <div class="check">${drewsNotPerfSelections[d.id]?'&#10003;':''}</div>
+      <span class="pname">${esc(d.name)}</span>
+    </div>`).join('');
+}
+function renderDrewsDidList(){
+  const el=document.getElementById('drewsnight-did-list');
+  if(!el) return;
+  const performed=state.know.filter(d=>drewsNightSelections[d.id]).sort((a,b)=>a.name.localeCompare(b.name));
+  const notPerf=bank.filter(d=>drewsNotPerfSelections[d.id]).sort((a,b)=>a.name.localeCompare(b.name));
+  if(!performed.length&&!notPerf.length){el.innerHTML=`<div class="empty" style="padding:1.5rem .5rem">Nothing selected yet</div>`;return;}
+  const perfHTML=performed.map(d=>`<div class="did-item">${esc(d.name)}<button class="remove" onclick="toggleDrewsPick('${d.id}')" title="Remove">&#215;</button></div>`).join('');
+  const notPerfHTML=notPerf.map(d=>`<div class="did-item" style="opacity:0.45;background:var(--bg2);border-color:var(--b3);color:var(--t2);">${esc(d.name)}<button class="remove" onclick="toggleDrewsNotPerf('${d.id}')" title="Remove" style="color:var(--t3);">&#215;</button></div>`).join('');
+  el.innerHTML=perfHTML+notPerfHTML;
+}
+function toggleDrewsPick(id){
+  if(drewsNightSelections[id]){
+    delete drewsNightSelections[id];
+    if(state.danceLog){
+      state.danceLog=state.danceLog.filter(e=>!(e.danceId===id && e.date===drewsSelectedDate && e.type!=='not_performed'));
+    }
+  } else {
+    drewsNightSelections[id]=true;
+    const dance=state.know.find(d=>d.id===id);
+    const dj=document.getElementById('drewsnight-dj')?.value.trim()||'';
+    const now=new Date();
+    if(!state.danceLog) state.danceLog=[];
+    state.danceLog.push({
+      danceId:id,
+      danceName:dance?dance.name:'',
+      timestamp:now.toISOString(),
+      localTime:now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}),
+      dj:dj||null,
+      date:drewsSelectedDate
+    });
+  }
+  renderDrewsPickList();renderDrewsDidList();scheduleDrewsNightSave();
+}
+function toggleDrewsNotPerf(id){
+  if(drewsNotPerfSelections[id]){
+    delete drewsNotPerfSelections[id];
+    if(state.danceLog){
+      state.danceLog=state.danceLog.filter(e=>!(e.danceId===id && e.date===drewsSelectedDate && e.type==='not_performed'));
+    }
+  } else {
+    drewsNotPerfSelections[id]=true;
+    const dance=bank.find(d=>d.id===id);
+    const dj=document.getElementById('drewsnight-dj')?.value.trim()||'';
+    const now=new Date();
+    if(!state.danceLog) state.danceLog=[];
+    state.danceLog.push({
+      type:'not_performed',
+      danceId:id,
+      danceName:dance?dance.name:'',
+      timestamp:now.toISOString(),
+      localTime:now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}),
+      dj:dj||null,
+      date:drewsSelectedDate
+    });
+  }
+  renderDrewsNotPerfList();renderDrewsDidList();scheduleDrewsNightSave();
+}
+function commitDrewsNightSave(){
+  if(!drewsSelectedDate) return;
+  const dj=document.getElementById('drewsnight-dj')?.value.trim()||'';
+  const arriveTime=document.getElementById('drewsnight-arrive')?.value||'';
+  const leaveTime=document.getElementById('drewsnight-leave')?.value||'';
+  const existing=getDrewsNightData(drewsSelectedDate);
+  // Save performed dances to state.nights so analytics picks them up
+  state.nights[drewsSelectedDate]={...existing,dances:Object.keys(drewsNightSelections),notPerformed:Object.keys(drewsNotPerfSelections),dj,arriveTime,leaveTime};
+  saveLocalCache();
+  syncPending=true;
+  const msg=document.getElementById('drewsnight-save-msg');
+  if(msg){msg.textContent='Saved locally';setTimeout(()=>{if(msg.textContent==='Saved locally')msg.textContent='';},2000);}
+  clearTimeout(saveTimeout);
+  saveToCloud();
+}
+function scheduleDrewsNightSave(){
+  clearTimeout(drewsNightSaveTimeout);
+  drewsNightSaveTimeout=setTimeout(commitDrewsNightSave,200);
+}
+function openDrewsHighlightsModal(){
+  const dances=state.know.filter(d=>drewsNightSelections[d.id]);
+  if(!dances.length){alert('Select some performed dances for tonight first!');return;}
+  document.getElementById('highlights-modal-date').textContent=formatDate(drewsSelectedDate);
+  ['hl-pick-1','hl-pick-2','hl-pick-3'].forEach(id=>{
+    const sel=document.getElementById(id);
+    sel.innerHTML='<option value="">Select a dance...</option>'+dances.map(d=>`<option value="${d.id}">${esc(d.name)}</option>`).join('');
+  });
+  const existing=getDrewsNightData(drewsSelectedDate);
+  if(existing.highlights){
+    if(existing.highlights[0]) document.getElementById('hl-pick-1').value=existing.highlights[0];
+    if(existing.highlights[1]) document.getElementById('hl-pick-2').value=existing.highlights[1];
+    if(existing.highlights[2]) document.getElementById('hl-pick-3').value=existing.highlights[2];
+  }
+  // Override save button to save to drewsNights
+  document.getElementById('highlights-modal').dataset.source='drewsnight';
+  document.getElementById('highlights-modal').style.display='flex';
+}
+function renderDrewsHighlightsDisplay(){
+  const el=document.getElementById('drewsnight-highlights-display');
+  if(!el) return;
+  const nd=getDrewsNightData(drewsSelectedDate);
+  if(!nd.highlights||!nd.highlights.some(Boolean)){el.innerHTML='';return;}
+  const performedDances=state.know.filter(d=>drewsNightSelections[d.id]);
+  const getName=id=>state.know.find(d=>d.id===id)?.name||bank.find(d=>d.id===id)?.name||'';
+  const labels=['1st favorite','2nd favorite','3rd favorite'];
+  const rankCls=['rank-1','rank-2','rank-3'];
+  const favItems=nd.highlights.map((id,i)=>{
+    if(!id) return '';
+    return `<div class="highlight-item ${rankCls[i]}">
+      <span class="highlight-rank-num">${i+1}</span>
+      <div><div class="highlight-name">${esc(getName(id))}</div><div class="highlight-label">${labels[i]}</div></div>
+    </div>`;
+  }).join('');
+  el.innerHTML=`
+    <div class="highlights-panel">
+      <div class="highlights-date">${formatDate(drewsSelectedDate)}</div>
+      <div class="highlights-favorites">${favItems}</div>
+      <hr class="highlights-divider">
+      <div class="highlights-total"><strong>${performedDances.length}</strong> dances performed tonight</div>
+      <div class="highlights-all">${performedDances.map(d=>`<span class="log-pill">${esc(d.name)}</span>`).join('')}</div>
     </div>`;
 }
 
@@ -3077,6 +3477,10 @@ function buildCardHTML(card,isMe){
   const learnPills=(card.learn||[]).slice().sort((a,b)=>a.localeCompare(b)).slice(0,6).map(n=>`<span class="fc-pill">${esc(n)}</span>`).join('');
   const knowCount=(card.know||[]).length;
   const learnCount=(card.learn||[]).length;
+  // Mutual dances count for card preview
+  const myKnowNamesSet=new Set((state.know||[]).map(d=>d.name.toLowerCase()));
+  const mutualCount=!isMe?(card.know||[]).filter(n=>myKnowNamesSet.has(n.toLowerCase())).length:0;
+  const mutualBadge=!isMe&&mutualCount>0?`<div style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--green-text);background:var(--green-bg);border:0.5px solid var(--green-border);border-radius:20px;padding:2px 8px;margin-bottom:8px">✓ ${mutualCount} mutual dance${mutualCount!==1?'s':''}</div>`:'';
   const clickAttr=`onclick="${isMe?`openMyCardDetail()`:`openFriendDetail('${escA(card.username)}')`}"`;
   const editBtn=isMe?`<button onclick="event.stopPropagation();openFriendSetup(true)" style="position:absolute;top:10px;right:10px;background:rgba(255,255,255,0.22);border:none;border-radius:20px;color:#fff;font-size:11px;font-weight:500;padding:4px 10px;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.01em;backdrop-filter:blur(4px)">Edit</button>`:'';
   const isFaved=favoriteFriends.includes(card.username);
@@ -3089,6 +3493,7 @@ function buildCardHTML(card,isMe){
       ${isFaved&&!isMe?`<div style="position:absolute;bottom:8px;right:10px;font-size:10px;font-weight:600;color:rgba(255,255,255,0.85);letter-spacing:.04em;text-transform:uppercase;text-shadow:0 1px 2px rgba(0,0,0,0.3)">&#9733; Favorite</div>`:''}
     </div>
     <div class="fc-body">
+      ${mutualBadge}
       <div class="fc-section-label">Top favorites</div>
       <div class="fc-fav-list">${favHTML}</div>
       ${knowPills?`<div class="fc-section-label">Dances they know (${knowCount})</div><div class="fc-pills" style="margin-bottom:10px">${knowPills}${knowCount>8?`<span class="fc-pill">+${knowCount-8} more</span>`:''}</div>`:''}
@@ -3117,19 +3522,32 @@ function buildFavAdminHTML(card){
 function attachFavDragListeners(){}// drag handled inline via HTML attrs
 
 function toggleFriendFavorite(username){
-  const idx=favoriteFriends.indexOf(username);
-  if(idx>=0) favoriteFriends.splice(idx,1);
-  else favoriteFriends.push(username);
-  // Persist per-user in localStorage
-  try{ localStorage.setItem('favFriends_'+currentUser, JSON.stringify(favoriteFriends)); }catch(e){}
+  if(!state.favoriteFriends) state.favoriteFriends=[];
+  const idx=state.favoriteFriends.indexOf(username);
+  if(idx>=0) state.favoriteFriends.splice(idx,1);
+  else state.favoriteFriends.push(username);
+  favoriteFriends=state.favoriteFriends;
+  scheduleSave();
   renderFriendsTab();
 }
 function loadFavoriteFriends(){
   if(!currentUser){favoriteFriends=[];return;}
+  if(!state.favoriteFriends) state.favoriteFriends=[];
+  // Migrate any legacy localStorage favorites into state (one-time)
   try{
-    const stored=localStorage.getItem('favFriends_'+currentUser);
-    favoriteFriends=stored?JSON.parse(stored):[];
-  }catch(e){favoriteFriends=[];}
+    const legacyKey='favFriends_'+currentUser;
+    const stored=localStorage.getItem(legacyKey);
+    if(stored){
+      const legacy=JSON.parse(stored);
+      if(Array.isArray(legacy)&&legacy.length>0){
+        const merged=Array.from(new Set([...state.favoriteFriends,...legacy]));
+        state.favoriteFriends=merged;
+        scheduleSave();
+      }
+      localStorage.removeItem(legacyKey);
+    }
+  }catch(e){}
+  favoriteFriends=state.favoriteFriends;
 }
 
 function fcFavDragStart(e,id){fcDragSrc=id;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
@@ -3153,17 +3571,42 @@ function openFriendDetail(username){
   const grad=GRADIENTS[card.grad||0];
   // Use stored favNames so viewers see actual dance names
   const favNames=card.favNames||card.favs.map(id=>state.know.find(d=>d.id===id)?.name||'').filter(Boolean);
-  const knowList=(card.know||[]).slice().sort((a,b)=>a.localeCompare(b)).map(n=>`<span class="fc-pill">${esc(n)}</span>`).join('');
-  const learnList=(card.learn||[]).slice().sort((a,b)=>a.localeCompare(b)).map(n=>`<span class="fc-pill">${esc(n)}</span>`).join('');
+
+  // Compute mutual dances (dances both this friend and the current user know)
+  const myKnowNames=new Set((state.know||[]).map(d=>d.name.toLowerCase()));
+  const friendKnow=(card.know||[]).slice().sort((a,b)=>a.localeCompare(b));
+  const friendLearn=(card.learn||[]).slice().sort((a,b)=>a.localeCompare(b));
+  const mutualKnow=friendKnow.filter(n=>myKnowNames.has(n.toLowerCase()));
+  const mutualSet=new Set(mutualKnow.map(n=>n.toLowerCase()));
+
+  // Build know pills — highlight mutuals
+  const knowList=friendKnow.map(n=>{
+    const isMutual=mutualSet.has(n.toLowerCase());
+    return isMutual
+      ? `<span class="fc-pill" style="background:var(--green-bg);border-color:var(--green-border);color:var(--green-text);font-weight:600">✓ ${esc(n)}</span>`
+      : `<span class="fc-pill">${esc(n)}</span>`;
+  }).join('');
+  const learnList=friendLearn.map(n=>`<span class="fc-pill">${esc(n)}</span>`).join('');
+
+  // Mutual section HTML
+  const mutualHTML=mutualKnow.length
+    ? `<div style="background:var(--green-bg);border:0.5px solid var(--green-border);border-radius:var(--radius-lg);padding:1rem 1.1rem;margin-bottom:1.25rem">
+        <div style="font-size:11px;font-weight:600;color:var(--green-text);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">✓ You both know (${mutualKnow.length})</div>
+        <div class="fc-pills">${mutualKnow.map(n=>`<span class="fc-pill" style="background:var(--green-bg);border-color:var(--green-border);color:var(--green-text);font-weight:600">${esc(n)}</span>`).join('')}</div>
+      </div>`
+    : `<div style="background:var(--bg2);border:0.5px solid var(--b3);border-radius:var(--radius-lg);padding:.9rem 1.1rem;margin-bottom:1.25rem;font-size:13px;color:var(--t3)">No mutual dances yet</div>`;
+
   document.getElementById('friend-detail-content').innerHTML=`
     <div style="background:${grad};border-radius:12px;padding:1.5rem;margin:-2rem -2rem 1.5rem;position:relative;">
       <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.3)">${esc(card.displayName)}</div>
       <div style="font-size:12px;color:rgba(255,255,255,0.75);margin-top:2px">@${esc(card.username)}</div>
       <button onclick="closeFriendDetail()" style="position:absolute;top:12px;right:14px;background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:28px;height:28px;color:#fff;font-size:16px;cursor:pointer;line-height:1">&#215;</button>
     </div>
-    ${favNames.length?`<div class="section-title" style="margin-top:0">Top favorites</div><div style="display:flex;flex-direction:column;gap:6px;margin-bottom:1.25rem">${favNames.map((n,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:0.5px solid var(--b3);border-radius:var(--radius-md);background:var(--bg2)"><span style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--t3);min-width:20px">${i+1}</span><span style="font-size:14px;font-weight:500">${esc(n)}</span></div>`).join('')}</div>`:''}
-    ${knowList?`<div class="section-title">Dances they know (${(card.know||[]).length})</div><div class="fc-pills" style="margin-bottom:1.25rem">${knowList}</div>`:''}
-    ${learnList?`<div class="section-title">Want to learn (${(card.learn||[]).length})</div><div class="fc-pills">${learnList}</div>`:''}
+    <div class="section-title" style="margin-top:0">Mutual dances</div>
+    ${mutualHTML}
+    ${favNames.length?`<div class="section-title">Top favorites</div><div style="display:flex;flex-direction:column;gap:6px;margin-bottom:1.25rem">${favNames.map((n,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:0.5px solid var(--b3);border-radius:var(--radius-md);background:var(--bg2)"><span style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--t3);min-width:20px">${i+1}</span><span style="font-size:14px;font-weight:500">${esc(n)}</span></div>`).join('')}</div>`:''}
+    ${knowList?`<div class="section-title">Dances they know (${friendKnow.length}) <span style="font-size:11px;font-weight:400;color:var(--green-text)"></span></div><div class="fc-pills" style="margin-bottom:1.25rem">${knowList}</div>`:''}
+    ${learnList?`<div class="section-title">Want to learn (${friendLearn.length})</div><div class="fc-pills">${learnList}</div>`:''}
   `;
   document.getElementById('friend-detail-modal').style.display='flex';
 }
@@ -4719,6 +5162,222 @@ window.addEventListener('load',()=>{
     }
   }
 });
+
+// ---- Debug Tab ----
+// ---- Debug Tab ----
+let debugUserState = null; // state of the currently-inspected user
+let debugUsername = '';    // username of the currently-inspected user
+
+async function renderDebugTab(){
+  if(!isAdmin) return;
+  await debugLoadUsers();
+}
+
+async function debugLoadUsers(){
+  if(!isAdmin) return;
+  const sel=document.getElementById('debug-user-select');
+  if(!sel) return;
+  const status=document.getElementById('debug-status');
+  if(status) status.textContent='Loading users…';
+  const r=await sbFetch(`/rest/v1/dances?username=neq.__bank__&username=neq.__picks__&username=neq.__submissions__&username=neq.__friendcards__&username=neq.__djlist__&username=neq.__homeconfig__&select=username,updated_at&order=username.asc`);
+  if(!r.ok||!r.data){if(status) status.textContent='Could not load users.';return;}
+  const users=r.data.filter(u=>!u.username.startsWith('__'));
+  const prev=sel.value;
+  sel.innerHTML='<option value="">— Select a user —</option>'+users.map(u=>`<option value="${esc(u.username)}"${u.username===prev?' selected':''}>${esc(u.username)}${u.username===ADMIN_USER?' (admin)':''}</option>`).join('');
+  if(status) status.textContent=`${users.length} user${users.length!==1?'s':''} found.`;
+  if(prev&&users.find(u=>u.username===prev)) await debugLoadUser();
+}
+
+async function debugLoadUser(){
+  if(!isAdmin) return;
+  const sel=document.getElementById('debug-user-select');
+  const username=sel?.value;
+  const status=document.getElementById('debug-status');
+  const nightRow=document.getElementById('debug-night-row');
+  const out=document.getElementById('debug-night-output');
+  const dateSel=document.getElementById('debug-date-select');
+  if(!username){
+    if(nightRow) nightRow.style.display='none';
+    if(out) out.innerHTML='';
+    if(status) status.textContent='';
+    return;
+  }
+  if(status) status.textContent=`Loading data for ${esc(username)}…`;
+  if(out) out.innerHTML='';
+  const r=await sbFetch(`/rest/v1/dances?username=eq.${enc(username)}&select=data`);
+  if(!r.ok||!r.data||!r.data.length){
+    if(status) status.textContent=`No data found for "${esc(username)}".`;
+    if(nightRow) nightRow.style.display='none';
+    return;
+  }
+  debugUserState=r.data[0].data||{};
+  debugUsername=username;
+  const nights=Object.keys(debugUserState.nights||{}).sort((a,b)=>b.localeCompare(a));
+  if(dateSel){
+    dateSel.innerHTML='<option value="">— Select a night —</option>'+nights.map(d=>`<option value="${d}">${formatDate(d)} (${d})</option>`).join('');
+  }
+  if(nightRow) nightRow.style.display='flex';
+  if(status) status.textContent=`Viewing: ${esc(username)} · ${nights.length} night${nights.length!==1?'s':''} logged.`;
+}
+
+function renderDebugNight(){
+  if(!isAdmin) return;
+  const date=document.getElementById('debug-date-select')?.value;
+  const out=document.getElementById('debug-night-output');
+  if(!out) return;
+  if(!date||!debugUserState){out.innerHTML=`<div class="empty">Select a user and night above to inspect data.</div>`;return;}
+
+  const nights=debugUserState.nights||{};
+  const nd=nights[date];
+  if(!nd){out.innerHTML=`<div class="empty">No data found for ${esc(date)}.</div>`;return;}
+
+  const nightObj=Array.isArray(nd)?{dances:nd,dj:'',highlights:null,arriveTime:'',leaveTime:'',notPerformed:[]}:{notPerformed:[],...nd};
+  const danceLog=((debugUserState.danceLog)||[]).filter(e=>e.date===date);
+  const performed=danceLog.filter(e=>e.type!=='not_performed'&&e.type!=='palace_times'&&(e.danceId||e.danceName));
+  const notPerformed=danceLog.filter(e=>e.type==='not_performed'&&(e.danceId||e.danceName));
+
+  // For resolving IDs — use the inspected user's know list + bank
+  const userKnow=debugUserState.know||[];
+
+  function pill(label,val,color){
+    return`<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px;background:${color||'var(--bg2)'};border:0.5px solid var(--b3);color:var(--t1);white-space:nowrap;">${esc(label)}: <strong>${esc(String(val??'—'))}</strong></span>`;
+  }
+  function section(title,color,content){
+    return`<div style="margin-bottom:1.25rem;">
+      <div style="font-size:11px;font-weight:600;color:${color};text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">${title}</div>
+      ${content}
+    </div>`;
+  }
+  function fmtDebugTime(e){
+    if(e.timestamp){
+      const d=new Date(e.timestamp);
+      return d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true});
+    }
+    return e.localTime||'—';
+  }
+  function logTable(entries,emptyMsg){
+    if(!entries.length) return`<div style="font-size:13px;color:var(--t3);padding:6px 0;">${emptyMsg}</div>`;
+    return`<div style="border:0.5px solid var(--b3);border-radius:var(--radius-lg);overflow:hidden;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:var(--bg2);">
+            <th style="padding:7px 12px;text-align:left;font-weight:500;color:var(--t2);border-bottom:0.5px solid var(--b3);">Dance</th>
+            <th style="padding:7px 12px;text-align:left;font-weight:500;color:var(--t2);border-bottom:0.5px solid var(--b3);">Time</th>
+            <th style="padding:7px 12px;text-align:left;font-weight:500;color:var(--t2);border-bottom:0.5px solid var(--b3);">DJ</th>
+            <th style="padding:7px 12px;text-align:left;font-weight:500;color:var(--t2);border-bottom:0.5px solid var(--b3);">Timestamp (ISO)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${entries.map((e,i)=>`<tr style="background:${i%2?'var(--bg2)':'var(--bg)'};">
+            <td style="padding:7px 12px;border-bottom:0.5px solid var(--b3);">${esc(e.danceName||e.danceId||'?')}</td>
+            <td style="padding:7px 12px;border-bottom:0.5px solid var(--b3);font-variant-numeric:tabular-nums;">${esc(fmtDebugTime(e))}</td>
+            <td style="padding:7px 12px;border-bottom:0.5px solid var(--b3);">${esc(e.dj||'—')}</td>
+            <td style="padding:7px 12px;border-bottom:0.5px solid var(--b3);font-size:11px;color:var(--t2);font-variant-numeric:tabular-nums;">${esc(e.timestamp||'—')}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  }
+
+  const hlNames=(nightObj.highlights||[]).map(id=>{
+    const d=userKnow.find(k=>k.id===id);
+    return d?d.name:id||'—';
+  });
+  const storedPerformed=(nightObj.dances||[]).map(id=>{
+    const d=userKnow.find(k=>k.id===id);
+    return d?d.name:id;
+  }).sort((a,b)=>a.localeCompare(b));
+  const storedNotPerf=(nightObj.notPerformed||[]).map(id=>{
+    const d=bank.find(k=>k.id===id)||userKnow.find(k=>k.id===id);
+    return d?d.name:id;
+  }).sort((a,b)=>a.localeCompare(b));
+
+  // Determine if this is the admin's own data (can delete directly) or another user's
+  const isOwnData=debugUsername===currentUser;
+
+  out.innerHTML=`
+    <div style="background:var(--bg);border:0.5px solid var(--b3);border-radius:var(--radius-lg);padding:1.5rem;">
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap;">
+        <div style="flex:1;">
+          <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:2px;">${formatDate(date)}</div>
+          <div style="font-size:12px;color:var(--t2);font-family:monospace;">${esc(date)} · user: ${esc(debugUsername)}</div>
+        </div>
+        <button class="btn sm danger" onclick="debugDeleteNight('${date}')">&#128465; Delete Night</button>
+      </div>
+
+      ${section('Night metadata','var(--t2)',`
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          ${pill('DJ',nightObj.dj||'None')}
+          ${pill('Arrived',nightObj.arriveTime||'—')}
+          ${pill('Left',nightObj.leaveTime||'—')}
+          ${pill('Performed count',(nightObj.dances||[]).length)}
+          ${pill('Not performed count',(nightObj.notPerformed||[]).length)}
+        </div>
+      `)}
+
+      ${section('Highlights','var(--amber-text)',nightObj.highlights&&nightObj.highlights.some(Boolean)
+        ?`<div style="display:flex;flex-direction:column;gap:6px;">
+            ${hlNames.map((n,i)=>n&&n!=='—'?`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:0.5px solid var(--amber-border);border-radius:var(--radius-md);background:var(--amber-bg);">
+              <span style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--amber-text);min-width:20px;">${i+1}</span>
+              <span style="font-size:13px;font-weight:500;">${esc(n)}</span>
+            </div>`:'').join('')}
+          </div>`
+        :`<div style="font-size:13px;color:var(--t3);">No highlights saved for this night.</div>`
+      )}
+
+      ${section('Performed dances','var(--green-text)',storedPerformed.length
+        ?`<div style="display:flex;flex-wrap:wrap;gap:5px;">${storedPerformed.map(n=>`<span style="font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px;background:var(--green-bg);border:0.5px solid var(--green-border);color:var(--green-text);">${esc(n)}</span>`).join('')}</div>`
+        :`<div style="font-size:13px;color:var(--t3);">None stored.</div>`
+      )}
+
+      ${storedNotPerf.length?section('Not performed dances','var(--red-text)',`<div style="display:flex;flex-wrap:wrap;gap:5px;">${storedNotPerf.map(n=>`<span style="font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px;background:var(--red-bg);border:0.5px solid var(--red-border);color:var(--red-text);">${esc(n)}</span>`).join('')}</div>`):''}
+
+      ${section(`Dance log — performed (${performed.length} entries)`,'var(--blue-text)',logTable(performed,'No performed log entries for this night.'))}
+
+      ${notPerformed.length?section(`Dance log — not performed (${notPerformed.length} entries)`,'var(--purple-text)',logTable(notPerformed,'No not-performed log entries.')):''}
+
+      <div style="margin-top:1.5rem;border-top:0.5px solid var(--b3);padding-top:1rem;">
+        <div style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Raw JSON</div>
+        <pre style="font-size:11px;font-family:monospace;background:var(--bg2);border:0.5px solid var(--b3);border-radius:var(--radius-md);padding:12px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;color:var(--t1);max-height:300px;overflow-y:auto;">${esc(JSON.stringify({night:nightObj,danceLog:danceLog},null,2))}</pre>
+      </div>
+    </div>`;
+}
+
+async function debugDeleteNight(date){
+  if(!isAdmin||!debugUserState||!debugUsername) return;
+  if(!confirm(`Delete the night of ${formatDate(date)} for user "${debugUsername}"?\n\nThis will remove the night entry and all its dance log entries. This cannot be undone.`)) return;
+
+  // Remove from the fetched user state
+  delete debugUserState.nights[date];
+  if(debugUserState.danceLog){
+    debugUserState.danceLog=debugUserState.danceLog.filter(e=>e.date!==date);
+  }
+
+  // If it's the admin's own data, also update the live state
+  if(debugUsername===currentUser){
+    delete state.nights[date];
+    if(state.danceLog) state.danceLog=state.danceLog.filter(e=>e.date!==date);
+    scheduleSave();
+  } else {
+    // Write directly to that user's record in Supabase
+    const r=await sbFetch(`/rest/v1/dances?username=eq.${enc(debugUsername)}`,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({data:debugUserState,updated_at:new Date().toISOString()})});
+    if(!r.ok){
+      alert('Failed to delete night from server. Please try again.');
+      return;
+    }
+  }
+
+  // Update the night dropdown and clear output
+  const dateSel=document.getElementById('debug-date-select');
+  const status=document.getElementById('debug-status');
+  const out=document.getElementById('debug-night-output');
+  if(dateSel){
+    const nights=Object.keys(debugUserState.nights||{}).sort((a,b)=>b.localeCompare(a));
+    dateSel.innerHTML='<option value="">— Select a night —</option>'+nights.map(d=>`<option value="${d}">${formatDate(d)} (${d})</option>`).join('');
+  }
+  if(out) out.innerHTML=`<div class="empty">Night of ${formatDate(date)} deleted successfully.</div>`;
+  if(status) status.textContent=`Viewing: ${esc(debugUsername)} · ${Object.keys(debugUserState.nights||{}).length} night(s) remaining.`;
+}
 
 tryAutoLogin();
 
