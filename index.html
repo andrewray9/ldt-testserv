@@ -653,7 +653,7 @@
     .ndm-hlitem.r1 .ndm-hllabel{color:#5a3a0a;}
     .ndm-dpills{display:flex;flex-wrap:wrap;gap:5px;}
     .ndm-dpill{font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px;background:var(--bg2);color:var(--t2);border:0.5px solid var(--b3);}
-    .ndm-delrow{display:flex;justify-content:flex-end;margin-top:1.25rem;padding-top:1rem;border-top:0.5px solid var(--b3);}
+    .ndm-delrow{display:flex;justify-content:flex-end;gap:8px;margin-top:1.25rem;padding-top:1rem;border-top:0.5px solid var(--b3);flex-wrap:wrap;}
     .friend-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:2000;padding:1rem;}
     .friend-modal{background:var(--bg);border-radius:var(--radius-lg);padding:2rem;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
     .friend-modal h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:6px;}
@@ -2683,7 +2683,7 @@ function enterGuestMode(){
   try { applyTabVisibility(); } catch(e){ console.warn('applyTabVisibility error', e); }
   try { renderBank(); } catch(e){ console.warn('renderBank error', e); }
   try { renderCustomListPills(); } catch(e){ console.warn('renderCustomListPills error', e); }
-  try { switchTab('home'); } catch(e){ console.warn('switchTab error', e); }
+  try { switchTab('home', false, true); } catch(e){ console.warn('switchTab error', e); }
   hideSplash();
 }
 
@@ -2893,15 +2893,14 @@ async function tryAutoLogin() {
     console.warn('Guest data load error:', e);
   }
 
-  // Show the app in guest mode — hideSplash() is called inside enterGuestMode()
-  enterGuestMode();
-
+  // If there's no saved session, show guest mode immediately and stop.
   if (!savedUser || !token) {
+    enterGuestMode();
     return;
   }
 
-  // Silently attempt to restore the previous session in the background.
-  // The app is already visible and usable; this just upgrades to logged-in state.
+  // A saved session exists — keep the splash up a little longer so the home tab
+  // doesn't flash before we restore the user's last tab.
   try {
     const ok = await finishLogin(savedUser);
     if (ok) return;
@@ -2929,13 +2928,15 @@ async function tryAutoLogin() {
       }
     }
 
-    // Could not restore session — clear stale tokens, stay in guest mode
+    // Could not restore session — clear stale tokens, fall back to guest mode
     localStorage.removeItem('ld_user');
     localStorage.removeItem('sb_access_token');
     localStorage.removeItem('sb_refresh_token');
+    enterGuestMode();
   } catch(e) {
     console.warn('Background login error:', e);
-    // App already visible in guest mode — nothing else needed
+    // Fall back to guest mode so the app is usable
+    enterGuestMode();
   }
 }
 // ---- Tabs ----
@@ -2963,7 +2964,7 @@ let swipeHistory=['home'];   // stack of visited tabs
 let swipeForward=[];         // forward stack (filled when going back)
 let currentTabName='home';
 
-function switchTab(tab,_fromSwipe=false){
+function switchTab(tab,_fromSwipe=false,_noSave=false){
   if(!_fromSwipe){
     // Normal navigation: push current onto history, clear forward stack
     if(currentTabName && currentTabName!==tab){
@@ -2989,7 +2990,7 @@ function switchTab(tab,_fromSwipe=false){
   requestAnimationFrame(()=>{
     requestAnimationFrame(()=>{ el.classList.add('visible'); });
   });
-  localStorage.setItem('ld_active_tab', tab);
+  if(!_noSave) localStorage.setItem('ld_active_tab', tab);
   if(tab==='night') renderNight();
   if(tab==='drewsnight') renderDrewsNight();
   if(tab==='log'){renderHistoryStats();renderTop5();renderLog();renderDJAnalytics();renderTFDJFavs();}
@@ -4358,7 +4359,6 @@ function renderLog(){
 
     return `<div class="nlc" onclick="openNightModal('${date}')">
       <div class="nlc-head" style="background:${grad};">
-        <button class="nlc-color-btn" onclick="event.stopPropagation();openNightColorPicker('${date}',this)" title="Change card color">🎨</button>
         <div class="nlc-date">${formatDate(date)}</div>
         <div class="nlc-meta">${metaParts.join(' \xb7 ')}</div>
       </div>
@@ -4414,16 +4414,18 @@ function openNightModal(date){
     : `<div style="font-size:13px;color:var(--t3);">No dances recorded for this night.</div>`;
 
   const html=`<div class="ndm-overlay" id="ndm-overlay" onclick="if(event.target===this)closeNightModal()">
-    <div class="ndm-modal">
+    <div class="ndm-modal" id="ndm-modal-card">
       <div class="ndm-mhead" style="background:${grad};">
-        <button class="ndm-close" onclick="closeNightModal()">&#215;</button>
+        <button class="ndm-close ndm-ui-only" onclick="closeNightModal()">&#215;</button>
         <div class="ndm-mdate">${formatDate(date)}</div>
         ${metaParts.length?`<div class="ndm-mmeta">${metaParts.join(' \xb7 ')}</div>`:''}
       </div>
       <div class="ndm-mbody">
         ${hlSection}
         ${danceSection}
-        <div class="ndm-delrow">
+        <div class="ndm-delrow ndm-ui-only">
+          <button class="btn xs" style="background:var(--bg2);border:0.5px solid var(--b2);color:var(--t2);" onclick="openNightColorPicker('${date}',this)">🎨 Card Color</button>
+          <button class="btn xs" style="background:var(--bg2);border:0.5px solid var(--b2);color:var(--t2);" onclick="saveNightCardPng('${date}')">💾 Save PNG</button>
           <button class="btn xs danger" onclick="deleteNight('${date}',event);closeNightModal();">Delete night</button>
         </div>
       </div>
@@ -4446,10 +4448,10 @@ function openNightColorPicker(date, btn){
   popup.className='nlc-color-popup';
   popup.innerHTML=`<div class="nlc-color-popup-title">Card Color</div><div class="nlc-color-swatches">${swatches}</div><div class="nlc-color-popup-footer"><button class="nlc-color-reset" onclick="resetNightColor('${date}')">Reset Default</button></div>`;
   document.body.appendChild(popup);
-  // Position popup near button
   const rect=btn.getBoundingClientRect();
-  const pw=220, ph=200;
-  let top=rect.bottom+6, left=rect.right-pw;
+  const pw=220, ph=220;
+  let top=rect.bottom+6, left=rect.left;
+  if(left+pw>window.innerWidth-8) left=window.innerWidth-pw-8;
   if(left<8) left=8;
   if(top+ph>window.innerHeight-8) top=rect.top-ph-6;
   popup.style.top=top+'px';
@@ -4466,6 +4468,9 @@ async function applyNightColor(date, grad){
   if(!state.nightColors) state.nightColors={};
   state.nightColors[date]=grad;
   closeNightColorPopup();
+  // Update the modal header live
+  const mhead=document.querySelector('#ndm-modal-card .ndm-mhead');
+  if(mhead) mhead.style.background=grad;
   await scheduleSave();
   renderLog();
 }
@@ -4473,8 +4478,91 @@ async function applyNightColor(date, grad){
 async function resetNightColor(date){
   if(state.nightColors) delete state.nightColors[date];
   closeNightColorPopup();
+  const mhead=document.querySelector('#ndm-modal-card .ndm-mhead');
+  if(mhead) mhead.style.background=DEFAULT_NIGHT_GRAD;
   await scheduleSave();
   renderLog();
+}
+
+async function saveNightCardPng(date){
+  const modal=document.getElementById('ndm-modal-card');
+  if(!modal) return;
+  // Hide UI-only elements
+  const uiEls=modal.querySelectorAll('.ndm-ui-only');
+  uiEls.forEach(el=>el.style.visibility='hidden');
+  // Temporarily remove max-height and overflow so html2canvas captures full content
+  const prevMaxHeight=modal.style.maxHeight;
+  const prevOverflow=modal.style.overflowY;
+  modal.style.maxHeight='none';
+  modal.style.overflowY='visible';
+  try{
+    // Dynamically load html2canvas if not present
+    if(!window.html2canvas){
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+        s.onload=res; s.onerror=rej;
+        document.head.appendChild(s);
+      });
+    }
+    const fullCanvas=await html2canvas(modal,{
+      backgroundColor:null,
+      scale:2,
+      useCORS:true,
+      logging:false,
+      width:modal.scrollWidth,
+      height:modal.scrollHeight,
+      windowWidth:modal.scrollWidth,
+      windowHeight:modal.scrollHeight
+    });
+    // Crop to actual content — trim transparent/white rows from bottom
+    const ctx=fullCanvas.getContext('2d');
+    const imgData=ctx.getImageData(0,0,fullCanvas.width,fullCanvas.height);
+    const pixels=imgData.data;
+    let lastContentRow=0;
+    for(let y=fullCanvas.height-1;y>=0;y--){
+      let rowHasContent=false;
+      for(let x=0;x<fullCanvas.width;x++){
+        const idx=(y*fullCanvas.width+x)*4;
+        const a=pixels[idx+3];
+        const r=pixels[idx],g=pixels[idx+1],b=pixels[idx+2];
+        // Consider a pixel "content" if it's non-transparent and not pure white/near-white
+        if(a>10&&!(r>245&&g>245&&b>245)){rowHasContent=true;break;}
+      }
+      if(rowHasContent){lastContentRow=y;break;}
+    }
+    const cropHeight=Math.min(lastContentRow+20,fullCanvas.height); // 10px bottom padding (20 at scale:2)
+    const croppedCanvas=document.createElement('canvas');
+    croppedCanvas.width=fullCanvas.width;
+    croppedCanvas.height=cropHeight;
+    const croppedCtx=croppedCanvas.getContext('2d');
+    // Apply rounded corners via clipping path (radius=12px * scale:2 = 24)
+    const radius=24;
+    const w=fullCanvas.width,h=cropHeight;
+    croppedCtx.beginPath();
+    croppedCtx.moveTo(radius,0);
+    croppedCtx.lineTo(w-radius,0);
+    croppedCtx.quadraticCurveTo(w,0,w,radius);
+    croppedCtx.lineTo(w,h-radius);
+    croppedCtx.quadraticCurveTo(w,h,w-radius,h);
+    croppedCtx.lineTo(radius,h);
+    croppedCtx.quadraticCurveTo(0,h,0,h-radius);
+    croppedCtx.lineTo(0,radius);
+    croppedCtx.quadraticCurveTo(0,0,radius,0);
+    croppedCtx.closePath();
+    croppedCtx.clip();
+    croppedCtx.drawImage(fullCanvas,0,0);
+    const link=document.createElement('a');
+    link.download=`night-${date}.png`;
+    link.href=croppedCanvas.toDataURL('image/png');
+    link.click();
+  } catch(e){
+    alert('Could not save PNG. Please try again.');
+  } finally {
+    uiEls.forEach(el=>el.style.visibility='');
+    modal.style.maxHeight=prevMaxHeight;
+    modal.style.overflowY=prevOverflow;
+  }
 }
 
 // ---- DJ Freestyle (manual entry) ----
