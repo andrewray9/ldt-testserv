@@ -44,6 +44,9 @@
 
     /* AUTH */
     .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem 1rem;}
+    /* Guest mode: auth modal overlays the app */
+    .auth-modal-overlay{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;padding:1rem;}
+    .auth-modal-wrap{width:100%;max-width:400px;}
     .auth-card{background:var(--bg);border:0.5px solid var(--b3);border-radius:var(--radius-lg);padding:2.5rem 2rem;width:100%;max-width:380px;}
     .auth-card h1{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:4px;}
     .auth-card .sub{font-size:13px;color:var(--t2);margin-bottom:2rem;}
@@ -58,7 +61,7 @@
     .auth-error{font-size:13px;color:var(--red-text);background:var(--red-bg);border:0.5px solid var(--red-border);border-radius:var(--radius-md);padding:8px 12px;margin-bottom:14px;display:none;}
 
     /* APP SHELL */
-    .app{max-width:880px;margin:0 auto;padding:2rem 1.25rem 4rem;display:none;}
+    .app{max-width:880px;margin:0 auto;padding:2rem 1.25rem 4rem;display:block;}
     .app-header{display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap;}
     h1{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;letter-spacing:-0.5px;flex:1;}
     .user-pill{font-size:12px;color:var(--t2);background:var(--bg2);border:0.5px solid var(--b3);border-radius:20px;padding:4px 12px;display:flex;align-items:center;gap:8px;}
@@ -735,47 +738,15 @@
 })();
 </script>
 
-<!-- ios-haptics library (https://github.com/tijnjh/ios-haptics) -->
 <script>
-// Inline implementation of ios-haptics by tijnjh
-// Uses <input type="checkbox" switch /> for iOS Safari haptic feedback
-// Falls back to navigator.vibrate() on Android
+// 1-in-18 chance of alternate splash screen
 (function(){
-  function triggerSwitch(){
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.setAttribute('switch', '');
-    cb.style.cssText = 'position:fixed;opacity:0;pointer-events:none;width:1px;height:1px;top:-100px;left:-100px;';
-    document.body.appendChild(cb);
-    cb.checked = !cb.checked;
-    requestAnimationFrame(function(){
-      requestAnimationFrame(function(){
-        document.body.removeChild(cb);
-      });
-    });
+  if(Math.random() < 1/9){
+    var img = document.getElementById('splash-logo-img');
+    var title = document.getElementById('splash-title-text');
+    if(img) img.src = 'https://i.imgur.com/WNiUH0Z.png';
+    if(title) title.textContent = 'Line Dance Tracker';
   }
-
-  function haptic(){
-    if(navigator.vibrate){ navigator.vibrate(10); return; }
-    triggerSwitch();
-  }
-
-  // confirm: two rapid haptics
-  haptic.confirm = function(){
-    if(navigator.vibrate){ navigator.vibrate([10,50,10]); return; }
-    triggerSwitch();
-    setTimeout(triggerSwitch, 80);
-  };
-
-  // error: three rapid haptics
-  haptic.error = function(){
-    if(navigator.vibrate){ navigator.vibrate([10,40,10,40,10]); return; }
-    triggerSwitch();
-    setTimeout(triggerSwitch, 80);
-    setTimeout(triggerSwitch, 160);
-  };
-
-  window.haptic = haptic;
 })();
 </script>
 
@@ -881,8 +852,9 @@
   <div class="friend-modal" id="friend-detail-content"></div>
 </div>
 
-<!-- AUTH -->
-<div class="auth-wrap" id="auth-wrap">
+<!-- AUTH MODAL (shown as overlay when guest tries a write action, or on manual sign-in) -->
+<div class="auth-modal-overlay" id="auth-wrap" style="display:none">
+  <div class="auth-modal-wrap">
   <div class="auth-card">
     <h1>Line Dance Tracker</h1>
     <p class="sub" id="auth-sub">Sign in to sync your dances across devices</p>
@@ -909,6 +881,10 @@
     </div>
     <button class="auth-btn" id="auth-btn" onclick="authSubmit()">Sign in</button>
     <div class="auth-toggle" id="auth-toggle">No account? <span onclick="toggleAuthMode()">Create one</span></div>
+    <div style="text-align:center;margin-top:1rem;" id="auth-dismiss-row">
+      <button onclick="dismissAuthModal()" style="background:none;border:none;font-size:13px;color:var(--t2);cursor:pointer;text-decoration:underline;font-family:'DM Sans',sans-serif;">Continue browsing as guest</button>
+    </div>
+  </div>
   </div>
 </div>
 
@@ -918,16 +894,19 @@
     <h1>Line Dance Tracker</h1>
     <div style="display:flex;align-items:center;gap:8px;">
       <button class="hamburger-btn" id="hamburger-btn" onclick="switchTab('home');mobileSwitch('home')" aria-label="Home" style="font-size:18px;padding:6px 10px;line-height:1;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display:block;color:var(--t1);"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></button>
-      <div class="user-pill">
+      <!-- Guest sign-in button (shown when not logged in) -->
+      <button id="guest-signin-btn" onclick="openAuthModal('signin')" style="font-size:13px;font-weight:500;padding:5px 14px;border:1.5px solid var(--b2);border-radius:20px;background:var(--bg2);color:var(--t1);cursor:pointer;font-family:'DM Sans',sans-serif;display:none;">Sign in</button>
+      <!-- User pill (shown when logged in) -->
+      <div class="user-pill" id="user-pill-wrap" style="display:none;">
         <span id="user-label"></span>
         <span class="admin-badge" id="admin-badge" style="display:none">Admin</span>
         <span class="mod-badge" id="mod-badge" style="display:none">Mod</span>
-        <button class="logout" onclick="if(confirm('Sign out?')){if(typeof haptic!=='undefined')haptic.error();logout();}" title="Sign out">&#215;</button>
+        <button class="logout" onclick="if(confirm('Sign out?'))logout()" title="Sign out">&#215;</button>
       </div>
     </div>
   </div>
   <p class="subtitle">Track your dances, your progress, and your nights out</p>
-  <div class="sync-bar"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">Not synced</span></div>
+  <div class="sync-bar"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">Browsing as guest — <button onclick="openAuthModal('signin')" style="background:none;border:none;font-size:12px;color:var(--t1);cursor:pointer;font-weight:500;text-decoration:underline;font-family:'DM Sans',sans-serif;padding:0;">sign in</button> to save your data</span></div>
 
   <!-- MOBILE MENU -->
   <div class="mobile-menu-overlay" id="mobile-menu-overlay" onclick="closeMobileMenu()"></div>
@@ -1722,7 +1701,7 @@ const SUPABASE_URL='https://chuvnwaqtgyqrwdpzpfx.supabase.co';
 const SUPABASE_KEY='sb_publishable_1k44O83Uhj5OABd-VB_wLQ_fFJb1woU';
 const ADMIN_USER='drew';
 
-let currentUser=null,isAdmin=false,isMod=false;
+let currentUser=null,isAdmin=false,isMod=false,isGuest=true;
 let state={know:[],learn:[],nights:{},djFreestyles:{},favorites:[],favoriteFriends:[]};
 let drewDJFreestyles={}; // Drew's DJ freestyle data, loaded for all users
 let bank=[];
@@ -1787,7 +1766,13 @@ function setSyncStatus(t,l){
   const dot=document.getElementById('sync-dot');
   const lbl=document.getElementById('sync-label');
   if(dot) dot.className='sync-dot '+t;
-  if(lbl) lbl.textContent=l;
+  if(lbl){
+    if(isGuest){
+      lbl.innerHTML='Browsing as guest — <button onclick="openAuthModal(\'signin\')" style="background:none;border:none;font-size:12px;color:var(--t1);cursor:pointer;font-weight:500;text-decoration:underline;font-family:\'DM Sans\',sans-serif;padding:0;">sign in</button> to save your data';
+    } else {
+      lbl.textContent=l;
+    }
+  }
 }
 
 // Retry queue — holds the most recent failed state snapshot.
@@ -2091,7 +2076,6 @@ async function saveCustomList(){
 
 async function deleteCustomList(id){
   if(!confirm('Delete this custom list?')) return;
-  if(typeof haptic!=='undefined') haptic.error();
   customLists=customLists.filter(l=>l.id!==id);
   // If the deleted list was being viewed, reset bank view
   if(bankView==='custom:'+id) setBankView('all',document.getElementById('bank-view-all-pill'));
@@ -2603,16 +2587,9 @@ async function authSubmit() {
     if (!state.favoriteFriends) state.favoriteFriends = [];
     if (!state.drewsNights) state.drewsNights = {};
 
-    await loadBank();
-    await loadPicks();
+    // Load any data not already fetched in guest mode
     await loadSubmissions();
-    await loadFriendCards();
-    await loadDJList();
     await loadModList();
-    await loadHomeConfig();
-    await loadCustomLists();
-    await loadDrewDJFreestyles();
-    await clLoad();
     enterApp(finalUsername);
 
   } catch (err) {
@@ -2622,7 +2599,58 @@ async function authSubmit() {
   }
 }
 
+function enterGuestMode(){
+  isGuest=true;
+  currentUser=null;
+  function _hide(id){ const el=document.getElementById(id); if(el) el.style.display='none'; }
+  function _show(id,v){ const el=document.getElementById(id); if(el) el.style.display=(v||''); }
+  _hide('auth-wrap');
+  _show('app','block');
+  showAppFooter();
+  // Show "Sign in" button, hide user pill
+  _show('guest-signin-btn','');
+  _hide('user-pill-wrap');
+  // Hide logged-in-only tabs
+  _hide('admin-tab');
+  _hide('submissions-tab');
+  _hide('editpeople-tab');
+  _hide('debug-tab');
+  _hide('dj-tab-btn');
+  _hide('drewsnight-tab-btn');
+  _hide('picks-admin-panel');
+  _hide('mobile-admin-section');
+  try { applyTabVisibility(); } catch(e){ console.warn('applyTabVisibility error', e); }
+  try { renderBank(); } catch(e){ console.warn('renderBank error', e); }
+  try { renderCustomListPills(); } catch(e){ console.warn('renderCustomListPills error', e); }
+  try { switchTab('home'); } catch(e){ console.warn('switchTab error', e); }
+  hideSplash();
+}
+
+function openAuthModal(mode){
+  // mode: 'signin' or 'signup'
+  if(mode==='signup') { if(!isSignUp) toggleAuthMode(); }
+  else { if(isSignUp) toggleAuthMode(); }
+  // Hide the dismiss button only when this is triggered by a write-action gate
+  // (it's always shown; we keep it visible so users can cancel)
+  document.getElementById('auth-dismiss-row').style.display='';
+  document.getElementById('auth-wrap').style.display='flex';
+}
+
+function dismissAuthModal(){
+  document.getElementById('auth-wrap').style.display='none';
+}
+
+// Call this whenever a guest tries to do something that requires being logged in
+function requireLogin(message){
+  if(!isGuest) return false; // already logged in
+  const sub=document.getElementById('auth-sub');
+  if(sub) sub.textContent = message || 'Sign in to save your data across devices';
+  openAuthModal('signin');
+  return true; // blocked — caller should stop
+}
+
 function enterApp(username){
+  isGuest=false;
   currentUser=username;isAdmin=username===ADMIN_USER;
   // Check if user is a moderator (loaded from modList)
   isMod=isAdmin||modList.includes(username);
@@ -2633,7 +2661,15 @@ function enterApp(username){
   document.getElementById('app').style.display='block';
   showAppFooter();
   clMaybeShowModal();
+  // Show user pill, hide guest sign-in button
+  const guestBtn=document.getElementById('guest-signin-btn');
+  const userPill=document.getElementById('user-pill-wrap');
+  if(guestBtn) guestBtn.style.display='none';
+  if(userPill) userPill.style.display='';
   document.getElementById('user-label').textContent=username;
+  // Update sync bar to show normal logged-in state
+  const lbl=document.getElementById('sync-label');
+  if(lbl) lbl.textContent='Loading…';
   document.getElementById('admin-badge').style.display=isAdmin?'inline':'none';
   const modBadgeEl=document.getElementById('mod-badge');
   if(modBadgeEl) modBadgeEl.style.display=(!isAdmin&&isMod)?'inline':'none';
@@ -2690,6 +2726,7 @@ function logout() {
   friendCardSyncPending=false;
   currentUser = null;
   isAdmin = false;
+  isGuest = true;
   localStorage.removeItem('ld_user');
   localStorage.removeItem('sb_access_token');
   localStorage.removeItem('sb_refresh_token');
@@ -2701,8 +2738,6 @@ function logout() {
   bank = []; drewPicks = []; submissions = []; friendCards = []; favoriteFriends = [];
   friendsFavFilterActive = false;
   
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('auth-wrap').style.display = 'flex';
   // Re-fill remembered credentials if Remember Me is active
   const remMe = localStorage.getItem('ld_remember_me') === '1';
   document.getElementById('auth-email').value = remMe ? (localStorage.getItem('ld_remembered_email') || '') : '';
@@ -2711,6 +2746,18 @@ function logout() {
   document.getElementById('auth-username').value = '';
   document.getElementById('auth-btn').disabled = false;
   document.getElementById('auth-btn').textContent = 'Sign in';
+
+  // Reload public data and go back to guest mode
+  (async()=>{
+    await loadBank();
+    await loadPicks();
+    await loadFriendCards();
+    await loadDJList();
+    await loadHomeConfig();
+    await loadCustomLists();
+    await loadDrewDJFreestyles();
+    enterGuestMode();
+  })();
 }
 
 function hideSplash(){
@@ -2753,11 +2800,6 @@ async function tryAutoLogin() {
 
   const savedUser = localStorage.getItem('ld_user');
   const token = localStorage.getItem('sb_access_token');
-  
-  if (!savedUser || !token) {
-    hideSplash();
-    return;
-  }
 
   async function finishLogin(user) {
     const r = await sbFetch(`/rest/v1/dances?username=eq.${enc(user)}&select=data,updated_at`);
@@ -2769,35 +2811,46 @@ async function tryAutoLogin() {
       if (!state.favoriteFriends) state.favoriteFriends = [];
       if (!state.drewsNights) state.drewsNights = {};
       state.__cloudUpdatedAt = r.data[0].updated_at || null;
-      await loadBank();
-      await loadPicks();
-      await loadSubmissions();
-      await loadFriendCards();
-      await loadDJList();
-      await loadModList();
-      await loadHomeConfig();
-      await loadCustomLists();
-      await loadDrewDJFreestyles();
-      await clLoad();
       enterApp(user);
       return true;
     }
     return false;
   }
 
+  // Always load public data first so the app is usable as a guest.
+  // Wrapped in try/catch so a network error never leaves the splash stuck.
   try {
-    // Try with current token first
+    await loadBank();
+    await loadPicks();
+    await loadFriendCards();
+    await loadDJList();
+    await loadHomeConfig();
+    await loadCustomLists();
+    await loadDrewDJFreestyles();
+    await clLoad();
+  } catch(e) {
+    console.warn('Guest data load error:', e);
+  }
+
+  // Show the app in guest mode — hideSplash() is called inside enterGuestMode()
+  enterGuestMode();
+
+  if (!savedUser || !token) {
+    return;
+  }
+
+  // Silently attempt to restore the previous session in the background.
+  // The app is already visible and usable; this just upgrades to logged-in state.
+  try {
     const ok = await finishLogin(savedUser);
     if (ok) return;
 
-    // Token may be expired — try refreshing it
     const refreshed = await tryRefreshToken();
     if (refreshed) {
       const ok2 = await finishLogin(savedUser);
       if (ok2) return;
     }
 
-    // If remember-me is set, silently re-authenticate with stored credentials
     if (rememberMe && rememberedEmail && rememberedPassword) {
       const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
         method: 'POST',
@@ -2815,12 +2868,13 @@ async function tryAutoLogin() {
       }
     }
 
-    logout();
-    hideSplash();
+    // Could not restore session — clear stale tokens, stay in guest mode
+    localStorage.removeItem('ld_user');
+    localStorage.removeItem('sb_access_token');
+    localStorage.removeItem('sb_refresh_token');
   } catch(e) {
-    // Network error during login — cannot load data without cloud connection
-    logout();
-    hideSplash();
+    console.warn('Background login error:', e);
+    // App already visible in guest mode — nothing else needed
   }
 }
 // ---- Tabs ----
@@ -3160,6 +3214,7 @@ function toggleBankItem(id){
   if(el) el.classList.toggle('open');
 }
 function addFromBankById(type,bankId){
+  if(requireLogin('Sign in to add dances to your list')) return;
   const d=bank.find(x=>x.id===bankId);if(!d)return;
   const name=d.name;
   const other=type==='know'?'learn':'know';
@@ -3170,12 +3225,14 @@ function addFromBankById(type,bankId){
   if(bankFavFilterActive) renderBank();
 }
 function addFromBank(type,name){
+  if(requireLogin('Sign in to add dances to your list')) return;
   const other=type==='know'?'learn':'know';
   state[other]=state[other].filter(d=>d.name.toLowerCase()!==name.toLowerCase());
   if(!isInList(name,type)) state[type].push({id:Date.now()+'',name,added:new Date().toISOString()});
   renderBank();renderList('know');renderList('learn');scheduleSave();syncMyCard();
 }
 function removeFromList(type,name){
+  if(requireLogin('Sign in to manage your dance list')) return;
   state[type]=state[type].filter(d=>d.name.toLowerCase()!==name.toLowerCase());
   renderBank();renderList('know');renderList('learn');scheduleSave();syncMyCard();
 }
@@ -3221,7 +3278,6 @@ function adminAddDJ(){
 function adminRemoveDJ(name){
   if(!isAdmin)return;
   if(!confirm(`Remove "${name}" from the DJ list?`))return;
-  if(typeof haptic!=='undefined') haptic.error();
   djList=djList.filter(d=>d!==name);
   saveDJListToCloud();renderAdminDJList();renderDJDropdown();
 }
@@ -3256,7 +3312,6 @@ function adminAddDance(){
 }
 function adminRemoveDance(id){
   if(!isAdmin)return;if(!confirm('Remove this dance from the bank?'))return;
-  if(typeof haptic!=='undefined') haptic.error();
   bank=bank.filter(d=>d.id!==id);saveBankToCloud();renderAdminBank();renderBank();
 }
 function toggleEditForm(id){
@@ -3463,7 +3518,6 @@ async function adminAddMod(){
 async function adminRemoveMod(username){
   if(!isAdmin) return;
   if(!confirm(`Remove mod role from "${username}"?`)) return;
-  if(typeof haptic!=='undefined') haptic.error();
   modList=modList.filter(m=>m!==username);
   await saveModListToCloud();
   renderAdminModList();
@@ -3600,7 +3654,6 @@ async function modDeleteDance(id){
   if(!isMod) return;
   const d=bank.find(b=>b.id===id);
   if(!d||!confirm(`Delete "${d.name}" from the bank?`)) return;
-  if(typeof haptic!=='undefined') haptic.error();
   bank=bank.filter(b=>b.id!==id);
   await saveBankToCloud();
   renderBank();renderModBank();
@@ -3627,6 +3680,7 @@ function syncMyCard(){
   saveFriendCardsToCloud();
 }
 async function addDance(type){
+  if(requireLogin('Sign in to add dances to your list')) return;
   const inp=document.getElementById(type+'-input');
   const name=inp.value.trim();if(!name)return;
   const newDance={id:Date.now()+'',name,added:new Date().toISOString()};
@@ -3651,7 +3705,7 @@ async function addDance(type){
   }
 }
 async function removeDance(type,id){
-  if(typeof haptic!=='undefined') haptic.error();
+  if(requireLogin('Sign in to manage your dance list')) return;
   state[type]=state[type].filter(d=>d.id!==id);
   if(type==='know') state.favorites=(state.favorites||[]).filter(f=>f!==id);
   renderList(type);renderBank();
@@ -3659,6 +3713,7 @@ async function removeDance(type,id){
   if(ok) syncMyCard();
 }
 async function moveToKnow(id){
+  if(requireLogin('Sign in to track your progress')) return;
   const d=state.learn.find(x=>x.id===id);if(!d)return;
   state.learn=state.learn.filter(x=>x.id!==id);state.know.push({...d});
   renderList('learn');renderList('know');renderBank();
@@ -3666,6 +3721,7 @@ async function moveToKnow(id){
   if(ok) syncMyCard();
 }
 async function toggleFav(id){
+  if(requireLogin('Sign in to save your favorites')) return;
   if(!state.favorites) state.favorites=[];
   if(isFav(id)) state.favorites=state.favorites.filter(f=>f!==id);
   else state.favorites.push(id);
@@ -3769,6 +3825,7 @@ function renderDidList(){
   el.innerHTML=dances.map(d=>`<div class="did-item">${esc(d.name)}<button class="remove" onclick="togglePick('${d.id}')" title="Remove">&#215;</button></div>`).join('');
 }
 async function togglePick(id){
+  if(requireLogin('Sign in to log your night')) return;
   if(nightSelections[id]){
     delete nightSelections[id];
     if(state.danceLog){
@@ -3776,7 +3833,6 @@ async function togglePick(id){
     }
   } else {
     nightSelections[id]=true;
-    if(typeof haptic==='function') haptic.confirm();
     const dance=state.know.find(d=>d.id===id);
     const dj=document.getElementById('night-dj').value.trim();
     const now=new Date();
@@ -3823,12 +3879,14 @@ async function commitNightSave(){
   else showNightSaveSuccess();
 }
 function scheduleNightSave(){
+  if(isGuest) return; // guest — no-op, picks are blocked at togglePick level
   clearTimeout(nightSaveTimeout);
   nightSaveTimeout=setTimeout(commitNightSave,200);
 }
 
 // ---- Highlights ----
 function openHighlightsModal(){
+  if(requireLogin('Sign in to save your night highlights')) return;
   const dances=state.know.filter(d=>nightSelections[d.id]);
   if(!dances.length){alert('Select some dances for tonight first!');return;}
   document.getElementById('highlights-modal-date').textContent=formatDate(selectedDate);
@@ -3987,7 +4045,6 @@ function toggleDrewsPick(id){
     }
   } else {
     drewsNightSelections[id]=true;
-    if(typeof haptic==='function') haptic.confirm();
     const dance=state.know.find(d=>d.id===id);
     const dj=document.getElementById('drewsnight-dj')?.value.trim()||'';
     const now=new Date();
@@ -4011,7 +4068,6 @@ function toggleDrewsNotPerf(id){
     }
   } else {
     drewsNotPerfSelections[id]=true;
-    if(typeof haptic==='function') haptic.confirm();
     const dance=bank.find(d=>d.id===id);
     const dj=document.getElementById('drewsnight-dj')?.value.trim()||'';
     const now=new Date();
@@ -4177,7 +4233,6 @@ function renderTop5(){
 function deleteNight(date,e){
   e.stopPropagation();
   if(!confirm(`Delete the night of ${formatDate(date)}? This cannot be undone.`))return;
-  if(typeof haptic!=='undefined') haptic.error();
   delete state.nights[date];
   // Remove all log entries for this date
   if(state.danceLog){
@@ -4288,7 +4343,6 @@ function toggleDJSessions(djName){
 }
 function djDeleteSession(djName,sessionId){
   if(!confirm('Delete this session?'))return;
-  if(typeof haptic!=='undefined') haptic.error();
   const arr=state.djFreestyles[djName];
   if(!arr)return;
   state.djFreestyles[djName]=arr.filter(s=>(s.id||'')!==sessionId);
@@ -4519,6 +4573,7 @@ let friendsFavFilterActive=false; // whether to show only favorited friends
 function myCard(){return friendCards.find(c=>c.username===currentUser)||null;}
 
 function openFriendSetup(editMode=false){
+  if(requireLogin('Sign in to create your friend card')) return;
   const card=myCard();
   document.getElementById('fc-display-name').value=card?card.displayName:'';
   fcPickSelections=card?[...card.favs]:[];
@@ -4601,6 +4656,7 @@ function toggleFcPick(id){
   renderFcPickList();
 }
 function saveFriendCard(){
+  if(requireLogin('Sign in to create your friend card')) return;
   const displayName=document.getElementById('fc-display-name').value.trim();
   if(!displayName){alert('Please enter a display name.');return;}
   // Store both the id (for drag-reorder ownership) and the resolved name
@@ -4857,6 +4913,7 @@ function openSuggestModal(){
 }
 function closeSuggestModal(){document.getElementById('suggest-modal').style.display='none';}
 function submitSuggestion(){
+  if(requireLogin('Sign in to suggest a dance')) return;
   const name=document.getElementById('suggest-name').value.trim();
   const notes=document.getElementById('suggest-notes').value.trim();
   const errEl=document.getElementById('suggest-error');
@@ -4885,6 +4942,7 @@ function openAppSuggestionModal(){
 }
 function closeAppSuggestionModal(){document.getElementById('app-suggestion-modal').style.display='none';}
 function submitAppSuggestion(){
+  if(requireLogin('Sign in to submit a suggestion')) return;
   const title=document.getElementById('app-suggestion-title').value.trim();
   const desc=document.getElementById('app-suggestion-desc').value.trim();
   const errEl=document.getElementById('app-suggestion-error');
@@ -4909,6 +4967,7 @@ function openBugModal(){
 }
 function closeBugModal(){document.getElementById('bug-modal').style.display='none';}
 function submitBugReport(){
+  if(requireLogin('Sign in to report a bug')) return;
   const title=document.getElementById('bug-title').value.trim();
   const desc=document.getElementById('bug-desc').value.trim();
   const errEl=document.getElementById('bug-error');
@@ -4998,7 +5057,6 @@ function updateSubmissionsBadge(){
   }
 }
 function dismissSubmission(id){
-  if(typeof haptic!=='undefined') haptic.error();
   submissions=submissions.filter(s=>s.id!==id);
   saveSubmissionsToCloud();renderSubmissions();updateSubmissionsBadge();
 }
@@ -5344,7 +5402,6 @@ function epRenderNights(){
 function epDeleteNight(date,e){
   e.stopPropagation();
   if(!confirm(`Delete night of ${formatDate(date)}?`))return;
-  if(typeof haptic!=='undefined') haptic.error();
   delete epTargetState.nights[date];
   epRenderNights();epSaveUserState();
 }
@@ -5381,7 +5438,6 @@ function epEditCardDisplayName(){
 }
 function epDeleteCard(){
   if(!confirm('Delete this user\'s friend card?'))return;
-  if(typeof haptic!=='undefined') haptic.error();
   const idx=friendCards.findIndex(c=>c.username===epTargetUsername);
   if(idx>=0){friendCards.splice(idx,1);saveFriendCardsToCloud();epRenderCard();}
 }
@@ -6750,7 +6806,6 @@ function renderDebugNight(){
 async function debugDeleteNight(date){
   if(!isAdmin||!debugUserState||!debugUsername) return;
   if(!confirm(`Delete the night of ${formatDate(date)} for user "${debugUsername}"?\n\nThis will remove the night entry and all its dance log entries. This cannot be undone.`)) return;
-  if(typeof haptic!=='undefined') haptic.error();
 
   // Remove from the fetched user state
   delete debugUserState.nights[date];
@@ -7224,6 +7279,7 @@ function recShowEmpty(msg) {
 }
 
 function recAddToLearn() {
+  if(requireLogin('Sign in to add dances to your learn list')) return;
   if (!recCurrentResult) return;
   const name = recCurrentResult.b.name;
   const already = (state.learn || []).some(d => d.name.toLowerCase() === name.toLowerCase());
@@ -7242,13 +7298,6 @@ function recAddToLearn() {
 // Expose for the skip button
 window.recAddToLearn = recAddToLearn;
 window.recRefresh = recRefresh;
-
-// Global haptic feedback wiring (ios-haptics library)
-// Single haptic fires on every button/interactive element click
-document.addEventListener('click', function(e){
-  var btn = e.target.closest('button, .tab, .mobile-tab, .home-card, .filter-pill, .sort-btn, .pick-item, .sp-dance-item, .cl-dance-check-item, .bank-item-head, .changelog-entry-head, .auth-btn, .fav-btn, .rec-btn-skip, .rec-btn-add, .footer-link, .footer-version, .admin-custom-list-head, .custom-list-pill');
-  if(btn && typeof haptic === 'function') haptic();
-}, true);
 
 tryAutoLogin();
 
@@ -7337,7 +7386,6 @@ async function clAddEntry() {
 
 async function clDeleteEntry(id) {
   if (!confirm('Delete this changelog entry?')) return;
-  if(typeof haptic!=='undefined') haptic.error();
   changelog = changelog.filter(e => e.id !== id);
   await clSave();
   clUpdateVersionUI();
