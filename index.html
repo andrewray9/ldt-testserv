@@ -91,6 +91,7 @@
     .tab.admin-tab{color:var(--amber-text);}
     .tab.mod-tab{color:var(--blue-text);}
     .tab[data-tab="submissions"].active,.tab[data-tab="admin"].active,.tab[data-tab="editpeople"].active{background:#FAEEDA;color:#633806;border-color:#FAC775;}
+    .tab[data-tab="adminanalytics"].active{background:#0f2027;color:#7dd3fc;border-color:#2c5364;}
     .tab[data-tab="modpanel"].active{background:#E6F1FB;color:#0C447C;border-color:#B5D4F4;}
     .tab[data-tab="feedback"].active{background:#F0FDF4;color:#166534;border-color:#86efac;}
     .tab[data-tab="changelog"].active{background:#F5F0FF;color:#5B21B6;border-color:#C4B5FD;}
@@ -1005,6 +1006,7 @@
     <button class="tab admin-tab" data-tab="editpeople" id="editpeople-tab" style="display:none" onclick="switchTab('editpeople')">&#9998; Edit People</button>
     <button class="tab mod-tab" data-tab="modpanel" id="modpanel-tab" style="display:none" onclick="switchTab('modpanel')"> Mod Panel</button>
     <button class="tab admin-tab" data-tab="debug" id="debug-tab" style="display:none" onclick="switchTab('debug')">Debug</button>
+    <button class="tab admin-tab" data-tab="adminanalytics" id="adminanalytics-tab" style="display:none" onclick="switchTab('adminanalytics')">&#128202; Analytics</button>
   </div>
 
   <!-- HOME -->
@@ -1095,6 +1097,12 @@
         <span class="home-card-desc">Inspect raw night data</span>
         <span class="home-card-arrow">→</span>
       </button>
+      <button class="home-card" id="home-card-adminanalytics" style="display:none;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);" onclick="switchTab('adminanalytics')">
+        <span class="home-card-icon">📊</span>
+        <span class="home-card-title">Admin Analytics</span>
+        <span class="home-card-desc">App-wide stats & insights</span>
+        <span class="home-card-arrow">→</span>
+      </button>
     </div>
   </div>
 
@@ -1104,6 +1112,7 @@
       <p class="section-note" style="margin-bottom:0">Browse all dances</p>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="btn sm" id="rec-toggle-btn" onclick="toggleRecWidget()" style="background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-border);">Need a Suggestion?</button>
+        <button class="btn sm" onclick="openSpotifyModal()" style="background:#1DB954;color:#fff;border-color:#1DB954;display:flex;align-items:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg> Playlist</button>
         <button class="btn sm info" onclick="openSuggestModal()">&#43; Suggest a Dance</button>
         <button class="btn sm" id="admin-create-list-btn" onclick="openCustomListModal()" style="display:none;background:var(--purple-bg);color:var(--purple-text);border-color:var(--purple-border);">&#9998; Create List</button>
       </div>
@@ -1313,8 +1322,8 @@
     <div id="dj-records-list"></div>
 
     <!-- SONG TIME HEATMAP -->
-    <div class="section-title" style="margin-top:2rem">🎵 Song Time Heatmap</div>
-    <p class="section-note">When Drew's songs are played throughout the night — click any point for details</p>
+    <div class="section-title" style="margin-top:2rem">Time Heatmap</div>
+    <p class="section-note">Songs are played throughout the night — click any point for details</p>
     <div id="tf-song-heatmap"></div>
 
     <!-- PERSONAL STATS DASHBOARD -->
@@ -1543,6 +1552,7 @@
           <button class="btn info" onclick="adminAddMod()">Add Mod</button>
         </div>
         <div id="admin-mod-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <div id="admin-mod-refresh-note" style="display:none;margin-top:10px;font-size:12px;color:var(--green-text);background:var(--green-bg);border:0.5px solid var(--green-border);border-radius:var(--radius-md);padding:8px 12px;"></div>
       </div>
     </div>
     <div class="admin-section-collapsible collapsed" id="admin-tab-visibility-section">
@@ -1630,6 +1640,44 @@
     </div>
     <div id="debug-status" style="font-size:13px;color:var(--t2);margin-bottom:1rem;"></div>
     <div id="debug-night-output"></div>
+  </div>
+
+  <!-- ADMIN ANALYTICS -->
+  <div id="tab-adminanalytics" class="section">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:1.5rem;">
+      <div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:4px;">Admin Analytics</h2>
+        <p style="font-size:13px;color:var(--t2);">App-wide stats across all users. Refreshed each time you visit.</p>
+      </div>
+      <button class="btn amber" onclick="renderAdminAnalytics()">&#8635; Refresh</button>
+    </div>
+    <div id="aa-loading" style="font-size:13px;color:var(--t2);padding:2rem 0;text-align:center;display:none;">Loading…</div>
+    <div id="aa-content" style="display:none;">
+      <!-- Top stat cards -->
+      <div class="section-title">Overview</div>
+      <div class="stats-grid" id="aa-stats-grid"></div>
+
+      <!-- User activity table -->
+      <div class="section-title" style="margin-top:1.5rem;">User Leaderboard</div>
+      <p style="font-size:12px;color:var(--t3);margin-bottom:.75rem;">Ranked by total dances known. Click a row to expand.</p>
+      <div id="aa-user-table"></div>
+
+      <!-- Top dances across all users -->
+      <div class="section-title" style="margin-top:1.5rem;">Most Known Dances (across all users)</div>
+      <div id="aa-top-dances"></div>
+
+      <!-- Most wanted to learn -->
+      <div class="section-title" style="margin-top:1.5rem;">Most Wanted to Learn</div>
+      <div id="aa-top-learn"></div>
+
+      <!-- Difficulty distribution -->
+      <div class="section-title" style="margin-top:1.5rem;">Bank: Difficulty Distribution</div>
+      <div id="aa-diff-bars"></div>
+
+      <!-- User activity over time -->
+      <div class="section-title" style="margin-top:1.5rem;">Most Active Nights (by # of users who logged that date)</div>
+      <div id="aa-top-nights"></div>
+    </div>
   </div>
 
   <!-- CHANGELOG SECTION -->
@@ -1768,6 +1816,7 @@ let drewPicks=[];
 let submissions=[]; // shared list of user-submitted dances not in bank
 let friendCards=[]; // shared list of friend profile cards
 let djList=[]; // shared list of DJs managed by admin
+let djColors={}; // admin-set default gradient per DJ name
 let modList=[]; // shared list of moderator usernames
 let homeConfig={}; // admin-configurable home card gradients
 let tabVisibilityConfig={}; // admin-configurable tab visibility per role
@@ -1789,6 +1838,7 @@ const TAB_VISIBILITY_REGISTRY=[
   {key:'editpeople',label:'Edit People',       tabId:'editpeople-tab',    homeCardId:null,                  mobileTabId:'mobile-tab-editpeople', alwaysFor:['admin'],roles:['mod']},
   {key:'drewsnight',label:"Night",             tabId:'drewsnight-tab-btn',homeCardId:'home-card-drewsnight',mobileTabId:'mobile-tab-drewsnight', alwaysFor:['admin'],roles:['mod']},
   {key:'debug',     label:'Debug',             tabId:'debug-tab',         homeCardId:'home-card-debug',     mobileTabId:'mobile-tab-debug',      alwaysFor:['admin'],roles:['mod']},
+  {key:'adminanalytics',label:'Admin Analytics',tabId:'adminanalytics-tab',homeCardId:'home-card-adminanalytics',mobileTabId:null,              alwaysFor:['admin'],roles:[]},
 ];
 let selectedDate='',nightSelections={};
 let drewsSelectedDate='',drewsNightSelections={},drewsNotPerfSelections={};
@@ -1832,12 +1882,57 @@ function setSyncStatus(t,l){
       lbl.textContent=l;
     }
   }
+  // Start polling when we have pending changes; stop when we don't
+  if(t==='error' && retryQueued){
+    startPendingPoll();
+  } else {
+    stopPendingPoll();
+  }
 }
 
 // Retry queue — holds the most recent failed state snapshot.
 // We only ever need the latest snapshot since each save sends the full state.
 let retryQueued = false;
 let retryInProgress = false;
+
+// Polling interval used when changes are pending and we're waiting to reconnect.
+// Every 300ms we attempt to flush the queue; on success we reload from cloud.
+let pendingPollInterval = null;
+
+function startPendingPoll(){
+  if(pendingPollInterval) return; // already running
+  pendingPollInterval = setInterval(async()=>{
+    if(!retryQueued || retryInProgress || !currentUser) return;
+    // Try a lightweight connectivity probe before a full flush
+    try{
+      const probe = await sbFetch(`/rest/v1/dances?username=eq.${enc(currentUser)}&select=username&limit=1`);
+      if(probe.ok){
+        stopPendingPoll();
+        await flushRetryQueue();
+        if(!retryQueued){
+          // Flush succeeded — wait briefly for DB propagation then reload
+          let blocker = document.getElementById('sync-blocker');
+          if(!blocker){
+            blocker = document.createElement('div');
+            blocker.id = 'sync-blocker';
+            blocker.style.cssText = 'position:fixed;inset:0;z-index:9999;cursor:wait;';
+            document.body.appendChild(blocker);
+          }
+          await new Promise(res => setTimeout(res, 500));
+          blocker.remove();
+          await refreshFromCloud();
+        } else {
+          // Still failing — resume polling
+          startPendingPoll();
+        }
+      }
+    }catch(e){ /* still offline, keep polling */ }
+  }, 300);
+}
+
+function stopPendingPoll(){
+  if(pendingPollInterval){ clearInterval(pendingPollInterval); pendingPollInterval = null; }
+}
 
 async function flushRetryQueue(){
   if(!retryQueued || retryInProgress || !currentUser) return;
@@ -1920,6 +2015,8 @@ async function saveToCloud(){
   if(!currentUser) return false;
   setSyncStatus('syncing','Syncing...');
   if(isAdmin) drewDJFreestyles=state.djFreestyles||{};
+  // Stamp joinedAt once on the very first save — never overwrite it
+  if(!state.joinedAt) state.joinedAt = new Date().toISOString();
   try{
     const r=await sbFetch(`/rest/v1/dances?username=eq.${enc(currentUser)}`,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({data:state,updated_at:new Date().toISOString()})});
     if(r.ok){
@@ -2035,13 +2132,13 @@ function renderCustomListDanceChecklist(){
   const el=document.getElementById('custom-list-dance-checklist');
   const countEl=document.getElementById('custom-list-selected-count');
   if(!el) return;
-  const q=(document.getElementById('custom-list-dance-search')?.value||'').toLowerCase();
+  const q=(document.getElementById('custom-list-dance-search')?.value||'');
   // Get currently selected IDs
   const editing=customListEditingId?customLists.find(l=>l.id===customListEditingId):null;
   // Selected set: use checkboxes already rendered if they exist, otherwise seed from editing
   const selected=getCustomListModalSelected();
   const sorted=[...bank].sort((a,b)=>a.name.localeCompare(b.name));
-  const filtered=q?sorted.filter(d=>d.name.toLowerCase().includes(q)):sorted;
+  const filtered=q?sorted.filter(d=>danceMatchesQuery(d, q)):sorted;
   if(!filtered.length){el.innerHTML=`<div style="font-size:13px;color:var(--t3);padding:8px 4px;">No dances match your search.</div>`;return;}
   el.innerHTML=filtered.map(d=>{
     const checked=selected.has(d.id);
@@ -2303,6 +2400,10 @@ async function saveFriendCardsToCloud(){
 async function loadDJList(){
   const r=await sbFetch(`/rest/v1/dances?username=eq.__djlist__&select=data`);
   djList=(r.ok&&r.data&&r.data.length>0)?(r.data[0].data.djs||[]):[];
+  djColors=(r.ok&&r.data&&r.data.length>0)?(r.data[0].data.djColors||{}):{}; 
+  // Re-populate any dropdowns that may already be in the DOM so the DJ list
+  // is never empty due to a load-order race between DJ data and the night tab.
+  try{ renderDJDropdown(); }catch(e){}
 }
 async function loadModList(){
   const r=await sbFetch(`/rest/v1/dances?username=eq.__modlist__&select=data`);
@@ -2334,9 +2435,9 @@ async function saveDJListToCloud(){
   setSyncStatus('syncing','Syncing...');
   const check=await sbFetch(`/rest/v1/dances?username=eq.__djlist__&select=username`);
   if(check.ok&&check.data&&check.data.length>0){
-    await sbFetch(`/rest/v1/dances?username=eq.__djlist__`,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({data:{djs:djList},updated_at:new Date().toISOString()})});
+    await sbFetch(`/rest/v1/dances?username=eq.__djlist__`,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({data:{djs:djList,djColors:djColors},updated_at:new Date().toISOString()})});
   } else {
-    await sbFetch('/rest/v1/dances',{method:'POST',prefer:'return=minimal',body:JSON.stringify({username:'__djlist__',password:'__djlist__',data:{djs:djList}})});
+    await sbFetch('/rest/v1/dances',{method:'POST',prefer:'return=minimal',body:JSON.stringify({username:'__djlist__',password:'__djlist__',data:{djs:djList,djColors:djColors}})});
   }
   setSyncStatus('synced','Synced');
 }
@@ -2376,6 +2477,7 @@ const HOME_CARD_DEFAULTS={
   'home-card-modpanel':    'linear-gradient(135deg,#3b82f6,#1d4ed8)',
   'home-card-changelog':   'linear-gradient(135deg,#7c3aed,#a855f7)',
   'home-card-drewsnight':  'linear-gradient(135deg,#fc5c7d,#6a82fb)',
+  'home-card-adminanalytics': 'linear-gradient(135deg,#0f2027,#203a43,#2c5364)',
 };
 const HOME_CARD_LABELS={
   'home-card-bank':'Dance Bank','home-card-know':'Dances I Know',
@@ -2385,6 +2487,7 @@ const HOME_CARD_LABELS={
   'home-card-submissions':'Submissions','home-card-feedback':'Suggestions & Bugs',
   'home-card-modpanel':'Mod Panel','home-card-changelog':'Changelog',
   'home-card-drewsnight':'Night (Drew\'s Night)',
+  'home-card-adminanalytics':'Admin Analytics',
 };
 function applyHomeCardGradients(){
   Object.keys(HOME_CARD_DEFAULTS).forEach(id=>{
@@ -2490,7 +2593,7 @@ function applyTabVisibility(){
   });
   // Admin-only home cards always visible for admin
   if(isAdmin){
-    ['home-card-admin','home-card-dj','home-card-submissions','home-card-debug'].forEach(id=>{
+    ['home-card-admin','home-card-dj','home-card-submissions','home-card-debug','home-card-adminanalytics'].forEach(id=>{
       const el=document.getElementById(id);if(el) el.style.display='';
     });
   }
@@ -2638,7 +2741,7 @@ async function authSubmit() {
     if (r.ok && r.data && r.data.length > 0) {
       state = r.data[0].data || {know:[], learn:[], nights:{}, djFreestyles:{}, favorites:[]};
     } else {
-      state = {know:[], learn:[], nights:{}, djFreestyles:{}, favorites:[]};
+      state = {know:[], learn:[], nights:{}, djFreestyles:{}, favorites:[], joinedAt: new Date().toISOString()};
     }
     
     if (!state.djFreestyles) state.djFreestyles = {};
@@ -2678,6 +2781,7 @@ function enterGuestMode(){
   _hide('debug-tab');
   _hide('dj-tab-btn');
   _hide('drewsnight-tab-btn');
+  _hide('adminanalytics-tab');
   _hide('picks-admin-panel');
   _hide('mobile-admin-section');
   try { applyTabVisibility(); } catch(e){ console.warn('applyTabVisibility error', e); }
@@ -2740,6 +2844,7 @@ function enterApp(username){
   document.getElementById('debug-tab').style.display=isAdmin?'inline-block':'none';
   document.getElementById('dj-tab-btn').style.display=isAdmin?'inline-block':'none';
   document.getElementById('drewsnight-tab-btn').style.display=isAdmin?'inline-block':'none';
+  document.getElementById('adminanalytics-tab').style.display=isAdmin?'inline-block':'none';
   document.getElementById('picks-admin-panel').style.display=isAdmin?'block':'none';
   applyTabVisibility();
   const adminSection=document.getElementById('mobile-admin-section');
@@ -2769,7 +2874,7 @@ function enterApp(username){
   if(isAdmin) initDrewsNightDate();
   // Restore the tab the user was on before the last refresh, default to home
   const savedTab = localStorage.getItem('ld_active_tab') || 'home';
-  const adminTabs = ['submissions','admin','editpeople','dj','drewsnight','debug'];
+  const adminTabs = ['submissions','admin','editpeople','dj','drewsnight','debug','adminanalytics'];
   const modTabs = ['modpanel'];
   if(savedTab && !(adminTabs.includes(savedTab) && !isAdmin) && !(modTabs.includes(savedTab) && !isMod)){
     switchTab(savedTab);
@@ -2872,6 +2977,10 @@ async function tryAutoLogin() {
       if (!state.favoriteFriends) state.favoriteFriends = [];
       if (!state.drewsNights) state.drewsNights = {};
       state.__cloudUpdatedAt = r.data[0].updated_at || null;
+      _lastActiveAt = Date.now();
+      localStorage.setItem('ld_last_active', String(_lastActiveAt));
+      await loadSubmissions();
+      await loadModList();
       enterApp(user);
       return true;
     }
@@ -2899,8 +3008,14 @@ async function tryAutoLogin() {
     return;
   }
 
-  // A saved session exists — keep the splash up a little longer so the home tab
-  // doesn't flash before we restore the user's last tab.
+  // A saved session exists — always refresh the token first on page load
+  // so we never try to fetch data with a stale/expired token.
+  try {
+    await tryRefreshToken();
+  } catch(e) {
+    console.warn('Token pre-refresh error:', e);
+  }
+
   try {
     const ok = await finishLogin(savedUser);
     if (ok) return;
@@ -3013,6 +3128,7 @@ function switchTab(tab,_fromSwipe=false,_noSave=false){
   if(tab==='debug') renderDebugTab();
   if(tab==='changelog') renderChangelog();
   if(tab==='modpanel') renderModBank();
+  if(tab==='adminanalytics') renderAdminAnalytics();
 }
 
 // ---- Sort helpers ----
@@ -3027,7 +3143,13 @@ function toggleSort(key){
 }
 function applySortAndSearch(items,searchVal,sorted){
   let result=[...items];
-  if(searchVal) result=result.filter(d=>d.name.toLowerCase().includes(searchVal.toLowerCase()));
+  if(searchVal){
+    result=result.filter(d=>{
+      // For items from state.know/learn, try to find matching bank entry for song title search
+      const bankEntry=bank.find(b=>b.name.toLowerCase()===d.name.toLowerCase())||d;
+      return danceMatchesQuery(bankEntry, searchVal);
+    });
+  }
   if(sorted) result.sort((a,b)=>a.name.localeCompare(b.name));
   return result;
 }
@@ -3091,7 +3213,7 @@ function renderBank(){
     const list=customLists.find(l=>l.id===listId);
     if(!list){el.innerHTML=`<div class="empty">List not found.</div>`;return;}
     let items=list.danceIds.map(id=>bank.find(d=>d.id===id)).filter(Boolean);
-    if(q) items=items.filter(d=>d.name.toLowerCase().includes(q.toLowerCase()));
+    if(q) items=items.filter(d=>danceMatchesQuery(d, q));
     if(bankFilter!=='all') items=items.filter(d=>d.difficulty===bankFilter);
     if(sortState.bank) items.sort((a,b)=>a.name.localeCompare(b.name));
     if(!items.length){
@@ -3133,7 +3255,7 @@ function renderBank(){
   // --- New to Me view (not in know or learn) ---
   if(bankView==='new'){
     let items=bank.filter(d=>!isInList(d.name,'know')&&!isInList(d.name,'learn'));
-    if(q) items=items.filter(d=>d.name.toLowerCase().includes(q.toLowerCase()));
+    if(q) items=items.filter(d=>danceMatchesQuery(d, q));
     if(bankFilter!=='all') items=items.filter(d=>d.difficulty===bankFilter);
     if(sortState.bank) items.sort((a,b)=>a.name.localeCompare(b.name));
     if(!items.length){
@@ -3171,7 +3293,11 @@ function renderBank(){
   // --- My Lists view (know / learn) ---
   if(bankView==='know'||bankView==='learn'){
     const listItems=[...state[bankView]];
-    let filtered=listItems.filter(d=>!q||d.name.toLowerCase().includes(q.toLowerCase()));
+    let filtered=listItems.filter(d=>{
+      if(!q) return true;
+      const bankEntry=bank.find(b=>b.name.toLowerCase()===d.name.toLowerCase())||d;
+      return danceMatchesQuery(bankEntry, q);
+    });
     if(bankFilter!=='all'){
       filtered=filtered.filter(d=>{
         const be=bank.find(b=>b.name.toLowerCase()===d.name.toLowerCase());
@@ -3226,7 +3352,7 @@ function renderBank(){
   }
 
   // --- Default: all-dances view ---
-  let items=bank.filter(d=>!q||d.name.toLowerCase().includes(q.toLowerCase()));
+  let items=bank.filter(d=>!q||danceMatchesQuery(d, q));
   if(bankFilter!=='all') items=items.filter(d=>d.difficulty===bankFilter);
   if(bankFavFilterActive){
     items=items.filter(d=>{
@@ -3275,6 +3401,53 @@ function toggleBankItem(id){
   const el=document.getElementById('bitem-'+id);
   if(el) el.classList.toggle('open');
 }
+// ---- Confetti ----
+function launchConfetti(){
+  const colors=['#f7971e','#ffd200','#43e97b','#4facfe','#f093fb','#fc5c7d','#a18cd1','#38ef7d','#667eea','#ff6b6b','#feca57'];
+  const count=100;
+  for(let i=0;i<count;i++){
+    const size=Math.random()*9+5;
+    const color=colors[Math.floor(Math.random()*colors.length)];
+    const startX=Math.random()*window.innerWidth;
+    const drift=(Math.random()-0.5)*250;
+    const duration=Math.random()*1200+1000;
+    const delay=Math.random()*400;
+    const isCircle=Math.random()<0.5;
+    const el=document.createElement('div');
+    el.style.cssText=[
+      'position:fixed',
+      'pointer-events:none',
+      'z-index:99999',
+      `width:${size}px`,
+      `height:${isCircle?size:size*0.5}px`,
+      `background:${color}`,
+      `border-radius:${isCircle?'50%':'2px'}`,
+      `left:${startX}px`,
+      'top:-16px',
+      `transform:rotate(${Math.random()*360}deg)`,
+      'will-change:transform,opacity',
+    ].join(';');
+    document.body.appendChild(el);
+    let startTime=null;
+    const initRot=Math.random()*360;
+    function frame(ts){
+      if(!startTime) startTime=ts;
+      const elapsed=ts-startTime;
+      if(elapsed<delay){requestAnimationFrame(frame);return;}
+      const t=Math.min((elapsed-delay)/duration,1);
+      const y=t*window.innerHeight*1.15;
+      const x=drift*t;
+      const rot=initRot+t*600;
+      const opacity=t>0.75?1-(t-0.75)/0.25:1;
+      el.style.transform=`translate(${x}px,${y}px) rotate(${rot}deg)`;
+      el.style.opacity=opacity;
+      if(t<1){requestAnimationFrame(frame);}
+      else{el.remove();}
+    }
+    requestAnimationFrame(frame);
+  }
+}
+
 function addFromBankById(type,bankId){
   if(requireLogin('Sign in to add dances to your list')) return;
   const d=bank.find(x=>x.id===bankId);if(!d)return;
@@ -3282,6 +3455,7 @@ function addFromBankById(type,bankId){
   const other=type==='know'?'learn':'know';
   state[other]=state[other].filter(x=>x.name.toLowerCase()!==name.toLowerCase());
   if(!isInList(name,type)) state[type].push({id:Date.now()+'',name,added:new Date().toISOString()});
+  if(type==='know') launchConfetti();
   renderBank();renderList('know');renderList('learn');scheduleSave();syncMyCard();
   // If fav filter is active and a dance was just added to know, keep filter consistent
   if(bankFavFilterActive) renderBank();
@@ -3291,6 +3465,7 @@ function addFromBank(type,name){
   const other=type==='know'?'learn':'know';
   state[other]=state[other].filter(d=>d.name.toLowerCase()!==name.toLowerCase());
   if(!isInList(name,type)) state[type].push({id:Date.now()+'',name,added:new Date().toISOString()});
+  if(type==='know') launchConfetti();
   renderBank();renderList('know');renderList('learn');scheduleSave();syncMyCard();
 }
 function removeFromList(type,name){
@@ -3302,30 +3477,47 @@ function removeFromList(type,name){
 // ---- DJ List (admin managed) ----
 function renderDJDropdown(){
   const sorted=[...djList].sort((a,b)=>a.localeCompare(b));
-  // Night tab dropdown
-  const sel=document.getElementById('night-dj');
-  if(sel){
-    const current=sel.value;
-    sel.innerHTML='<option value="">— Select DJ (optional) —</option>';
-    sorted.forEach(dj=>{const opt=document.createElement('option');opt.value=dj;opt.textContent=dj;sel.appendChild(opt);});
-    if(current&&djList.includes(current)) sel.value=current;
+
+  function _populate(sel, placeholder, getStateValue){
+    if(!sel) return;
+    // Capture whatever is currently displayed; fall back to reading from state
+    // so a saved DJ is always restored even on first render.
+    let current=sel.value;
+    if(!current && typeof getStateValue==='function') current=getStateValue()||'';
+    sel.innerHTML='<option value="">'+placeholder+'</option>';
+    sorted.forEach(function(dj){
+      var opt=document.createElement('option');
+      opt.value=dj; opt.textContent=dj;
+      sel.appendChild(opt);
+    });
+    // Restore even if the DJ was removed from the list — show it as selected
+    // so the saved data isn't silently cleared on next save.
+    if(current) sel.value=current;
   }
-  // Drew's Night dropdown
-  const dsel=document.getElementById('drewsnight-dj');
-  if(dsel){
-    const dcurrent=dsel.value;
-    dsel.innerHTML='<option value="">— Select DJ (optional) —</option>';
-    sorted.forEach(dj=>{const opt=document.createElement('option');opt.value=dj;opt.textContent=dj;dsel.appendChild(opt);});
-    if(dcurrent&&djList.includes(dcurrent)) dsel.value=dcurrent;
-  }
-  // DJ Freestyle / Test Features dropdown
-  const fsel=document.getElementById('dj-entry-name');
-  if(fsel){
-    const fcurrent=fsel.value;
-    fsel.innerHTML='<option value="">— Select DJ —</option>';
-    sorted.forEach(dj=>{const opt=document.createElement('option');opt.value=dj;opt.textContent=dj;fsel.appendChild(opt);});
-    if(fcurrent&&djList.includes(fcurrent)) fsel.value=fcurrent;
-  }
+
+  _populate(
+    document.getElementById('night-dj'),
+    '— Select DJ (optional) —',
+    function(){
+      if(!selectedDate) return '';
+      var nd=state.nights&&state.nights[selectedDate];
+      if(!nd) return '';
+      return Array.isArray(nd)?'':(nd.dj||'');
+    }
+  );
+
+  _populate(
+    document.getElementById('drewsnight-dj'),
+    '— Select DJ (optional) —',
+    function(){
+      if(!drewsSelectedDate) return '';
+      var nd=state.nights&&state.nights[drewsSelectedDate];
+      if(!nd) return '';
+      return Array.isArray(nd)?'':(nd.dj||'');
+    }
+  );
+
+  _populate(document.getElementById('dj-entry-name'), '— Select DJ —');
 }
 function adminAddDJ(){
   if(!isAdmin)return;
@@ -3348,11 +3540,60 @@ function renderAdminDJList(){
   if(!el)return;
   const sorted=[...djList].sort((a,b)=>a.localeCompare(b));
   if(!sorted.length){el.innerHTML=`<div class="empty" style="padding:.75rem 0">No DJs added yet.</div>`;return;}
-  el.innerHTML=sorted.map(dj=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg);border:0.5px solid var(--amber-border);border-radius:var(--radius-md);">
-      <span style="flex:1;font-size:13px;font-weight:500;">${esc(dj)}</span>
-      <button class="btn xs danger" onclick="adminRemoveDJ('${escA(dj)}')">Remove</button>
-    </div>`).join('');
+  el.innerHTML=sorted.map(dj=>{
+    const color=djColors[dj]||DEFAULT_NIGHT_GRAD;
+    const swatches=GRADIENTS.map((g,i)=>`<div class="nlc-color-swatch${g===color?' active':''}" style="background:${g};width:22px;height:22px;border-radius:5px;cursor:pointer;flex-shrink:0;border:2px solid ${g===color?'var(--t1)':'transparent'};transition:border-color 0.12s;" onclick="adminSetDJColor('${escA(dj)}','${g}',this)" title="${g}"></div>`).join('');
+    return `
+    <div style="border:0.5px solid var(--amber-border);border-radius:var(--radius-md);background:var(--bg);overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;">
+        <div style="width:28px;height:28px;border-radius:6px;flex-shrink:0;border:0.5px solid var(--b3);" id="dj-color-preview-${cssId(dj)}" style="background:${color};"></div>
+        <span style="flex:1;font-size:13px;font-weight:500;">${esc(dj)}</span>
+        <button class="btn xs" style="font-size:11px;padding:3px 8px;" onclick="toggleDJColorPicker('${escA(dj)}')">Color</button>
+        <button class="btn xs danger" onclick="adminRemoveDJ('${escA(dj)}')">Remove</button>
+      </div>
+      <div id="dj-color-picker-${cssId(dj)}" style="display:none;padding:8px 12px;border-top:0.5px solid var(--amber-border);background:var(--bg2);">
+        <div style="font-size:11px;font-weight:500;color:var(--t2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;">Default night color for ${esc(dj)}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">${swatches}</div>
+        <button class="btn xs" style="font-size:11px;" onclick="adminResetDJColor('${escA(dj)}')">Clear (use default)</button>
+      </div>
+    </div>`;
+  }).join('');
+  // Apply preview backgrounds after render
+  sorted.forEach(dj=>{
+    const prev=document.getElementById('dj-color-preview-'+cssId(dj));
+    if(prev) prev.style.background=djColors[dj]||DEFAULT_NIGHT_GRAD;
+  });
+}
+
+function toggleDJColorPicker(dj){
+  const el=document.getElementById('dj-color-picker-'+cssId(dj));
+  if(!el)return;
+  el.style.display=el.style.display==='none'?'':'none';
+}
+
+function adminSetDJColor(dj,grad,swatchEl){
+  djColors[dj]=grad;
+  // Update swatch active states in this picker
+  const picker=document.getElementById('dj-color-picker-'+cssId(dj));
+  if(picker){
+    picker.querySelectorAll('.nlc-color-swatch').forEach(s=>{
+      const active=s.style.background===grad;
+      s.classList.toggle('active',active);
+      s.style.border=active?'2px solid var(--t1)':'2px solid transparent';
+    });
+  }
+  // Update preview
+  const prev=document.getElementById('dj-color-preview-'+cssId(dj));
+  if(prev) prev.style.background=grad;
+  saveDJListToCloud();
+  renderLog(); // Re-render night cards with new default colors
+}
+
+function adminResetDJColor(dj){
+  delete djColors[dj];
+  renderAdminDJList();
+  saveDJListToCloud();
+  renderLog();
 }
 
 // ---- Admin bank ----
@@ -3414,8 +3655,8 @@ function adminSaveEdit(id){
 function renderAdminBank(){
   const el=document.getElementById('admin-bank-list');
   if(!bank.length){el.innerHTML=`<div class="empty">No dances in the bank yet.</div>`;return;}
-  const q=(document.getElementById('admin-bank-search')?.value||'').trim().toLowerCase();
-  const sorted=[...bank].sort((a,b)=>a.name.localeCompare(b.name)).filter(d=>!q||d.name.toLowerCase().includes(q));
+  const q=(document.getElementById('admin-bank-search')?.value||'').trim();
+  const sorted=[...bank].sort((a,b)=>a.name.localeCompare(b.name)).filter(d=>!q||danceMatchesQuery(d, q));
   if(!sorted.length){el.innerHTML=`<div class="empty">No dances match your search.</div>`;return;}
   el.innerHTML=sorted.map(d=>{
     const diffBadge=d.difficulty?`<span class="diff-badge diff-${d.difficulty}">${d.difficulty}</span>`:'';
@@ -3574,15 +3815,23 @@ async function adminAddMod(){
   if(modList.includes(username)){alert('That user is already a moderator.');return;}
   modList.push(username);
   await saveModListToCloud();
+  // If admin modded themselves, update isMod immediately
+  if(username===currentUser){ isMod=true; applyTabVisibility(); }
   renderAdminModList();
   sel.value='';
+  const note=document.getElementById('admin-mod-refresh-note');
+  if(note){ note.textContent=`✓ ${username} added as mod. They'll need to refresh or re-login to see their new permissions.`; note.style.display=''; setTimeout(()=>{note.style.display='none';},6000); }
 }
 async function adminRemoveMod(username){
   if(!isAdmin) return;
   if(!confirm(`Remove mod role from "${username}"?`)) return;
   modList=modList.filter(m=>m!==username);
   await saveModListToCloud();
+  // If admin removed their own mod role, update isMod immediately
+  if(username===currentUser){ isMod=isAdmin; applyTabVisibility(); }
   renderAdminModList();
+  const note=document.getElementById('admin-mod-refresh-note');
+  if(note){ note.textContent=`✓ ${username} removed from mods. They'll need to refresh or re-login for this to take effect.`; note.style.display=''; setTimeout(()=>{note.style.display='none';},6000); }
 }
 function renderAdminModList(){
   const el=document.getElementById('admin-mod-list');
@@ -3624,8 +3873,8 @@ function renderModBank(){
   const el=document.getElementById('mod-bank-list');
   if(!el) return;
   if(!bank.length){el.innerHTML=`<div class="empty">No dances in the bank yet.</div>`;return;}
-  const q=(document.getElementById('mod-bank-search')?.value||'').trim().toLowerCase();
-  const sorted=[...bank].sort((a,b)=>a.name.localeCompare(b.name)).filter(d=>!q||d.name.toLowerCase().includes(q));
+  const q=(document.getElementById('mod-bank-search')?.value||'').trim();
+  const sorted=[...bank].sort((a,b)=>a.name.localeCompare(b.name)).filter(d=>!q||danceMatchesQuery(d, q));
   if(!sorted.length){el.innerHTML=`<div class="empty">No dances match your search.</div>`;return;}
   el.innerHTML=sorted.map(d=>{
     const diffBadge=d.difficulty?`<span class="diff-badge diff-${d.difficulty}">${d.difficulty}</span>`:'';
@@ -3778,6 +4027,7 @@ async function moveToKnow(id){
   if(requireLogin('Sign in to track your progress')) return;
   const d=state.learn.find(x=>x.id===id);if(!d)return;
   state.learn=state.learn.filter(x=>x.id!==id);state.know.push({...d});
+  launchConfetti();
   renderList('learn');renderList('know');renderBank();
   const ok=await saveToCloud();
   if(ok) syncMyCard();
@@ -3857,16 +4107,28 @@ function initNightDate(){
   const inp=document.getElementById('night-date');
   const today=localDateStr();
   inp.value=today;selectedDate=today;
+  renderDJDropdown(); // populate before setting DJ value
   loadNightSelections();renderPickList();renderDidList();loadNightDJ();renderHighlightsDisplay();
-  inp.onchange=()=>{selectedDate=inp.value;loadNightSelections();renderPickList();renderDidList();loadNightDJ();renderHighlightsDisplay();};
+  inp.onchange=()=>{selectedDate=inp.value;renderDJDropdown();loadNightSelections();renderPickList();renderDidList();loadNightDJ();renderHighlightsDisplay();};
 }
 function loadNightSelections(){
   nightSelections={};const nd=getNightData(selectedDate);nd.dances.forEach(id=>nightSelections[id]=true);
 }
-function loadNightDJ(){const nd=getNightData(selectedDate);document.getElementById('night-dj').value=nd.dj||'';document.getElementById('night-arrive').value=nd.arriveTime||'';document.getElementById('night-leave').value=nd.leaveTime||'';}
+function loadNightDJ(){
+  const nd=getNightData(selectedDate);
+  const djEl=document.getElementById('night-dj');
+  // If dropdown has no DJ options yet (race on first load), populate it now
+  if(djEl && djEl.options.length<=1 && djList.length>0) renderDJDropdown();
+  if(djEl) djEl.value=nd.dj||'';
+  const arrEl=document.getElementById('night-arrive');
+  const lvEl=document.getElementById('night-leave');
+  if(arrEl) arrEl.value=nd.arriveTime||'';
+  if(lvEl) lvEl.value=nd.leaveTime||'';
+}
 function renderNight(){
   if(!selectedDate)initNightDate();
   selectedDate=document.getElementById('night-date').value||localDateStr();
+  renderDJDropdown(); // ensure options are present before loadNightDJ sets the value
   loadNightSelections();renderPickList();renderDidList();loadNightDJ();renderHighlightsDisplay();
 }
 function renderPickList(){
@@ -3971,16 +4233,19 @@ function saveHighlights(){
   const h2=document.getElementById('hl-pick-2').value;
   const h3=document.getElementById('hl-pick-3').value;
   const modal=document.getElementById('highlights-modal');
+  const hasAny=h1||h2||h3;
   if(modal.dataset.source==='drewsnight'){
     const existing=getDrewsNightData(drewsSelectedDate);
     state.nights[drewsSelectedDate]={...existing,highlights:[h1,h2,h3]};
     scheduleSave();closeHighlightsModal();renderDrewsHighlightsDisplay();
+    if(hasAny) launchConfetti();
     modal.dataset.source='';
     return;
   }
   const existing=getNightData(selectedDate);
   state.nights[selectedDate]={...existing,highlights:[h1,h2,h3]};
   scheduleSave();closeHighlightsModal();renderHighlightsDisplay();
+  if(hasAny) launchConfetti();
 }
 function renderHighlightsDisplay(){
   const el=document.getElementById('highlights-display');
@@ -4020,11 +4285,13 @@ function initDrewsNightDate(){
   if(!inp) return;
   const today=localDateStr();
   inp.value=today; drewsSelectedDate=today;
+  renderDJDropdown(); // populate before setting DJ value
   loadDrewsNightSelections();
   renderDrewsPickList();renderDrewsNotPerfList();renderDrewsDidList();
   loadDrewsNightDJ();renderDrewsHighlightsDisplay();
   inp.onchange=()=>{
     drewsSelectedDate=inp.value;
+    renderDJDropdown(); // re-populate so saved DJ value restores correctly on date change
     loadDrewsNightSelections();
     renderDrewsPickList();renderDrewsNotPerfList();renderDrewsDidList();
     loadDrewsNightDJ();renderDrewsHighlightsDisplay();
@@ -4041,6 +4308,8 @@ function loadDrewsNightDJ(){
   const djEl=document.getElementById('drewsnight-dj');
   const arrEl=document.getElementById('drewsnight-arrive');
   const lvEl=document.getElementById('drewsnight-leave');
+  // If dropdown has no DJ options yet (race on first load), populate it now
+  if(djEl && djEl.options.length<=1 && djList.length>0) renderDJDropdown();
   if(djEl) djEl.value=nd.dj||'';
   if(arrEl) arrEl.value=nd.arriveTime||'';
   if(lvEl) lvEl.value=nd.leaveTime||'';
@@ -4048,6 +4317,7 @@ function loadDrewsNightDJ(){
 function renderDrewsNight(){
   if(!drewsSelectedDate) initDrewsNightDate();
   drewsSelectedDate=document.getElementById('drewsnight-date').value||localDateStr();
+  renderDJDropdown(); // ensure options are present before loadDrewsNightDJ sets the value
   loadDrewsNightSelections();
   renderDrewsPickList();renderDrewsNotPerfList();renderDrewsDidList();
   loadDrewsNightDJ();renderDrewsHighlightsDisplay();
@@ -4063,9 +4333,12 @@ function renderDrewsPickList(){
   const el=document.getElementById('drewsnight-pick-list');
   if(!el) return;
   if(!state.know.length){el.innerHTML=`<div class="empty" style="padding:1.5rem .5rem">Add dances to "Dances I Know" first</div>`;return;}
-  const q=(document.getElementById('drewsnight-pick-search')?.value||'').toLowerCase();
+  const q=(document.getElementById('drewsnight-pick-search')?.value||'');
   let items=state.know.slice();
-  if(q) items=items.filter(d=>d.name.toLowerCase().includes(q));
+  if(q) items=items.filter(d=>{
+    const bankEntry=bank.find(b=>b.name.toLowerCase()===d.name.toLowerCase())||d;
+    return danceMatchesQuery(bankEntry, q);
+  });
   if(drewsNightSortState.pick) items.sort((a,b)=>a.name.localeCompare(b.name));
   else items.sort((a,b)=>b.name.localeCompare(a.name));
   el.innerHTML=items.map(d=>`
@@ -4078,9 +4351,9 @@ function renderDrewsNotPerfList(){
   const el=document.getElementById('drewsnight-notperf-list');
   if(!el) return;
   if(!bank.length){el.innerHTML=`<div class="empty" style="padding:1.5rem .5rem">No dances in the bank yet</div>`;return;}
-  const q=(document.getElementById('drewsnight-notperf-search')?.value||'').toLowerCase();
+  const q=(document.getElementById('drewsnight-notperf-search')?.value||'');
   let items=bank.slice();
-  if(q) items=items.filter(d=>d.name.toLowerCase().includes(q));
+  if(q) items=items.filter(d=>danceMatchesQuery(d, q));
   if(drewsNightSortState.notperf) items.sort((a,b)=>a.name.localeCompare(b.name));
   else items.sort((a,b)=>b.name.localeCompare(a.name));
   el.innerHTML=items.map(d=>`
@@ -4267,7 +4540,7 @@ function renderHistoryStats(){
       hourLabel=suffix;
     }
     const topCount=topEntry?topEntry[1]:0;
-    busiestHourHTML=`<div class="stat-card"><div class="stat-label">Busiest Hour</div><div class="stat-value" style="font-size:22px">${hourLabel}</div><div class="stat-sub">${topCount} dance${topCount!==1?'s':''} avg this month</div></div>`;
+    busiestHourHTML=`<div class="stat-card"><div class="stat-label">Busiest Hour</div><div class="stat-value" style="font-size:22px">${hourLabel}`;
   }
   el.innerHTML=`
     <div class="stat-card"><div class="stat-label">Dances This Month</div><div class="stat-value">${monthCount}</div></div>
@@ -4307,6 +4580,12 @@ function deleteNight(date,e){
 const DEFAULT_NIGHT_GRAD='linear-gradient(135deg,#e0c3fc,#8ec5fc)';
 function _nightGrad(date){
   if(state.nightColors&&state.nightColors[date]) return state.nightColors[date];
+  // Fall back to admin-set DJ preset color if this night has a known DJ
+  const nd=state.nights&&state.nights[date];
+  if(nd){
+    const dj=(Array.isArray(nd)?'':nd.dj)||'';
+    if(dj&&djColors&&djColors[dj]) return djColors[dj];
+  }
   return DEFAULT_NIGHT_GRAD;
 }
 
@@ -4373,8 +4652,40 @@ function renderLog(){
         <span class="caret">&#9660;</span>
       </div>
       <div class="accordion-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">
+          <div>
+            <input id="nights-song-search" type="text" placeholder="Songs\u2026" autocomplete="off"
+              oninput="applyNightSearch()"
+              style="width:100%;padding:8px 12px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg2);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;"
+              onfocus="this.style.borderColor='var(--b1)'" onblur="this.style.borderColor='var(--b2)'">
+          </div>
+          <div>
+            <input id="nights-dj-search" type="text" placeholder="DJs\u2026" autocomplete="off"
+              oninput="applyNightSearch()"
+              style="width:100%;padding:8px 12px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg2);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;"
+              onfocus="this.style.borderColor='var(--b1)'" onblur="this.style.borderColor='var(--b2)'">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;align-items:center;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:11px;color:var(--t3);white-space:nowrap;">Songs match:</span>
+            <button id="song-logic-or" onclick="setNightLogic('song','or')" style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;border:1.5px solid var(--blue-border);background:var(--blue-bg);color:var(--blue-text);cursor:pointer;font-family:'DM Sans',sans-serif;">OR</button>
+            <button id="song-logic-and" onclick="setNightLogic('song','and')" style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;border:1.5px solid var(--b3);background:var(--bg2);color:var(--t3);cursor:pointer;font-family:'DM Sans',sans-serif;">AND</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:11px;color:var(--t3);white-space:nowrap;">DJs match:</span>
+            <button id="dj-logic-or" onclick="setNightLogic('dj','or')" style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;border:1.5px solid var(--blue-border);background:var(--blue-bg);color:var(--blue-text);cursor:pointer;font-family:'DM Sans',sans-serif;">OR</button>
+            <button id="dj-logic-and" onclick="setNightLogic('dj','and')" style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;border:1.5px solid var(--b3);background:var(--bg2);color:var(--t3);cursor:pointer;font-family:'DM Sans',sans-serif;">AND</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+          <span style="font-size:11px;color:var(--t3);white-space:nowrap;">Between song &amp; DJ:</span>
+          <button id="fields-logic-and" onclick="setNightLogic('fields','and')" style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;border:1.5px solid var(--blue-border);background:var(--blue-bg);color:var(--blue-text);cursor:pointer;font-family:'DM Sans',sans-serif;">AND</button>
+          <button id="fields-logic-or" onclick="setNightLogic('fields','or')" style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;border:1.5px solid var(--b3);background:var(--bg2);color:var(--t3);cursor:pointer;font-family:'DM Sans',sans-serif;">OR</button>
+        </div>
+        <div id="nights-search-status" style="display:none;font-size:12px;color:var(--t2);margin-bottom:10px;"></div>
         <div style="margin-bottom:1.25rem;">
-          <div class="nights-grid">${cards}</div>
+          <div class="nights-grid" id="nights-grid-inner">${cards}</div>
         </div>
         <div style="border-top:0.5px solid var(--b3);padding-top:1rem">
           <div style="font-size:11px;font-weight:500;color:var(--t2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px">All-time dance totals</div>
@@ -4382,6 +4693,104 @@ function renderLog(){
         </div>
       </div>
     </div>`;
+}
+
+// Tracks current logic mode for each field and between fields
+const _nightSearchLogic={song:'or',dj:'or',fields:'and'};
+
+function setNightLogic(field, mode){
+  _nightSearchLogic[field]=mode;
+  // Update button styles
+  ['or','and'].forEach(m=>{
+    const btn=document.getElementById(`${field}-logic-${m}`);
+    if(!btn) return;
+    const active=m===mode;
+    btn.style.background=active?'var(--blue-bg)':'var(--bg2)';
+    btn.style.color=active?'var(--blue-text)':'var(--t3)';
+    btn.style.borderColor=active?'var(--blue-border)':'var(--b3)';
+  });
+  applyNightSearch();
+}
+
+function applyNightSearch(){
+  function parseTerms(raw){
+    return raw.split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
+  }
+  const djTerms=parseTerms(document.getElementById('nights-dj-search')?.value||'');
+  const songTerms=parseTerms(document.getElementById('nights-song-search')?.value||'');
+  const grid=document.getElementById('nights-grid-inner');
+  const status=document.getElementById('nights-search-status');
+  if(!grid) return;
+
+  const hasFilter=djTerms.length>0||songTerms.length>0;
+
+  if(hasFilter){
+    const acc=document.getElementById('all-nights-accordion');
+    if(acc&&!acc.classList.contains('open')) acc.classList.add('open');
+  }
+
+  const songLogic=_nightSearchLogic.song;
+  const djLogic=_nightSearchLogic.dj;
+  const fieldsLogic=_nightSearchLogic.fields;
+
+  let shown=0, total=0;
+  Array.from(grid.querySelectorAll('.nlc')).forEach(card=>{
+    total++;
+    const onclickVal=card.getAttribute('onclick')||'';
+    const dateMatch=onclickVal.match(/openNightModal\('([^']+)'\)/);
+    if(!dateMatch){card.style.display='';shown++;return;}
+    const date=dateMatch[1];
+    const val=state.nights[date];
+    if(!val){card.style.display='';shown++;return;}
+    const nd=Array.isArray(val)?{dances:val,dj:''}:{dj:'',...val};
+    const djName=(nd.dj||'').toLowerCase();
+    const dances=(nd.dances||[]).map(id=>state.know.find(d=>d.id===id)).filter(Boolean);
+
+    // Evaluate DJ terms
+    let djOk=true;
+    if(djTerms.length>0){
+      if(djLogic==='or') djOk=djTerms.some(t=>djName.includes(t));
+      else djOk=djTerms.every(t=>djName.includes(t));
+    }
+
+    // Evaluate song terms — AND means night must have ALL listed songs
+    let songOk=true;
+    if(songTerms.length>0){
+      if(songLogic==='or') songOk=songTerms.some(t=>dances.some(d=>(d.name||'').toLowerCase().includes(t)));
+      else songOk=songTerms.every(t=>dances.some(d=>(d.name||'').toLowerCase().includes(t)));
+    }
+
+    // Combine fields
+    let match;
+    if(djTerms.length===0) match=songOk;
+    else if(songTerms.length===0) match=djOk;
+    else if(fieldsLogic==='and') match=djOk&&songOk;
+    else match=djOk||songOk;
+
+    if(match){card.style.display='';shown++;}
+    else{card.style.display='none';}
+  });
+
+  if(!hasFilter){
+    if(status){status.style.display='none';status.textContent='';}
+    return;
+  }
+
+  if(status){
+    status.style.display='';
+    const parts=[];
+    if(djTerms.length) parts.push(`DJ ${djTerms.map(t=>`"${t}"`).join(` ${djLogic.toUpperCase()} `)}`);
+    if(songTerms.length) parts.push(`song ${songTerms.map(t=>`"${t}"`).join(` ${songLogic.toUpperCase()} `)}`);
+    const connector=djTerms.length&&songTerms.length?` ${fieldsLogic.toUpperCase()} `:'';
+    const filterDesc=parts.join(connector);
+    if(shown===0){
+      status.textContent=`No nights found matching ${filterDesc}`;
+      status.style.color='var(--t3)';
+    } else {
+      status.textContent=`${shown} of ${total} night${total!==1?'s':''} \u2014 ${filterDesc}`;
+      status.style.color='var(--t2)';
+    }
+  }
 }
 
 function openNightModal(date){
@@ -4442,11 +4851,16 @@ function openNightColorPicker(date, btn){
   closeNightColorPopup();
   _nightColorPopupDate=date;
   const currentGrad=_nightGrad(date);
+  const hasPersonal=state.nightColors&&state.nightColors[date];
+  const nd=state.nights&&state.nights[date];
+  const dj=nd&&!Array.isArray(nd)?(nd.dj||''):'';
+  const djPreset=dj&&djColors&&djColors[dj];
   const swatches=GRADIENTS.map((g,i)=>`<div class="nlc-color-swatch${g===currentGrad?' active':''}" style="background:${g}" onclick="applyNightColor('${date}','${g}')" title="${g}"></div>`).join('');
   const popup=document.createElement('div');
   popup.id='nlc-color-popup';
   popup.className='nlc-color-popup';
-  popup.innerHTML=`<div class="nlc-color-popup-title">Card Color</div><div class="nlc-color-swatches">${swatches}</div><div class="nlc-color-popup-footer"><button class="nlc-color-reset" onclick="resetNightColor('${date}')">Reset Default</button></div>`;
+  const djNote=(!hasPersonal&&djPreset)?`<div style="font-size:11px;color:var(--t2);margin-bottom:6px;padding:4px 8px;background:var(--bg2);border-radius:4px;">Using <strong>${esc(dj)}</strong>'s default color</div>`:'';
+  popup.innerHTML=`<div class="nlc-color-popup-title">Card Color</div>${djNote}<div class="nlc-color-swatches">${swatches}</div><div class="nlc-color-popup-footer"><button class="nlc-color-reset" onclick="resetNightColor('${date}')">${hasPersonal?'Reset to DJ Default':'Reset Default'}</button></div>`;
   document.body.appendChild(popup);
   const rect=btn.getBoundingClientRect();
   const pw=220, ph=220;
@@ -4478,8 +4892,9 @@ async function applyNightColor(date, grad){
 async function resetNightColor(date){
   if(state.nightColors) delete state.nightColors[date];
   closeNightColorPopup();
+  const fallback=_nightGrad(date); // now uses DJ color if set
   const mhead=document.querySelector('#ndm-modal-card .ndm-mhead');
-  if(mhead) mhead.style.background=DEFAULT_NIGHT_GRAD;
+  if(mhead) mhead.style.background=fallback;
   await scheduleSave();
   renderLog();
 }
@@ -4490,13 +4905,17 @@ async function saveNightCardPng(date){
   // Hide UI-only elements
   const uiEls=modal.querySelectorAll('.ndm-ui-only');
   uiEls.forEach(el=>el.style.visibility='hidden');
-  // Temporarily remove max-height and overflow so html2canvas captures full content
+  // Suppress the ::before pseudo-element circle that bleeds outside ndm-mhead bounds
+  const styleTag=document.createElement('style');
+  styleTag.id='_png-hide-before';
+  styleTag.textContent='#ndm-modal-card .ndm-mhead::before{display:none!important;}';
+  document.head.appendChild(styleTag);
+  // Temporarily remove max-height/overflow so full content is captured
   const prevMaxHeight=modal.style.maxHeight;
   const prevOverflow=modal.style.overflowY;
   modal.style.maxHeight='none';
   modal.style.overflowY='visible';
   try{
-    // Dynamically load html2canvas if not present
     if(!window.html2canvas){
       await new Promise((res,rej)=>{
         const s=document.createElement('script');
@@ -4505,56 +4924,39 @@ async function saveNightCardPng(date){
         document.head.appendChild(s);
       });
     }
-    const fullCanvas=await html2canvas(modal,{
+    const scale=2;
+    const rawCanvas=await html2canvas(modal,{
       backgroundColor:null,
-      scale:2,
+      scale,
       useCORS:true,
       logging:false,
       width:modal.scrollWidth,
       height:modal.scrollHeight,
-      windowWidth:modal.scrollWidth,
-      windowHeight:modal.scrollHeight
+      windowWidth:document.documentElement.scrollWidth,
+      windowHeight:document.documentElement.scrollHeight
     });
-    // Crop to actual content — trim transparent/white rows from bottom
-    const ctx=fullCanvas.getContext('2d');
-    const imgData=ctx.getImageData(0,0,fullCanvas.width,fullCanvas.height);
-    const pixels=imgData.data;
-    let lastContentRow=0;
-    for(let y=fullCanvas.height-1;y>=0;y--){
-      let rowHasContent=false;
-      for(let x=0;x<fullCanvas.width;x++){
-        const idx=(y*fullCanvas.width+x)*4;
-        const a=pixels[idx+3];
-        const r=pixels[idx],g=pixels[idx+1],b=pixels[idx+2];
-        // Consider a pixel "content" if it's non-transparent and not pure white/near-white
-        if(a>10&&!(r>245&&g>245&&b>245)){rowHasContent=true;break;}
-      }
-      if(rowHasContent){lastContentRow=y;break;}
-    }
-    const cropHeight=Math.min(lastContentRow+20,fullCanvas.height); // 10px bottom padding (20 at scale:2)
-    const croppedCanvas=document.createElement('canvas');
-    croppedCanvas.width=fullCanvas.width;
-    croppedCanvas.height=cropHeight;
-    const croppedCtx=croppedCanvas.getContext('2d');
-    // Apply rounded corners via clipping path (radius=12px * scale:2 = 24)
-    const radius=24;
-    const w=fullCanvas.width,h=cropHeight;
-    croppedCtx.beginPath();
-    croppedCtx.moveTo(radius,0);
-    croppedCtx.lineTo(w-radius,0);
-    croppedCtx.quadraticCurveTo(w,0,w,radius);
-    croppedCtx.lineTo(w,h-radius);
-    croppedCtx.quadraticCurveTo(w,h,w-radius,h);
-    croppedCtx.lineTo(radius,h);
-    croppedCtx.quadraticCurveTo(0,h,0,h-radius);
-    croppedCtx.lineTo(0,radius);
-    croppedCtx.quadraticCurveTo(0,0,radius,0);
-    croppedCtx.closePath();
-    croppedCtx.clip();
-    croppedCtx.drawImage(fullCanvas,0,0);
+    // Apply rounded corners via canvas clipping (--radius-lg = 12px)
+    const radius=12*scale;
+    const w=rawCanvas.width, h=rawCanvas.height;
+    const out=document.createElement('canvas');
+    out.width=w; out.height=h;
+    const ctx=out.getContext('2d');
+    ctx.beginPath();
+    ctx.moveTo(radius,0);
+    ctx.lineTo(w-radius,0);
+    ctx.quadraticCurveTo(w,0,w,radius);
+    ctx.lineTo(w,h-radius);
+    ctx.quadraticCurveTo(w,h,w-radius,h);
+    ctx.lineTo(radius,h);
+    ctx.quadraticCurveTo(0,h,0,h-radius);
+    ctx.lineTo(0,radius);
+    ctx.quadraticCurveTo(0,0,radius,0);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(rawCanvas,0,0);
     const link=document.createElement('a');
     link.download=`night-${date}.png`;
-    link.href=croppedCanvas.toDataURL('image/png');
+    link.href=out.toDataURL('image/png');
     link.click();
   } catch(e){
     alert('Could not save PNG. Please try again.');
@@ -4562,6 +4964,8 @@ async function saveNightCardPng(date){
     uiEls.forEach(el=>el.style.visibility='');
     modal.style.maxHeight=prevMaxHeight;
     modal.style.overflowY=prevOverflow;
+    const st=document.getElementById('_png-hide-before');
+    if(st) st.remove();
   }
 }
 
@@ -5443,6 +5847,30 @@ function getSpotifyLinks(d){
   return [];
 }
 
+// Normalize a string for fuzzy matching: lowercase + strip all non-alphanumeric chars
+function _normSearch(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]/g,''); }
+
+// Returns true if the bank dance entry d matches query string q.
+// Matches against: dance name (raw), dance name (normalized/no punctuation),
+// and any Spotify link labels (song titles).
+function danceMatchesQuery(d, q){
+  if(!q) return true;
+  const raw=q.toLowerCase();
+  const norm=_normSearch(q);
+  // Match raw substring in dance name
+  if(d.name.toLowerCase().includes(raw)) return true;
+  // Match normalized (punctuation-stripped) dance name
+  if(_normSearch(d.name).includes(norm)) return true;
+  // Match against Spotify link labels (song titles)
+  const links=getSpotifyLinks(d);
+  for(const l of links){
+    if(!l.label) continue;
+    if(l.label.toLowerCase().includes(raw)) return true;
+    if(_normSearch(l.label).includes(norm)) return true;
+  }
+  return false;
+}
+
 // Render display buttons from links array
 function renderSpotifyBtns(links, stopProp){
   if(!links||!links.length) return '';
@@ -5854,6 +6282,29 @@ function nvHideTip(){const t=document.getElementById('nv-tip');if(t)t.textConten
 // =====================================================================
 // TEST FEATURES — Extra Analytics
 // =====================================================================
+
+// ---- DJ Color palette (fallback when djColors has no entry) ----
+const DJ_PALETTE = [
+  '#e05c97','#4facfe','#43e97b','#f9ca24','#a29bfe',
+  '#fd7043','#00cec9','#fdcb6e','#6c5ce7','#55efc4',
+  '#ff6b6b','#48dbfb','#1dd1a1','#feca57','#ff9ff3'
+];
+
+// Active DJ filter for heatmap (null = show all)
+window._drewHeatmapDJFilter = null;
+
+// ---- Resolve a DJ's display color from djColors or palette ----
+function getDJColor(djName, djIndex) {
+  // djColors stores gradient strings like "linear-gradient(135deg,#e05c97,#764ba2)"
+  // Extract first hex color from the gradient, or use as-is if solid color
+  const raw = (djColors && djColors[djName]) || '';
+  if (raw) {
+    const match = raw.match(/#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})/);
+    if (match) return match[0];
+  }
+  return DJ_PALETTE[djIndex % DJ_PALETTE.length];
+}
+
 // ---- Drew's Song Time Heatmap ----
 async function renderDrewSongHeatmap() {
   const el = document.getElementById('tf-song-heatmap');
@@ -5870,97 +6321,8 @@ async function renderDrewSongHeatmap() {
     return;
   }
 
-  // Convert timestamps to minutes-since-midnight (local time),
-  // filter to 7:30pm (19*60+30=1170) through 1:30am (1*60+30=90 next day → store as 90+1440=1530)
-  const START_MIN = 19 * 60 + 30; // 1170  = 7:30 PM
-  const END_MIN   = 25 * 60 + 30; // 1530  = 1:30 AM (next day, as 24h+1h30m)
-
-  // Group: songName -> list of {mins, notPerformed}
-  const songTimes = {};
-
-  log.forEach(entry => {
-    const t = new Date(entry.timestamp);
-    let mins = t.getHours() * 60 + t.getMinutes();
-    // Treat early-morning times (0:00-1:30) as past-midnight (add 1440)
-    if (mins < 6 * 60) mins += 1440;
-    if (mins < START_MIN || mins > END_MIN) return;
-    const name = entry.danceName.trim();
-    if (!songTimes[name]) songTimes[name] = [];
-    songTimes[name].push({ mins, notPerformed: entry.type === 'not_performed' });
-  });
-
-  if (!Object.keys(songTimes).length) {
-    el.innerHTML = `<div class="empty">No songs found in the 7:30 PM - 1:30 AM window.</div>`;
-    return;
-  }
-
-  // Outlier removal: for each song, if it appears multiple times,
-  // remove any time point that is >1 hour (60 min) away from all other points of that song.
-  const cleanedSongTimes = {};
-  Object.entries(songTimes).forEach(([song, pts]) => {
-    if (pts.length <= 1) {
-      cleanedSongTimes[song] = [...pts];
-      return;
-    }
-    const kept = pts.filter(pt => {
-      // Keep if at least one OTHER point is within 60 min
-      return pts.some(other => other !== pt && Math.abs(other.mins - pt.mins) <= 60);
-    });
-    if (kept.length > 0) cleanedSongTimes[song] = kept;
-    else cleanedSongTimes[song] = [pts[0]]; // fallback: keep earliest
-  });
-
-  // Build 15-minute interval buckets (7:30 PM to 1:30 AM)
-  // Only performed songs count toward "most common" ranking
-  const INTERVAL = 15;
-  const buckets = {}; // key: slot start (mins), value: {songName: performedCount}
-  for (let m = START_MIN; m < END_MIN; m += INTERVAL) {
-    buckets[m] = {};
-  }
-
-  // All data points for rendering
-  const allPoints = []; // {song, mins, slotKey, notPerformed}
-  Object.entries(cleanedSongTimes).forEach(([song, pts]) => {
-    pts.forEach(pt => {
-      const slotKey = Math.floor((pt.mins - START_MIN) / INTERVAL) * INTERVAL + START_MIN;
-      if (buckets[slotKey] !== undefined) {
-        buckets[slotKey][song] = (buckets[slotKey][song] || 0) + 1;
-        allPoints.push({ song, mins: pt.mins, slotKey, notPerformed: pt.notPerformed });
-      }
-    });
-  });
-
-  // For each slot, find the most common song
-  const slotTopSong = {};
-  Object.entries(buckets).forEach(([slot, songMap]) => {
-    const entries = Object.entries(songMap);
-    if (!entries.length) { slotTopSong[slot] = null; return; }
-    entries.sort((a, b) => b[1] - a[1]);
-    slotTopSong[slot] = entries[0][0];
-  });
-
-  // Y axis: unique songs sorted by earliest average appearance
-  const songList = Object.keys(cleanedSongTimes).sort((a, b) => {
-    const avgA = cleanedSongTimes[a].reduce((s, v) => s + v.mins, 0) / cleanedSongTimes[a].length;
-    const avgB = cleanedSongTimes[b].reduce((s, v) => s + v.mins, 0) / cleanedSongTimes[b].length;
-    return avgA - avgB;
-  });
-
-  const songIndex = {};
-  songList.forEach((s, i) => { songIndex[s] = i; });
-
-  // Chart dimensions
-  const LABEL_W  = 140;
-  const COL_W    = 28;
-  const ROW_H    = 22;
-  const TITLE_H  = 30;   // space for "Dance Time Map" title
-  const TOP_PAD  = TITLE_H + 48;
-  const X_LABEL_H = 24;  // space for "Time" x-axis label
-  const RIGHT_PAD = 12;
-  const slotKeys = Object.keys(buckets).map(Number).sort((a, b) => a - b);
-  const dataW    = slotKeys.length * COL_W;
-  const chartW   = LABEL_W + dataW + RIGHT_PAD;
-  const chartH   = TOP_PAD + songList.length * ROW_H + X_LABEL_H + 16;
+  const START_MIN = 19 * 60 + 30; // 7:30 PM
+  const END_MIN   = 25 * 60 + 30; // 1:30 AM next day
 
   function minsToLabel(m) {
     const real = m >= 1440 ? m - 1440 : m;
@@ -5969,31 +6331,225 @@ async function renderDrewSongHeatmap() {
     return `${h % 12 || 12}:${mm}${h < 12 ? 'AM' : 'PM'}`;
   }
 
-  // Color scale: light blue -> deep blue (more occurrences = darker)
-  const maxCount = Math.max(...allPoints.map(p => buckets[p.slotKey][p.song] || 1), 1);
-  function pointColor(count) {
-    const t = Math.min(count / maxCount, 1);
-    // #bfdbfe (blue-200) -> #1e40af (blue-800)
-    const r = Math.round(191 - t * 161);
-    const g = Math.round(219 - t * 155);
-    const b = Math.round(254 - t * 79);
-    return `rgb(${r},${g},${b})`;
+  // ---- Collect all DJs present in log ----
+  const djSet = new Set();
+  log.forEach(e => { if (e.dj) djSet.add(e.dj.trim()); else djSet.add(''); });
+  const allDJNames = [...djSet].filter(Boolean).sort();
+  if (djSet.has('')) allDJNames.push(''); // unknown DJ at end
+
+  // Build ordered DJ color map: use getDJColor for named DJs
+  const djColorMap = {};
+  let palIdx = 0;
+  allDJNames.forEach(dj => {
+    if (dj) {
+      djColorMap[dj] = getDJColor(dj, palIdx++);
+    } else {
+      djColorMap[''] = '#a0a0a0';
+    }
+  });
+
+  // Store full log + config globally for re-render when switching DJ filter
+  window._drewHeatmapFullLog = log;
+  window._drewHeatmapDJColorMap = djColorMap;
+  window._drewHeatmapAllDJs = allDJNames;
+  window._drewHeatmapStartMin = START_MIN;
+  window._drewHeatmapEndMin = END_MIN;
+  window._drewHeatmapMinsToLabel = minsToLabel;
+  window._drewHeatmapDJFilter = window._drewHeatmapDJFilter || null;
+
+  // ---- Build the heatmap HTML shell with DJ switcher ----
+  const djFilteredName = window._drewHeatmapDJFilter;
+
+  // Active log = filtered or all
+  const activeLog = djFilteredName !== null
+    ? log.filter(e => (e.dj ? e.dj.trim() : '') === djFilteredName)
+    : log;
+
+  // ---- Process active log into song times ----
+  // Each entry now also carries its DJ name for coloring
+  const songTimesRaw = {}; // song -> [{mins, dj, notPerformed}]
+  activeLog.forEach(entry => {
+    const t = new Date(entry.timestamp);
+    let mins = t.getHours() * 60 + t.getMinutes();
+    if (mins < 6 * 60) mins += 1440;
+    if (mins < START_MIN || mins > END_MIN) return;
+    const name = entry.danceName.trim();
+    if (!songTimesRaw[name]) songTimesRaw[name] = [];
+    songTimesRaw[name].push({ mins, dj: (entry.dj||'').trim(), notPerformed: entry.type === 'not_performed' });
+  });
+
+  if (!Object.keys(songTimesRaw).length) {
+    // Render shell first so DJ tabs still appear
+    _renderDrewHeatmapShell(el, allDJNames, djColorMap, djFilteredName, null, null, null, null, null, minsToLabel, START_MIN, END_MIN);
+    return;
   }
 
-  // Build tooltip content (hidden divs)
+  // Outlier removal per song
+  const cleanedSongTimes = {};
+  Object.entries(songTimesRaw).forEach(([song, pts]) => {
+    if (pts.length <= 1) { cleanedSongTimes[song] = [...pts]; return; }
+    const kept = pts.filter(pt => pts.some(o => o !== pt && Math.abs(o.mins - pt.mins) <= 60));
+    cleanedSongTimes[song] = kept.length > 0 ? kept : [pts[0]];
+  });
+
+  // Build buckets
+  const INTERVAL = 15;
+  const buckets = {};
+  for (let m = START_MIN; m < END_MIN; m += INTERVAL) buckets[m] = {};
+
+  const allPoints = []; // {song, mins, dj, slotKey, notPerformed}
+  Object.entries(cleanedSongTimes).forEach(([song, pts]) => {
+    pts.forEach(pt => {
+      const slotKey = Math.floor((pt.mins - START_MIN) / INTERVAL) * INTERVAL + START_MIN;
+      if (buckets[slotKey] !== undefined) {
+        buckets[slotKey][song] = (buckets[slotKey][song] || 0) + 1;
+        allPoints.push({ song, mins: pt.mins, dj: pt.dj, slotKey, notPerformed: pt.notPerformed });
+      }
+    });
+  });
+
+  // Top song per slot
+  const slotTopSong = {};
+  Object.entries(buckets).forEach(([slot, songMap]) => {
+    const entries = Object.entries(songMap);
+    if (!entries.length) { slotTopSong[slot] = null; return; }
+    entries.sort((a, b) => b[1] - a[1]);
+    slotTopSong[slot] = entries[0][0];
+  });
+
+  // Song list sorted by earliest avg appearance
+  const songList = Object.keys(cleanedSongTimes).sort((a, b) => {
+    const avgA = cleanedSongTimes[a].reduce((s, v) => s + v.mins, 0) / cleanedSongTimes[a].length;
+    const avgB = cleanedSongTimes[b].reduce((s, v) => s + v.mins, 0) / cleanedSongTimes[b].length;
+    return avgA - avgB;
+  });
+  const songIndex = {};
+  songList.forEach((s, i) => { songIndex[s] = i; });
+
+  // Build per-song avg data (for search) — scoped to active log
+  const songAvgData = {};
+  Object.entries(cleanedSongTimes).forEach(([song, pts]) => {
+    const allMins = pts.map(p => p.mins);
+    const avg = Math.round(allMins.reduce((s, v) => s + v, 0) / allMins.length);
+    songAvgData[song] = { avg, count: allMins.length };
+  });
+
+  // Store globally for search
+  window._drewSongAvgData = songAvgData;
+
+  _renderDrewHeatmapShell(
+    el, allDJNames, djColorMap, djFilteredName,
+    songList, songIndex, allPoints, buckets, slotTopSong,
+    minsToLabel, START_MIN, END_MIN
+  );
+}
+
+// ---- Inner render: builds SVG + tabs + search from processed data ----
+function _renderDrewHeatmapShell(
+  el, allDJNames, djColorMap, djFilteredName,
+  songList, songIndex, allPoints, buckets, slotTopSong,
+  minsToLabel, START_MIN, END_MIN
+) {
+  const INTERVAL = 15;
+  const slotKeys = [];
+  for (let m = START_MIN; m < END_MIN; m += INTERVAL) slotKeys.push(m);
+
+  // ---- Build DJ switcher tabs HTML ----
+  const tabBtns = [
+    // "All DJs" tab
+    `<button onclick="drewHeatmapSwitchDJ(null)" style="
+      padding:5px 13px;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;
+      border-radius:999px;border:1.5px solid ${djFilteredName===null?'var(--t1)':'var(--b3)'};
+      background:${djFilteredName===null?'var(--t1)':'var(--bg2)'};
+      color:${djFilteredName===null?'var(--bg)':'var(--t2)'};
+      cursor:pointer;white-space:nowrap;transition:all 0.15s;">All DJs</button>`,
+    ...allDJNames.map(dj => {
+      const color = djColorMap[dj] || '#888';
+      const isActive = djFilteredName === dj;
+      const label = dj || 'Unknown DJ';
+      // Escape for safe use inside a single-quoted JS string inside an HTML attribute
+      const djSafe = (dj||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      return `<button onclick="drewHeatmapSwitchDJ('${djSafe}')" style="
+        padding:5px 13px;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;
+        border-radius:999px;border:1.5px solid ${isActive ? color : 'var(--b3)'};
+        background:${isActive ? color : 'var(--bg2)'};
+        color:${isActive ? '#fff' : 'var(--t2)'};
+        cursor:pointer;white-space:nowrap;transition:all 0.15s;">${esc(label)}</button>`;
+    })
+  ].join('');
+
+  // ---- Legend ----
+  const legendItems = allDJNames.map(dj => {
+    const color = djColorMap[dj] || '#888';
+    const label = dj || 'Unknown DJ';
+    return `<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);">
+      <span style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;display:inline-block;"></span>
+      ${esc(label)}
+    </span>`;
+  }).join('');
+
+  // ---- Empty state ----
+  if (!songList || !songList.length) {
+    const djLabel = djFilteredName !== null ? (djFilteredName || 'Unknown DJ') : null;
+    el.innerHTML = `
+    <div style="background:var(--bg);border:0.5px solid var(--b3);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;align-items:center;">
+        ${tabBtns}
+      </div>
+      <div class="empty" style="padding:.5rem 0;">No songs found in the 7:30 PM – 1:30 AM window${djLabel ? ' for ' + esc(djLabel) : ''}.</div>
+    </div>`;
+    return;
+  }
+
+  // ---- Chart layout ----
+  const LABEL_W  = 140;
+  const COL_W    = 28;
+  const ROW_H    = 22;
+  const TITLE_H  = 30;
+  const TOP_PAD  = TITLE_H + 48;
+  const X_LABEL_H = 24;
+  const RIGHT_PAD = 12;
+  const dataW    = slotKeys.length * COL_W;
+  const chartW   = LABEL_W + dataW + RIGHT_PAD;
+  const chartH   = TOP_PAD + songList.length * ROW_H + X_LABEL_H + 16;
+
+  // ---- Build dot color: based on DJ when showing All; based on count intensity for single DJ ----
   const tooltips = [];
+  const ttMap = {};
+
   const dots = allPoints.map((pt, i) => {
     const cx = LABEL_W + slotKeys.indexOf(pt.slotKey) * COL_W + COL_W / 2;
     const cy = TOP_PAD + songIndex[pt.song] * ROW_H + ROW_H / 2;
-    const performedCount = buckets[pt.slotKey][pt.song] || 0;
-    const count = performedCount || 1;
+    const performedCount = (buckets[pt.slotKey] && buckets[pt.slotKey][pt.song]) || 0;
+    const count = Math.max(performedCount, 1);
     const isTop = slotTopSong[pt.slotKey] === pt.song;
     const tooltipId = `shtt-${i}`;
-    tooltips.push({ id: tooltipId, song: pt.song, time: minsToLabel(pt.mins), slot: minsToLabel(pt.slotKey), count: performedCount, isTop });
-    const color = pointColor(count);
+    const djLabel = pt.dj || 'Unknown DJ';
+    const djColor = djColorMap[pt.dj] || '#888';
+
+    let dotColor;
+    if (djFilteredName !== null) {
+      // Single DJ view: use intensity-based shade of that DJ's color
+      const hex = djColor.replace('#','');
+      const rBase = parseInt(hex.slice(0,2),16);
+      const gBase = parseInt(hex.slice(2,4),16);
+      const bBase = parseInt(hex.slice(4,6),16);
+      const maxC = Math.max(...allPoints.map(p => (buckets[p.slotKey]&&buckets[p.slotKey][p.song])||1), 1);
+      const t = Math.min(count / maxC, 1);
+      const r = Math.round(rBase + (255 - rBase) * (1 - t) * 0.55);
+      const g = Math.round(gBase + (255 - gBase) * (1 - t) * 0.55);
+      const b2 = Math.round(bBase + (255 - bBase) * (1 - t) * 0.55);
+      dotColor = `rgb(${r},${g},${b2})`;
+    } else {
+      dotColor = djColor;
+    }
+
     const radius = 5 + Math.min(count - 1, 3) * 1.5;
-    return `<circle cx="${cx}" cy="${cy}" r="${radius}" fill="${color}" fill-opacity="0.85"
-      stroke="${isTop ? 'var(--t1)' : color}" stroke-width="${isTop ? 1.5 : 0}"
+    tooltips.push({ id: tooltipId, song: pt.song, time: minsToLabel(pt.mins), slot: minsToLabel(pt.slotKey), count: performedCount, isTop, dj: djLabel, djColor });
+    ttMap[tooltipId] = tooltips[tooltips.length - 1];
+
+    return `<circle cx="${cx}" cy="${cy}" r="${radius}" fill="${dotColor}" fill-opacity="0.88"
+      stroke="${isTop ? 'var(--t1)' : dotColor}" stroke-width="${isTop ? 1.5 : 0}"
       style="cursor:pointer;transition:r 0.12s,fill-opacity 0.12s;"
       onmouseenter="drewHeatmapShow(event,'${tooltipId}')"
       onmouseleave="drewHeatmapHide()"
@@ -6007,13 +6563,13 @@ async function renderDrewSongHeatmap() {
     return `<text x="${cx}" y="${TOP_PAD - 10}" text-anchor="middle" font-size="9" fill="var(--t3)" font-family="DM Sans,sans-serif">${minsToLabel(slot)}</text>`;
   }).join('');
 
-  // Slot column highlight lines (every 30 min)
+  // Slot column guide lines (every 30 min)
   const colLines = slotKeys.filter((_, i) => i % 2 === 0).map(slot => {
     const cx = LABEL_W + slotKeys.indexOf(slot) * COL_W + COL_W / 2;
     return `<line x1="${cx}" y1="${TOP_PAD - 4}" x2="${cx}" y2="${TOP_PAD + songList.length * ROW_H}" stroke="var(--b3)" stroke-width="1" stroke-dasharray="2,3"/>`;
   }).join('');
 
-  // Song labels on Y axis
+  // Y-axis song labels
   const yLabels = songList.map((song, i) => {
     const cy = TOP_PAD + i * ROW_H + ROW_H / 2 + 4;
     const short = song.length > 16 ? song.slice(0, 15) + '…' : song;
@@ -6026,24 +6582,45 @@ async function renderDrewSongHeatmap() {
     return `<rect x="${LABEL_W}" y="${TOP_PAD + i * ROW_H}" width="${slotKeys.length * COL_W}" height="${ROW_H}" fill="var(--bg2)" rx="2"/>`;
   }).join('');
 
-  // Tooltip data map stored in window
-  const ttMap = {};
-  tooltips.forEach(tt => { ttMap[tt.id] = tt; });
-
-  // Build slot summary (top song per slot)
+  // Slot summary rows
   const slotSummaryRows = slotKeys.map(slot => {
-    const songMap = buckets[slot];
+    const songMap = buckets[slot] || {};
     const top = Object.entries(songMap).sort((a, b) => b[1] - a[1]).slice(0, 2);
     if (!top.length) return `<div style="display:flex;gap:6px;align-items:center;padding:4px 0;border-bottom:0.5px solid var(--b3);"><span style="font-size:11px;color:var(--t3);min-width:56px;">${minsToLabel(slot)}</span><span style="font-size:11px;color:var(--t3);">—</span></div>`;
     return `<div style="display:flex;gap:6px;align-items:flex-start;padding:4px 0;border-bottom:0.5px solid var(--b3);">
       <span style="font-size:11px;color:var(--t2);min-width:56px;flex-shrink:0;">${minsToLabel(slot)}</span>
-      <div>${top.map(([ song, cnt ], idx) => `<div style="font-size:11px;color:${idx===0?'var(--t1)':'var(--t3)'};">${idx===0?'★ ':''}${song}${cnt>1?` ×${cnt}`:''}</div>`).join('')}</div>
+      <div>${top.map(([song, cnt], idx) => `<div style="font-size:11px;color:${idx===0?'var(--t1)':'var(--t3)'};">${idx===0?'★ ':''}${song}${cnt>1?` ×${cnt}`:''}</div>`).join('')}</div>
     </div>`;
   }).join('');
 
+  // Chart title
+  const chartTitle = djFilteredName !== null
+    ? `Dance Time Map — ${djFilteredName || 'Unknown DJ'}`
+    : 'Dance Time Map — All DJs';
+
+  const searchLabel = djFilteredName !== null
+    ? `Search songs — average play time (${djFilteredName || 'Unknown DJ'})`
+    : 'Search songs — average play time (all DJs combined)';
+
   el.innerHTML = `
   <div style="background:var(--bg);border:0.5px solid var(--b3);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;position:relative;">
-    <div id="drew-song-tooltip" style="display:none;position:fixed;z-index:9000;background:var(--bg);border:0.5px solid var(--b2);border-radius:8px;padding:10px 14px;box-shadow:0 4px 18px rgba(0,0,0,0.18);font-family:'DM Sans',sans-serif;min-width:160px;max-width:240px;pointer-events:none;"></div>
+
+    <!-- DJ Switcher Tabs -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;align-items:center;">
+      ${tabBtns}
+    </div>
+
+    <!-- Legend (only in All DJs view) -->
+    ${djFilteredName === null && allDJNames.length > 0 ? `
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:1rem;padding:8px 12px;background:var(--bg2);border:0.5px solid var(--b3);border-radius:var(--radius-md);">
+      <span style="font-size:11px;font-weight:600;color:var(--t2);letter-spacing:.04em;text-transform:uppercase;align-self:center;">DJ Legend</span>
+      ${legendItems}
+    </div>` : ''}
+
+    <!-- Tooltip (stays inside the container) -->
+    <div id="drew-song-tooltip" style="display:none;position:absolute;z-index:200;background:var(--bg);border:0.5px solid var(--b2);border-radius:8px;padding:10px 14px;box-shadow:0 4px 18px rgba(0,0,0,0.18);font-family:'DM Sans',sans-serif;min-width:160px;max-width:240px;pointer-events:none;"></div>
+
+    <!-- Scrollable heatmap -->
     <div id="drew-heatmap-scroll"
       style="overflow:auto;cursor:grab;user-select:none;-webkit-overflow-scrolling:touch;border-radius:6px;max-height:520px;position:relative;"
       onmousedown="drewHeatmapDragStart(event)"
@@ -6056,26 +6633,26 @@ async function renderDrewSongHeatmap() {
         ${yLabels}
         ${timeLabels}
         ${dots}
-        <!-- Border rect enclosing data area -->
         <rect x="${LABEL_W}" y="${TOP_PAD}" width="${dataW}" height="${songList.length * ROW_H}" fill="none" stroke="var(--b2)" stroke-width="1"/>
-        <!-- Chart title -->
-        <text x="${Math.round(LABEL_W + dataW / 2)}" y="${Math.round(TITLE_H / 2 + 4)}" text-anchor="middle" font-size="14" font-weight="600" fill="var(--t1)" font-family="DM Sans,sans-serif">Dance Time Map</text>
-        <!-- X-axis label -->
+        <text x="${Math.round(LABEL_W + dataW / 2)}" y="${Math.round(TITLE_H / 2 + 4)}" text-anchor="middle" font-size="13" font-weight="600" fill="var(--t1)" font-family="DM Sans,sans-serif">${chartTitle}</text>
         <text x="${Math.round(LABEL_W + dataW / 2)}" y="${TOP_PAD + songList.length * ROW_H + X_LABEL_H - 2}" text-anchor="middle" font-size="11" fill="var(--t2)" font-family="DM Sans,sans-serif">Time</text>
       </svg>
     </div>
+
     <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--t3);align-items:center;">
       <span>Dot size = times in slot</span>
       <span>★ outlined = most common this interval</span>
       <span>Click a dot to pin tooltip</span>
       <button onclick="drewHeatmapExport()" style="margin-left:auto;padding:5px 13px;font-size:11px;font-weight:500;font-family:'DM Sans',sans-serif;background:var(--bg2);color:var(--t2);border:0.5px solid var(--b2);border-radius:var(--radius-md);cursor:pointer;" title="Export heatmap as PNG">⬇ Export PNG</button>
     </div>
+
     <details style="margin-top:1rem;">
       <summary style="font-size:12px;font-weight:500;color:var(--t2);cursor:pointer;padding:6px 0;">Top song per 15-min interval ▾</summary>
       <div style="margin-top:8px;max-height:260px;overflow-y:auto;border:0.5px solid var(--b3);border-radius:var(--radius-md);padding:6px 12px;">${slotSummaryRows}</div>
     </details>
+
     <div style="margin-top:1.25rem;border-top:0.5px solid var(--b3);padding-top:1.25rem;">
-      <div style="font-size:12px;font-weight:500;color:var(--t2);margin-bottom:8px;">Search songs — average play time</div>
+      <div style="font-size:12px;font-weight:500;color:var(--t2);margin-bottom:8px;">${searchLabel}</div>
       <input id="drew-song-search" type="text" placeholder="Type a song name..." autocomplete="off"
         style="width:100%;max-width:340px;padding:8px 12px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg2);color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;margin-bottom:10px;"
         oninput="drewSongSearch(this.value)">
@@ -6083,7 +6660,81 @@ async function renderDrewSongHeatmap() {
     </div>
   </div>`;
 
-  // Build per-song average time data for search
+  window._drewHeatmapTT = ttMap;
+  window._drewHeatmapPinned = null;
+}
+
+// ---- Switch DJ filter and re-render ----
+window.drewHeatmapSwitchDJ = function(djName) {
+  window._drewHeatmapDJFilter = djName;
+  // Clear search when switching
+  window._drewSongAvgData = null;
+
+  const log = window._drewHeatmapFullLog;
+  const allDJNames = window._drewHeatmapAllDJs;
+  const djColorMap = window._drewHeatmapDJColorMap;
+  const START_MIN = window._drewHeatmapStartMin;
+  const END_MIN = window._drewHeatmapEndMin;
+  const minsToLabel = window._drewHeatmapMinsToLabel;
+  const INTERVAL = 15;
+
+  const el = document.getElementById('tf-song-heatmap');
+  if (!el || !log) return;
+
+  const activeLog = djName !== null
+    ? log.filter(e => (e.dj ? e.dj.trim() : '') === djName)
+    : log;
+
+  // Process
+  const songTimesRaw = {};
+  activeLog.forEach(entry => {
+    const t = new Date(entry.timestamp);
+    let mins = t.getHours() * 60 + t.getMinutes();
+    if (mins < 6 * 60) mins += 1440;
+    if (mins < START_MIN || mins > END_MIN) return;
+    const name = entry.danceName.trim();
+    if (!songTimesRaw[name]) songTimesRaw[name] = [];
+    songTimesRaw[name].push({ mins, dj: (entry.dj||'').trim(), notPerformed: entry.type === 'not_performed' });
+  });
+
+  const cleanedSongTimes = {};
+  Object.entries(songTimesRaw).forEach(([song, pts]) => {
+    if (pts.length <= 1) { cleanedSongTimes[song] = [...pts]; return; }
+    const kept = pts.filter(pt => pts.some(o => o !== pt && Math.abs(o.mins - pt.mins) <= 60));
+    cleanedSongTimes[song] = kept.length > 0 ? kept : [pts[0]];
+  });
+
+  const buckets = {};
+  for (let m = START_MIN; m < END_MIN; m += INTERVAL) buckets[m] = {};
+
+  const allPoints = [];
+  Object.entries(cleanedSongTimes).forEach(([song, pts]) => {
+    pts.forEach(pt => {
+      const slotKey = Math.floor((pt.mins - START_MIN) / INTERVAL) * INTERVAL + START_MIN;
+      if (buckets[slotKey] !== undefined) {
+        buckets[slotKey][song] = (buckets[slotKey][song] || 0) + 1;
+        allPoints.push({ song, mins: pt.mins, dj: pt.dj, slotKey, notPerformed: pt.notPerformed });
+      }
+    });
+  });
+
+  const slotTopSong = {};
+  Object.entries(buckets).forEach(([slot, songMap]) => {
+    const entries = Object.entries(songMap);
+    if (!entries.length) { slotTopSong[slot] = null; return; }
+    entries.sort((a, b) => b[1] - a[1]);
+    slotTopSong[slot] = entries[0][0];
+  });
+
+  const songList = Object.keys(cleanedSongTimes).sort((a, b) => {
+    const avgA = cleanedSongTimes[a].reduce((s, v) => s + v.mins, 0) / cleanedSongTimes[a].length;
+    const avgB = cleanedSongTimes[b].reduce((s, v) => s + v.mins, 0) / cleanedSongTimes[b].length;
+    return avgA - avgB;
+  });
+  const songIndex = {};
+  songList.forEach((s, i) => { songIndex[s] = i; });
+
+  // Update search data for the new filter
   const songAvgData = {};
   Object.entries(cleanedSongTimes).forEach(([song, pts]) => {
     const allMins = pts.map(p => p.mins);
@@ -6092,10 +6743,12 @@ async function renderDrewSongHeatmap() {
   });
   window._drewSongAvgData = songAvgData;
 
-  // Store tooltip map on window for event handlers
-  window._drewHeatmapTT = ttMap;
-  window._drewHeatmapPinned = null;
-}
+  _renderDrewHeatmapShell(
+    el, allDJNames, djColorMap, djName,
+    songList, songIndex, allPoints, buckets, slotTopSong,
+    minsToLabel, START_MIN, END_MIN
+  );
+};
 
 // ---- Heatmap drag-to-scroll (mouse) ----
 (function() {
@@ -6217,29 +6870,41 @@ function drewHeatmapRender(e, id) {
   if (!tt) return;
   const data = window._drewHeatmapTT && window._drewHeatmapTT[id];
   if (!data) return;
+
+  // Build tooltip HTML — include DJ info with color swatch
+  const djSwatch = data.djColor ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${data.djColor};margin-right:4px;vertical-align:middle;"></span>` : '';
   tt.innerHTML = `
     <div style="font-size:13px;font-weight:600;color:var(--t1);margin-bottom:4px;">${data.song}</div>
+    ${data.dj ? `<div style="font-size:11px;color:var(--t2);margin-bottom:3px;">${djSwatch}<strong>${data.dj}</strong></div>` : ''}
     <div style="font-size:11px;color:var(--t2);">Logged at: <strong>${data.time}</strong></div>
     <div style="font-size:11px;color:var(--t2);">Interval: <strong>${data.slot}</strong></div>
     ${data.count > 0 ? `<div style="font-size:11px;color:var(--t2);">Times in this slot: <strong>${data.count}</strong></div>` : ''}
     ${data.isTop ? `<div style="margin-top:4px;font-size:11px;font-weight:600;color:var(--amber-text);">★ Most common this interval</div>` : ''}
     <div style="margin-top:4px;font-size:10px;color:var(--t3);">Click to ${window._drewHeatmapPinned===id?'unpin':'pin'}</div>`;
   tt.style.display = 'block';
-  // Measure tooltip size after making it visible
-  const ttW = tt.offsetWidth || 200;
-  const ttH = tt.offsetHeight || 130;
-  const pad = 10;
-  const vw = window.innerWidth, vh = window.innerHeight;
-  // Prefer placing to the left of the cursor; fall back to right if not enough room
-  let left, top;
-  if (e.clientX - ttW - pad >= 0) {
-    left = e.clientX - ttW - pad;
-  } else {
-    left = e.clientX + pad;
-  }
-  top = e.clientY - Math.round(ttH / 2);
-  if (top + ttH > vh - 8) top = vh - ttH - 8;
-  if (top < 8) top = 8;
+
+  // Position relative to the outer container div (position:relative parent of the tooltip)
+  const container = tt.parentElement; // the card div with position:relative
+  if (!container) return;
+  const containerRect = container.getBoundingClientRect();
+  const ttW = tt.offsetWidth || 220;
+  const ttH = tt.offsetHeight || 140;
+  const pad = 12;
+
+  // Cursor position relative to container
+  let left = e.clientX - containerRect.left + pad;
+  let top  = e.clientY - containerRect.top - Math.round(ttH / 2);
+
+  // Keep within container horizontally
+  const containerW = containerRect.width;
+  if (left + ttW > containerW - 4) left = (e.clientX - containerRect.left) - ttW - pad;
+  if (left < 4) left = 4;
+
+  // Keep within container vertically
+  const containerH = containerRect.height;
+  if (top + ttH > containerH - 4) top = containerH - ttH - 4;
+  if (top < 4) top = 4;
+
   tt.style.left = left + 'px';
   tt.style.top  = top + 'px';
 }
@@ -6257,6 +6922,11 @@ window.drewSongSearch = function(query) {
     return `${h % 12 || 12}:${mm} ${h < 12 ? 'AM' : 'PM'}`;
   }
 
+  const djFilter = window._drewHeatmapDJFilter;
+  const context = djFilter !== null
+    ? (djFilter || 'Unknown DJ')
+    : 'all DJs';
+
   const matches = Object.entries(data)
     .filter(([song]) => song.toLowerCase().includes(q))
     .sort((a, b) => a[1].avg - b[1].avg);
@@ -6270,7 +6940,7 @@ window.drewSongSearch = function(query) {
     <div style="display:flex;align-items:center;gap:12px;padding:7px 12px;border-radius:var(--radius-md);background:var(--bg2);border:0.5px solid var(--b3);">
       <span style="flex:1;font-size:13px;font-weight:500;color:var(--t1);">${song}</span>
       <span style="font-size:12px;color:var(--t2);">avg <strong style="color:var(--t1);">${minsToLabel(info.avg)}</strong></span>
-      <span style="font-size:11px;color:var(--t3);">${info.count} data point${info.count !== 1 ? 's' : ''}</span>
+      <span style="font-size:11px;color:var(--t3);">${info.count} pt${info.count !== 1 ? 's' : ''} · ${context}</span>
     </div>`).join('');
 };
 
@@ -7259,7 +7929,13 @@ async function spCreatePlaylist(){
       }
     }
 
-    spShowStatus('success',`✓ Playlist "${esc(playlistName)}" created with ${uris.length} track${uris.length!==1?'s':''}!${skipped.length?' ('+skipped.length+' skipped)':''} <a href="${pl.external_urls?.spotify||'https://open.spotify.com'}" target="_blank" rel="noopener" style="color:inherit;font-weight:600;text-decoration:underline;">Open in Spotify →</a>`);
+    const _wl=pl.external_urls?.spotify||('https://open.spotify.com/playlist/'+pl.id);
+    const _dl='spotify:playlist:'+pl.id;
+    const _isMob=/iphone|ipad|ipod|android/i.test(navigator.userAgent);
+    const _openBtn=_isMob
+      ?`<button onclick="(function(){var a=document.createElement('a');a.href='${_dl}';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){window.open('${_wl}','_blank');},1200);})()" style="margin-left:8px;padding:5px 14px;background:#fff;color:#1DB954;border:1.5px solid #1DB954;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Open in Spotify App →</button>`
+      :`<a href="${_wl}" target="_blank" rel="noopener" style="color:inherit;font-weight:600;text-decoration:underline;">Open in Spotify →</a>`;
+    spShowStatus('success',`✓ Playlist "${esc(playlistName)}" created with ${uris.length} track${uris.length!==1?'s':''}!${skipped.length?' ('+skipped.length+' skipped)':''} ${_openBtn}`);
   }catch(e){ spShowStatus('error','Exception: '+e.message+' | Stack: '+e.stack); }
   btn.disabled=false;
 }
@@ -7364,122 +8040,253 @@ function renderDebugNight(){
   const date=document.getElementById('debug-date-select')?.value;
   const out=document.getElementById('debug-night-output');
   if(!out) return;
-  if(!date||!debugUserState){out.innerHTML=`<div class="empty">Select a user and night above to inspect data.</div>`;return;}
+  if(!date||!debugUserState){out.innerHTML='<div class="empty">Select a user and night above to inspect data.</div>';return;}
 
   const nights=debugUserState.nights||{};
   const nd=nights[date];
-  if(!nd){out.innerHTML=`<div class="empty">No data found for ${esc(date)}.</div>`;return;}
+  if(!nd){out.innerHTML='<div class="empty">No data found for '+esc(date)+'.</div>';return;}
 
   const nightObj=Array.isArray(nd)?{dances:nd,dj:'',highlights:null,arriveTime:'',leaveTime:'',notPerformed:[]}:{notPerformed:[],...nd};
-  const danceLog=((debugUserState.danceLog)||[]).filter(e=>e.date===date);
+
+  // Stamp every danceLog entry with a stable _eid so we can look them up by
+  // key instead of array index (indices shift when entries are deleted/filtered).
+  if(!debugUserState.danceLog) debugUserState.danceLog=[];
+  debugUserState.danceLog.forEach((e,i)=>{
+    if(!e._eid) e._eid='eid_'+i+'_'+(e.timestamp||Date.now()+'_'+i);
+  });
+
+  const fullLog=debugUserState.danceLog;
+  const danceLog=fullLog.filter(e=>e.date===date);
   const performed=danceLog.filter(e=>e.type!=='not_performed'&&e.type!=='palace_times'&&(e.danceId||e.danceName));
   const notPerformed=danceLog.filter(e=>e.type==='not_performed'&&(e.danceId||e.danceName));
-
-  // For resolving IDs — use the inspected user's know list + bank
   const userKnow=debugUserState.know||[];
 
   function pill(label,val,color){
-    return`<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px;background:${color||'var(--bg2)'};border:0.5px solid var(--b3);color:var(--t1);white-space:nowrap;">${esc(label)}: <strong>${esc(String(val??'—'))}</strong></span>`;
+    return'<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px;background:'+(color||'var(--bg2)')+';border:0.5px solid var(--b3);color:var(--t1);white-space:nowrap;">'+esc(label)+': <strong>'+esc(String(val??'—'))+'</strong></span>';
   }
-  function section(title,color,content){
-    return`<div style="margin-bottom:1.25rem;">
-      <div style="font-size:11px;font-weight:600;color:${color};text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">${title}</div>
-      ${content}
-    </div>`;
+  function section(title,color,body){
+    return'<div style="margin-bottom:1.25rem;"><div style="font-size:11px;font-weight:600;color:'+color+';text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">'+title+'</div>'+body+'</div>';
   }
   function fmtDebugTime(e){
-    if(e.timestamp){
-      const d=new Date(e.timestamp);
-      return d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true});
-    }
+    if(e.timestamp){const d=new Date(e.timestamp);return d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true});}
     return e.localTime||'—';
   }
-  function logTable(entries,emptyMsg){
-    if(!entries.length) return`<div style="font-size:13px;color:var(--t3);padding:6px 0;">${emptyMsg}</div>`;
-    return`<div style="border:0.5px solid var(--b3);border-radius:var(--radius-lg);overflow:hidden;">
-      <table style="width:100%;border-collapse:collapse;font-size:12px;">
-        <thead>
-          <tr style="background:var(--bg2);">
-            <th style="padding:7px 12px;text-align:left;font-weight:500;color:var(--t2);border-bottom:0.5px solid var(--b3);">Dance</th>
-            <th style="padding:7px 12px;text-align:left;font-weight:500;color:var(--t2);border-bottom:0.5px solid var(--b3);">Time</th>
-            <th style="padding:7px 12px;text-align:left;font-weight:500;color:var(--t2);border-bottom:0.5px solid var(--b3);">DJ</th>
-            <th style="padding:7px 12px;text-align:left;font-weight:500;color:var(--t2);border-bottom:0.5px solid var(--b3);">Timestamp (ISO)</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${entries.map((e,i)=>`<tr style="background:${i%2?'var(--bg2)':'var(--bg)'};">
-            <td style="padding:7px 12px;border-bottom:0.5px solid var(--b3);">${esc(e.danceName||e.danceId||'?')}</td>
-            <td style="padding:7px 12px;border-bottom:0.5px solid var(--b3);font-variant-numeric:tabular-nums;">${esc(fmtDebugTime(e))}</td>
-            <td style="padding:7px 12px;border-bottom:0.5px solid var(--b3);">${esc(e.dj||'—')}</td>
-            <td style="padding:7px 12px;border-bottom:0.5px solid var(--b3);font-size:11px;color:var(--t2);font-variant-numeric:tabular-nums;">${esc(e.timestamp||'—')}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>`;
+
+  const djOpts='<option value=""></option>'+djList.slice().sort((a,b)=>a.localeCompare(b)).map(dj=>'<option value="'+escA(dj)+'">'+esc(dj)+'</option>').join('');
+
+  function editableLogTable(entries,tableId,emptyMsg){
+    if(!entries.length) return'<div style="font-size:13px;color:var(--t3);padding:6px 0;">'+emptyMsg+'</div>';
+    const rows=entries.map((e,i)=>{
+      const eid=e._eid;
+      const rowBg=i%2?'var(--bg2)':'var(--bg)';
+      return'<tr data-eid="'+escA(eid)+'" style="background:'+rowBg+';">'
+        +'<td style="padding:5px 8px;border-bottom:0.5px solid var(--b3);">'
+          +'<input class="debug-edit-input" data-field="danceName" data-eid="'+escA(eid)+'" value="'+escA(e.danceName||e.danceId||'')+'" style="width:100%;min-width:100px;padding:4px 7px;border:0.5px solid var(--b2);border-radius:5px;background:var(--bg2);color:var(--t1);font-size:12px;font-family:\'DM Sans\',sans-serif;">'
+        +'</td>'
+        +'<td style="padding:5px 8px;border-bottom:0.5px solid var(--b3);white-space:nowrap;font-variant-numeric:tabular-nums;font-size:12px;color:var(--t2);">'+esc(fmtDebugTime(e))+'</td>'
+        +'<td style="padding:5px 8px;border-bottom:0.5px solid var(--b3);">'
+          +'<select class="debug-edit-select" data-field="dj" data-eid="'+escA(eid)+'" style="padding:4px 7px;border:0.5px solid var(--b2);border-radius:5px;background:var(--bg2);color:var(--t1);font-size:12px;font-family:\'DM Sans\',sans-serif;min-width:110px;">'+djOpts+'</select>'
+        +'</td>'
+        +'<td style="padding:5px 8px;border-bottom:0.5px solid var(--b3);">'
+          +'<input class="debug-edit-input" data-field="timestamp" data-eid="'+escA(eid)+'" value="'+escA(e.timestamp||'')+'" style="width:100%;min-width:160px;padding:4px 7px;border:0.5px solid var(--b2);border-radius:5px;background:var(--bg2);color:var(--t1);font-size:11px;font-family:monospace;">'
+        +'</td>'
+        +'<td style="padding:5px 8px;border-bottom:0.5px solid var(--b3);white-space:nowrap;">'
+          +'<button class="btn xs danger" onclick="debugDeleteLogEntry(\''+date+'\',\''+escA(eid)+'\')">&#215;</button>'
+        +'</td>'
+      +'</tr>';
+    }).join('');
+    return'<div style="overflow-x:auto;border:0.5px solid var(--b3);border-radius:var(--radius-lg);overflow:hidden;">'
+      +'<table id="'+tableId+'" style="width:100%;border-collapse:collapse;font-size:12px;">'
+        +'<thead><tr style="background:var(--bg2);">'
+          +'<th style="padding:7px 10px;text-align:left;font-weight:500;color:var(--t2);border-bottom:0.5px solid var(--b3);">Dance</th>'
+          +'<th style="padding:7px 10px;text-align:left;font-weight:500;color:var(--t2);border-bottom:0.5px solid var(--b3);">Time</th>'
+          +'<th style="padding:7px 10px;text-align:left;font-weight:500;color:var(--t2);border-bottom:0.5px solid var(--b3);">'
+            +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">'
+              +'DJ'
+              +'<select id="debug-apply-dj-sel-'+tableId+'" style="padding:3px 6px;border:0.5px solid var(--blue-border);border-radius:5px;background:var(--blue-bg);color:var(--blue-text);font-size:11px;font-family:\'DM Sans\',sans-serif;font-weight:600;">'+djOpts+'</select>'
+              +'<button class="btn xs" style="background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-border);font-size:11px;padding:3px 8px;" onclick="debugApplyDJToAll(\''+tableId+'\')">Apply to All</button>'
+            +'</div>'
+          +'</th>'
+          +'<th style="padding:7px 10px;text-align:left;font-weight:500;color:var(--t2);border-bottom:0.5px solid var(--b3);">Timestamp (ISO)</th>'
+          +'<th style="padding:7px 10px;border-bottom:0.5px solid var(--b3);"></th>'
+        +'</tr></thead>'
+        +'<tbody>'+rows+'</tbody>'
+      +'</table>'
+    +'</div>';
   }
 
-  const hlNames=(nightObj.highlights||[]).map(id=>{
-    const d=userKnow.find(k=>k.id===id);
-    return d?d.name:id||'—';
+  const hlNames=(nightObj.highlights||[]).map(id=>{const d=userKnow.find(k=>k.id===id);return d?d.name:id||'—';});
+  const storedPerformed=(nightObj.dances||[]).map(id=>{const d=userKnow.find(k=>k.id===id);return d?d.name:id;}).sort((a,b)=>a.localeCompare(b));
+  const storedNotPerf=(nightObj.notPerformed||[]).map(id=>{const d=bank.find(k=>k.id===id)||userKnow.find(k=>k.id===id);return d?d.name:id;}).sort((a,b)=>a.localeCompare(b));
+
+  out.innerHTML=
+    '<div style="background:var(--bg);border:0.5px solid var(--b3);border-radius:var(--radius-lg);padding:1.5rem;">'
+    +'<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap;">'
+      +'<div style="flex:1;">'
+        +'<div style="font-family:\'Playfair Display\',serif;font-size:20px;font-weight:700;margin-bottom:2px;">'+formatDate(date)+'</div>'
+        +'<div style="font-size:12px;color:var(--t2);font-family:monospace;">'+esc(date)+' · user: '+esc(debugUsername)+'</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'
+        +'<button class="btn sm success" id="debug-save-btn" onclick="debugSaveNight(\''+date+'\')">&#10003; Save Changes</button>'
+        +'<button class="btn sm danger" onclick="debugDeleteNight(\''+date+'\')">&#128465; Delete Night</button>'
+      +'</div>'
+    +'</div>'
+    +'<div id="debug-save-status" style="font-size:13px;margin-bottom:1rem;display:none;padding:8px 12px;border-radius:var(--radius-md);border:0.5px solid var(--b3);"></div>'
+    +section('Night metadata — editable','var(--t2)',
+      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">'
+        +'<div>'
+          +'<label style="font-size:11px;font-weight:600;color:var(--t2);display:block;margin-bottom:4px;">DJ</label>'
+          +'<select id="debug-meta-dj" style="width:100%;padding:7px 10px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg2);color:var(--t1);font-size:13px;font-family:\'DM Sans\',sans-serif;">'+djOpts+'</select>'
+        +'</div>'
+        +'<div>'
+          +'<label style="font-size:11px;font-weight:600;color:var(--t2);display:block;margin-bottom:4px;">Arrived</label>'
+          +'<input type="time" id="debug-meta-arrive" value="'+escA(nightObj.arriveTime||'')+'" style="width:100%;padding:7px 10px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg2);color:var(--t1);font-size:13px;font-family:\'DM Sans\',sans-serif;">'
+        +'</div>'
+        +'<div>'
+          +'<label style="font-size:11px;font-weight:600;color:var(--t2);display:block;margin-bottom:4px;">Left</label>'
+          +'<input type="time" id="debug-meta-leave" value="'+escA(nightObj.leaveTime||'')+'" style="width:100%;padding:7px 10px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg2);color:var(--t1);font-size:13px;font-family:\'DM Sans\',sans-serif;">'
+        +'</div>'
+        +'<div style="display:flex;flex-direction:column;justify-content:flex-end;">'
+          +pill('Performed',(nightObj.dances||[]).length,'var(--green-bg)')
+        +'</div>'
+      +'</div>'
+    )
+    +section('Highlights','var(--amber-text)',nightObj.highlights&&nightObj.highlights.some(Boolean)
+      ?'<div style="display:flex;flex-direction:column;gap:6px;">'+hlNames.map((n,i)=>n&&n!=='—'?'<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:0.5px solid var(--amber-border);border-radius:var(--radius-md);background:var(--amber-bg);"><span style="font-family:\'Playfair Display\',serif;font-size:15px;font-weight:700;color:var(--amber-text);min-width:20px;">'+(i+1)+'</span><span style="font-size:13px;font-weight:500;">'+esc(n)+'</span></div>':'').join('')+'</div>'
+      :'<div style="font-size:13px;color:var(--t3);">No highlights saved for this night.</div>'
+    )
+    +section('Performed dances','var(--green-text)',storedPerformed.length
+      ?'<div style="display:flex;flex-wrap:wrap;gap:5px;">'+storedPerformed.map(n=>'<span style="font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px;background:var(--green-bg);border:0.5px solid var(--green-border);color:var(--green-text);">'+esc(n)+'</span>').join('')+'</div>'
+      :'<div style="font-size:13px;color:var(--t3);">None stored.</div>'
+    )
+    +(storedNotPerf.length?section('Not performed dances','var(--red-text)','<div style="display:flex;flex-wrap:wrap;gap:5px;">'+storedNotPerf.map(n=>'<span style="font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px;background:var(--red-bg);border:0.5px solid var(--red-border);color:var(--red-text);">'+esc(n)+'</span>').join('')+'</div>'):'')
+    +section('Dance log — performed ('+performed.length+' entries) <span style="font-size:10px;font-weight:400;color:var(--t3);">— edit cells then Save Changes</span>','var(--blue-text)',editableLogTable(performed,'debug-log-performed','No performed log entries for this night.'))
+    +(notPerformed.length?section('Dance log — not performed ('+notPerformed.length+' entries)','var(--purple-text)',editableLogTable(notPerformed,'debug-log-notperformed','No not-performed log entries.')):'')
+    +'<div style="margin-top:1.5rem;border-top:0.5px solid var(--b3);padding-top:1rem;">'
+      +'<div style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Raw JSON</div>'
+      +'<pre id="debug-raw-json" style="font-size:11px;font-family:monospace;background:var(--bg2);border:0.5px solid var(--b3);border-radius:var(--radius-md);padding:12px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;color:var(--t1);max-height:300px;overflow-y:auto;">'+esc(JSON.stringify({night:nightObj,danceLog:danceLog},null,2))+'</pre>'
+    +'</div>'
+  +'</div>';
+
+  // Set select values after innerHTML (selects need value set post-render)
+  const metaDjSel=document.getElementById('debug-meta-dj');
+  if(metaDjSel) metaDjSel.value=nightObj.dj||'';
+  out.querySelectorAll('.debug-edit-select[data-field="dj"]').forEach(sel=>{
+    const eid=sel.dataset.eid;
+    const entry=fullLog.find(e=>e._eid===eid);
+    if(entry) sel.value=entry.dj||'';
   });
-  const storedPerformed=(nightObj.dances||[]).map(id=>{
-    const d=userKnow.find(k=>k.id===id);
-    return d?d.name:id;
-  }).sort((a,b)=>a.localeCompare(b));
-  const storedNotPerf=(nightObj.notPerformed||[]).map(id=>{
-    const d=bank.find(k=>k.id===id)||userKnow.find(k=>k.id===id);
-    return d?d.name:id;
-  }).sort((a,b)=>a.localeCompare(b));
+}
 
-  // Determine if this is the admin's own data (can delete directly) or another user's
-  const isOwnData=debugUsername===currentUser;
+// Apply a single DJ to every row in a log table
+function debugApplyDJToAll(tableId){
+  const selEl=document.getElementById('debug-apply-dj-sel-'+tableId);
+  if(!selEl) return;
+  const dj=selEl.value;
+  const out=document.getElementById('debug-night-output');
+  if(!out) return;
+  out.querySelectorAll('#'+tableId+' .debug-edit-select[data-field="dj"]').forEach(sel=>{
+    sel.value=dj;
+  });
+}
 
-  out.innerHTML=`
-    <div style="background:var(--bg);border:0.5px solid var(--b3);border-radius:var(--radius-lg);padding:1.5rem;">
-      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap;">
-        <div style="flex:1;">
-          <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:2px;">${formatDate(date)}</div>
-          <div style="font-size:12px;color:var(--t2);font-family:monospace;">${esc(date)} · user: ${esc(debugUsername)}</div>
-        </div>
-        <button class="btn sm danger" onclick="debugDeleteNight('${date}')">&#128465; Delete Night</button>
-      </div>
+async function debugSaveNight(date){
+  if(!isAdmin||!debugUserState||!debugUsername) return;
+  const statusEl=document.getElementById('debug-save-status');
+  const btn=document.getElementById('debug-save-btn');
 
-      ${section('Night metadata','var(--t2)',`
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          ${pill('DJ',nightObj.dj||'None')}
-          ${pill('Arrived',nightObj.arriveTime||'—')}
-          ${pill('Left',nightObj.leaveTime||'—')}
-          ${pill('Performed count',(nightObj.dances||[]).length)}
-          ${pill('Not performed count',(nightObj.notPerformed||[]).length)}
-        </div>
-      `)}
+  function setStatus(msg,color,bg){
+    if(!statusEl) return;
+    statusEl.style.display='';
+    statusEl.style.color=color||'var(--t2)';
+    statusEl.style.background=bg||'var(--bg2)';
+    statusEl.style.borderColor=color||'var(--b3)';
+    statusEl.textContent=msg;
+  }
 
-      ${section('Highlights','var(--amber-text)',nightObj.highlights&&nightObj.highlights.some(Boolean)
-        ?`<div style="display:flex;flex-direction:column;gap:6px;">
-            ${hlNames.map((n,i)=>n&&n!=='—'?`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:0.5px solid var(--amber-border);border-radius:var(--radius-md);background:var(--amber-bg);">
-              <span style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--amber-text);min-width:20px;">${i+1}</span>
-              <span style="font-size:13px;font-weight:500;">${esc(n)}</span>
-            </div>`:'').join('')}
-          </div>`
-        :`<div style="font-size:13px;color:var(--t3);">No highlights saved for this night.</div>`
-      )}
+  setStatus('Saving…','var(--t2)');
+  if(btn) btn.disabled=true;
 
-      ${section('Performed dances','var(--green-text)',storedPerformed.length
-        ?`<div style="display:flex;flex-wrap:wrap;gap:5px;">${storedPerformed.map(n=>`<span style="font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px;background:var(--green-bg);border:0.5px solid var(--green-border);color:var(--green-text);">${esc(n)}</span>`).join('')}</div>`
-        :`<div style="font-size:13px;color:var(--t3);">None stored.</div>`
-      )}
+  const nights=debugUserState.nights||{};
+  const nd=nights[date];
+  if(!nd){setStatus('Night not found.','var(--red-text)','var(--red-bg)');if(btn)btn.disabled=false;return;}
+  const nightObj=Array.isArray(nd)?{dances:nd,dj:'',highlights:null,arriveTime:'',leaveTime:'',notPerformed:[]}:{notPerformed:[],...nd};
 
-      ${storedNotPerf.length?section('Not performed dances','var(--red-text)',`<div style="display:flex;flex-wrap:wrap;gap:5px;">${storedNotPerf.map(n=>`<span style="font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px;background:var(--red-bg);border:0.5px solid var(--red-border);color:var(--red-text);">${esc(n)}</span>`).join('')}</div>`):''}
+  // Read metadata
+  const metaDj=document.getElementById('debug-meta-dj');
+  const metaArrive=document.getElementById('debug-meta-arrive');
+  const metaLeave=document.getElementById('debug-meta-leave');
+  if(metaDj) nightObj.dj=metaDj.value||'';
+  if(metaArrive) nightObj.arriveTime=metaArrive.value||'';
+  if(metaLeave) nightObj.leaveTime=metaLeave.value||'';
+  debugUserState.nights[date]=nightObj;
 
-      ${section(`Dance log — performed (${performed.length} entries)`,'var(--blue-text)',logTable(performed,'No performed log entries for this night.'))}
+  // Read editable log rows by _eid (stable key, never shifts on delete/filter)
+  const fullLog=debugUserState.danceLog||[];
+  const out=document.getElementById('debug-night-output');
+  if(out){
+    out.querySelectorAll('.debug-edit-input').forEach(inp=>{
+      const eid=inp.dataset.eid;
+      const field=inp.dataset.field;
+      const entry=fullLog.find(e=>e._eid===eid);
+      if(entry&&field) entry[field]=inp.value;
+    });
+    out.querySelectorAll('.debug-edit-select').forEach(sel=>{
+      const eid=sel.dataset.eid;
+      const field=sel.dataset.field;
+      const entry=fullLog.find(e=>e._eid===eid);
+      if(entry&&field) entry[field]=sel.value||null;
+    });
+  }
 
-      ${notPerformed.length?section(`Dance log — not performed (${notPerformed.length} entries)`,'var(--purple-text)',logTable(notPerformed,'No not-performed log entries.')):''}
+  // Sync palace_times entry
+  const palaceIdx=fullLog.findIndex(e=>e.date===date&&e.type==='palace_times');
+  if(nightObj.arriveTime||nightObj.leaveTime){
+    const entry={type:'palace_times',date,arriveTime:nightObj.arriveTime,leaveTime:nightObj.leaveTime};
+    if(palaceIdx>=0) fullLog[palaceIdx]=entry; else fullLog.push(entry);
+  } else if(palaceIdx>=0){
+    fullLog.splice(palaceIdx,1);
+  }
 
-      <div style="margin-top:1.5rem;border-top:0.5px solid var(--b3);padding-top:1rem;">
-        <div style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Raw JSON</div>
-        <pre style="font-size:11px;font-family:monospace;background:var(--bg2);border:0.5px solid var(--b3);border-radius:var(--radius-md);padding:12px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;color:var(--t1);max-height:300px;overflow-y:auto;">${esc(JSON.stringify({night:nightObj,danceLog:danceLog},null,2))}</pre>
-      </div>
-    </div>`;
+  // Strip internal _eid keys before saving to keep cloud data clean
+  const cleanLog=fullLog.map(e=>{const c={...e};delete c._eid;return c;});
+  debugUserState.danceLog=cleanLog;
+
+  try{
+    if(debugUsername===currentUser){
+      state.nights[date]=nightObj;
+      state.danceLog=cleanLog;
+      const ok=await saveToCloud();
+      if(!ok) throw new Error('Save failed — changes queued for retry');
+    } else {
+      const r=await sbFetch('/rest/v1/dances?username=eq.'+enc(debugUsername),{
+        method:'PATCH',
+        prefer:'return=minimal',
+        body:JSON.stringify({data:debugUserState,updated_at:new Date().toISOString()})
+      });
+      if(!r.ok) throw new Error('Save failed (server returned '+r.status+')');
+    }
+    setStatus('✓ Saved successfully','var(--green-dark)','var(--green-bg)');
+    // Refresh raw JSON preview
+    const rawEl=document.getElementById('debug-raw-json');
+    if(rawEl){
+      const dl2=(cleanLog).filter(e=>e.date===date);
+      rawEl.textContent=JSON.stringify({night:nightObj,danceLog:dl2},null,2);
+    }
+    // Re-stamp eids on cleanLog entries so subsequent saves still work
+    debugUserState.danceLog.forEach((e,i)=>{e._eid='eid_'+i+'_'+(e.timestamp||Date.now()+'_'+i);});
+    setTimeout(()=>{if(statusEl&&statusEl.textContent.startsWith('✓'))statusEl.style.display='none';},3000);
+  }catch(err){
+    setStatus('⚠ '+err.message,'var(--red-text)','var(--red-bg)');
+  }
+  if(btn) btn.disabled=false;
+}
+
+function debugDeleteLogEntry(date,eid){
+  if(!isAdmin||!debugUserState) return;
+  if(!confirm('Delete this log entry?')) return;
+  debugUserState.danceLog=(debugUserState.danceLog||[]).filter(e=>e._eid!==eid);
+  renderDebugNight();
 }
 
 async function debugDeleteNight(date){
@@ -7564,6 +8371,8 @@ async function debugDeleteNight(date){
 
   document.addEventListener('touchstart',function(e){
     if(anyModalOpen()){swiping=false;return;}
+    // Disable swipe gestures when touching inside any heatmap container
+    if(e.target.closest('#tf-heatmap,#tf-song-heatmap,#drew-heatmap-scroll,[id*="heatmap"]')){swiping=false;return;}
     const t=e.touches[0];
     tx0=t.clientX; ty0=t.clientY; swiping=true;
     // Show edge indicator when touch starts near left edge
@@ -7980,11 +8789,116 @@ window.recRefresh = recRefresh;
 
 tryAutoLogin();
 
+// ---- Session keep-alive & stale-tab recovery ----
+// Track when the app was last active so we can detect long absences.
+// Persisted to localStorage so a browser close+reopen is treated as a long absence.
+let _lastActiveAt = parseInt(localStorage.getItem('ld_last_active') || '0') || Date.now();
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    _onAppResume();
+  } else {
+    _lastActiveAt = Date.now();
+    localStorage.setItem('ld_last_active', String(_lastActiveAt));
+  }
+});
+
+// Also handle back/forward cache restores (bfcache) – the browser may serve
+// a frozen page without re-running any scripts at all.
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) _onAppResume();
+});
+
+async function _onAppResume() {
+  const now = Date.now();
+  const awayMs = now - _lastActiveAt;
+  _lastActiveAt = now;
+  localStorage.setItem('ld_last_active', String(now));
+
+  // Always reload public data (bank, friend cards, home config) so
+  // any admin changes made while away show up immediately.
+  try {
+    await loadBank();
+    await loadFriendCards();
+    await loadHomeConfig();
+    await loadCustomLists();
+    await loadDJList();
+    await loadDrewDJFreestyles();
+    await clLoad();
+  } catch(e) {
+    console.warn('Resume: public data reload error', e);
+  }
+
+  // If the user was away for more than 30 minutes and is logged in,
+  // refresh their token and re-fetch their personal data so everything
+  // shows up without needing a manual page refresh.
+  const STALE_THRESHOLD_MS = 30 * 60 * 1000; // 30 minutes
+  if (awayMs < STALE_THRESHOLD_MS) {
+    // Short absence — just re-render with the data we already have
+    if (!isGuest) {
+      try { renderBank(); } catch(e) {}
+      try { renderFriendsTab(); } catch(e) {}
+      try { applyTabVisibility(); } catch(e) {}
+      try { applyHomeCardGradients(); } catch(e) {}
+    }
+    return;
+  }
+
+  // Long absence — token is likely expired; do a full re-auth + data reload.
+  if (!currentUser) return; // guest — nothing to restore
+
+  setSyncStatus('syncing', 'Reconnecting…');
+  try {
+    const refreshed = await tryRefreshToken();
+    if (!refreshed) {
+      // Token could not be refreshed — fall back to guest mode
+      setSyncStatus('error', 'Session expired');
+      logout();
+      return;
+    }
+
+    // Re-fetch personal state from the cloud
+    const r = await sbFetch(`/rest/v1/dances?username=eq.${enc(currentUser)}&select=data,updated_at`);
+    if (r.ok && r.data && r.data.length > 0) {
+      state = r.data[0].data || {know:[], learn:[], nights:{}, djFreestyles:{}, favorites:[], favoriteFriends:[]};
+      if (!state.djFreestyles)    state.djFreestyles = {};
+      if (!state.favorites)       state.favorites = [];
+      if (!state.danceLog)        state.danceLog = [];
+      if (!state.favoriteFriends) state.favoriteFriends = [];
+      if (!state.drewsNights)     state.drewsNights = {};
+      if (!state.nightColors)     state.nightColors = {};
+    }
+
+    // Re-load submissions / mod list (small payloads, always refresh)
+    try { await loadSubmissions(); } catch(e) {}
+    try { await loadModList(); } catch(e) {}
+
+    // Re-render everything
+    renderBank();
+    renderList('know');
+    renderList('learn');
+    renderDJDropdown();
+    renderPicks();
+    renderCustomListPills();
+    try { renderFriendsTab(); } catch(e) {}
+    try { applyTabVisibility(); } catch(e) {}
+    try { applyHomeCardGradients(); } catch(e) {}
+    if (isAdmin) {
+      try { initDrewsNightDate(); } catch(e) {}
+    }
+    setSyncStatus('synced', 'Synced');
+  } catch(e) {
+    console.warn('Resume re-auth error:', e);
+    setSyncStatus('error', 'Reconnect failed — try refreshing');
+  }
+}
+
 // Refresh the Supabase token every 45 minutes while the app is open,
 // so a long session never expires silently.
 setInterval(async()=>{
   if(!currentUser) return;
   await tryRefreshToken();
+  _lastActiveAt = Date.now();
+  localStorage.setItem('ld_last_active', String(_lastActiveAt)); // reset the stale timer after a successful background refresh
 }, 45 * 60 * 1000);
 
 // ---- CHANGELOG ----
@@ -8135,6 +9049,334 @@ function renderChangelog() {
 function showAppFooter() {
   const footer = document.getElementById('app-footer');
   if (footer) footer.style.display = '';
+}
+
+// ---- Admin Analytics ----
+async function renderAdminAnalytics() {
+  if (!isAdmin) return;
+  const loading = document.getElementById('aa-loading');
+  const content = document.getElementById('aa-content');
+  if (!loading || !content) return;
+  loading.style.display = 'block';
+  content.style.display = 'none';
+
+  // Fetch all user rows (exclude system rows)
+  const r = await sbFetch(`/rest/v1/dances?username=neq.__bank__&username=neq.__picks__&username=neq.__submissions__&username=neq.__friendcards__&username=neq.__djlist__&username=neq.__modlist__&username=neq.__homeconfig__&username=neq.__changelog__&select=username,updated_at,data&order=username.asc`);
+  if (!r.ok || !r.data) {
+    loading.textContent = 'Could not load data.';
+    return;
+  }
+  const users = r.data.filter(u => !u.username.startsWith('__'));
+  const totalUsers = users.length;
+  const bankSize = bank.length;
+  const totalMods = modList.length;
+
+  // Aggregate stats
+  let totalKnow = 0, totalLearn = 0, totalNights = 0;
+  const knowCounts = {}; // danceName -> count of users who know it
+  const learnCounts = {}; // danceName -> count of users who want to learn it
+  const nightDateCounts = {}; // date -> count of users who logged that night
+  const userRows = [];
+
+  users.forEach(u => {
+    const d = u.data || {};
+    const know = d.know || [];
+    const learn = d.learn || [];
+    const nights = d.nights || {};
+    const nightCount = Object.keys(nights).length;
+    totalKnow += know.length;
+    totalLearn += learn.length;
+    totalNights += nightCount;
+    know.forEach(dk => {
+      const name = dk.name || dk;
+      knowCounts[name] = (knowCounts[name] || 0) + 1;
+    });
+    learn.forEach(dl => {
+      const name = dl.name || dl;
+      learnCounts[name] = (learnCounts[name] || 0) + 1;
+    });
+    Object.keys(nights).forEach(date => {
+      nightDateCounts[date] = (nightDateCounts[date] || 0) + 1;
+    });
+    // Find the most recently added dance in know list
+    const lastKnowAdded = know.reduce((latest, dk) => {
+      const t = dk.added || null;
+      if (!t) return latest;
+      return (!latest || t > latest) ? t : latest;
+    }, null);
+    // Find the most recently added dance in learn list
+    const lastLearnAdded = learn.reduce((latest, dl) => {
+      const t = dl.added || null;
+      if (!t) return latest;
+      return (!latest || t > latest) ? t : latest;
+    }, null);
+    // New user = joinedAt within last 3 days.
+    // joinedAt is stamped permanently on a user's first ever save and never overwritten.
+    const createdAt = d.joinedAt || null;
+    const isNewUser = createdAt && (Date.now() - new Date(createdAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
+    userRows.push({
+      username: u.username,
+      know: know.length,
+      learn: learn.length,
+      nights: nightCount,
+      lastActive: u.updated_at || null,
+      lastKnowAdded: lastKnowAdded,
+      lastLearnAdded: lastLearnAdded,
+      createdAt: createdAt,
+      isNewUser: isNewUser,
+      isMod: modList.includes(u.username),
+      isAdmin: u.username === ADMIN_USER,
+      rawKnow: know,
+      rawLearn: learn,
+      rawNights: nights,
+      rawFavorites: d.favorites || [],
+      rawDanceLog: d.danceLog || [],
+      rawJoinedAt: d.joinedAt || null,
+    });
+  });
+
+  // Sort user rows by know desc
+  userRows.sort((a, b) => b.know - a.know || b.nights - a.nights);
+
+  const avgKnow = totalUsers ? (totalKnow / totalUsers).toFixed(1) : 0;
+  const avgLearn = totalUsers ? (totalLearn / totalUsers).toFixed(1) : 0;
+  const newUserCount = userRows.filter(u => u.isNewUser).length;
+
+  // ---- Overview stat cards ----
+  const statsGrid = document.getElementById('aa-stats-grid');
+  const stats = [
+    { label: 'Registered Users', value: totalUsers, sub: `${totalMods} mod${totalMods !== 1 ? 's' : ''}` },
+    { label: 'New Users (3 days)', value: newUserCount, sub: 'joined recently', highlight: newUserCount > 0 },
+    { label: 'Dances in Bank', value: bankSize, sub: 'total available' },
+    { label: 'Avg Dances Known', value: avgKnow, sub: 'per user' },
+    { label: 'Avg Want to Learn', value: avgLearn, sub: 'per user' },
+    { label: 'Total Nights Logged', value: totalNights, sub: 'across all users' },
+    { label: 'Unique Nights', value: Object.keys(nightDateCounts).length, sub: 'distinct dates' },
+  ];
+  statsGrid.innerHTML = stats.map(s => `
+    <div class="stat-card" style="${s.highlight ? 'border-color:var(--blue-border);background:var(--blue-bg);' : ''}">
+      <div class="stat-label" style="${s.highlight ? 'color:var(--blue-text);' : ''}">${s.label}</div>
+      <div class="stat-value" style="${s.highlight ? 'color:var(--blue-text);' : ''}">${s.value}</div>
+      <div class="stat-sub">${s.sub}</div>
+    </div>`).join('');
+
+  // ---- User leaderboard ----
+  const userTable = document.getElementById('aa-user-table');
+  userTable.innerHTML = userRows.map((u, i) => {
+    const safeId = 'aa_u_' + u.username.replace(/[^a-zA-Z0-9]/g, '_');
+    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `<span style="color:var(--t3);font-size:13px;min-width:24px;display:inline-block;text-align:center">${i + 1}</span>`;
+    const pctKnow = bankSize ? Math.round((u.know / bankSize) * 100) : 0;
+    // Format a full datetime nicely
+    const fmtDt = iso => {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) + ' · ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    };
+    return `
+    <div style="border:0.5px solid ${u.isNewUser ? 'var(--blue-border)' : 'var(--b3)'};border-radius:var(--radius-lg);background:var(--bg);margin-bottom:6px;overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 15px;cursor:pointer;transition:background 0.1s;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''" onclick="document.getElementById('${safeId}').style.display=document.getElementById('${safeId}').style.display==='none'?'block':'none'">
+        <span style="font-size:16px;min-width:28px;text-align:center">${medal}</span>
+        <span style="flex:1;font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          ${esc(u.username)}
+          ${u.isNewUser ? '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--blue-bg);border:0.5px solid var(--blue-border);color:var(--blue-text);letter-spacing:0.3px;">✨ New</span>' : ''}
+        </span>
+        ${u.isAdmin ? '<span class="admin-badge">Admin</span>' : ''}
+        ${u.isMod && !u.isAdmin ? '<span class="mod-badge">Mod</span>' : ''}
+        <span style="display:flex;gap:4px;flex-shrink:0;">
+          <span style="font-size:11px;font-weight:500;padding:2px 7px;border-radius:20px;background:var(--green-bg);border:0.5px solid var(--green-border);color:var(--green-text)">${u.know} know</span>
+          <span style="font-size:11px;font-weight:500;padding:2px 7px;border-radius:20px;background:var(--purple-bg);border:0.5px solid var(--purple-border);color:var(--purple-text)">${u.learn} learning</span>
+          <span style="font-size:11px;font-weight:500;padding:2px 7px;border-radius:20px;background:var(--bg2);border:0.5px solid var(--b3);color:var(--t2)">${u.nights} nights</span>
+        </span>
+        <span style="font-size:11px;color:var(--t3);flex-shrink:0">${u.lastActive ? formatDate(u.lastActive.slice(0,10)) : '—'}</span>
+      </div>
+      <div id="${safeId}" style="display:none;border-top:0.5px solid var(--b3);background:var(--bg2);">
+        ${(() => {
+          const favSet = new Set(u.rawFavorites);
+          // ---- Activity row ----
+          const activityHtml = `
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;padding:12px 15px;border-bottom:0.5px solid var(--b3);">
+            <div style="padding:8px 12px;border-radius:var(--radius-md);background:var(--bg);border:0.5px solid var(--b3);">
+              <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Last Online</div>
+              <div style="font-size:12px;color:var(--t1);font-weight:500;">${u.lastActive ? fmtDt(u.lastActive) : '—'}</div>
+            </div>
+            ${u.rawJoinedAt || u.isNewUser ? `<div style="padding:8px 12px;border-radius:var(--radius-md);background:var(--blue-bg);border:0.5px solid var(--blue-border);">
+              <div style="font-size:10px;font-weight:600;color:var(--blue-text);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Joined</div>
+              <div style="font-size:12px;color:var(--t1);font-weight:500;">${fmtDt(u.rawJoinedAt || u.createdAt)}</div>
+            </div>` : ''}
+            <div style="padding:8px 12px;border-radius:var(--radius-md);background:var(--green-bg);border:0.5px solid var(--green-border);">
+              <div style="font-size:10px;font-weight:600;color:var(--green-text);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Last Added to Know</div>
+              <div style="font-size:12px;color:var(--t1);font-weight:500;">${u.lastKnowAdded ? fmtDt(u.lastKnowAdded) : '—'}</div>
+            </div>
+            <div style="padding:8px 12px;border-radius:var(--radius-md);background:var(--purple-bg);border:0.5px solid var(--purple-border);">
+              <div style="font-size:10px;font-weight:600;color:var(--purple-text);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Last Added to Learn</div>
+              <div style="font-size:12px;color:var(--t1);font-weight:500;">${u.lastLearnAdded ? fmtDt(u.lastLearnAdded) : '—'}</div>
+            </div>
+            <div style="padding:8px 12px;border-radius:var(--radius-md);background:var(--bg);border:0.5px solid var(--b3);">
+              <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Bank Coverage</div>
+              <div style="margin-top:4px;background:var(--bg3);border-radius:20px;height:6px;overflow:hidden;">
+                <div style="height:100%;width:${pctKnow}%;background:var(--green-dark);border-radius:20px;"></div>
+              </div>
+              <div style="font-size:11px;color:var(--t3);margin-top:3px">${pctKnow}% (${u.know} / ${bankSize})</div>
+            </div>
+            <div style="padding:8px 12px;border-radius:var(--radius-md);background:var(--amber-bg);border:0.5px solid var(--amber-border);">
+              <div style="font-size:10px;font-weight:600;color:var(--amber-text);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Favorites</div>
+              <div style="font-size:12px;color:var(--t1);font-weight:500;">${u.rawFavorites.length} dance${u.rawFavorites.length !== 1 ? 's' : ''}</div>
+            </div>
+          </div>`;
+
+          // ---- Dances I Know ----
+          const knowSorted = u.rawKnow.slice().sort((a,b) => (a.name||a).localeCompare(b.name||b));
+          const knowHtml = knowSorted.length ? knowSorted.map(dk => {
+            const name = dk.name || dk;
+            const isFav = favSet.has(dk.id);
+            const addedStr = dk.added ? fmtDt(dk.added) : null;
+            return `<div style="display:flex;align-items:center;gap:8px;padding:5px 10px;border-radius:6px;background:var(--bg);border:0.5px solid var(--green-border);margin-bottom:4px;">
+              ${isFav ? '<span style="font-size:13px;flex-shrink:0;">⭐</span>' : ''}
+              <span style="flex:1;font-size:13px;font-weight:500;color:var(--t1);">${esc(name)}</span>
+              ${addedStr ? `<span style="font-size:11px;color:var(--t3);flex-shrink:0;">${addedStr}</span>` : ''}
+            </div>`;
+          }).join('') : '<div style="font-size:12px;color:var(--t3);padding:6px 0;">No dances yet.</div>';
+
+          // ---- Want to Learn ----
+          const learnSorted = u.rawLearn.slice().sort((a,b) => (a.name||a).localeCompare(b.name||b));
+          const learnHtml = learnSorted.length ? learnSorted.map(dl => {
+            const name = dl.name || dl;
+            const addedStr = dl.added ? fmtDt(dl.added) : null;
+            return `<div style="display:flex;align-items:center;gap:8px;padding:5px 10px;border-radius:6px;background:var(--bg);border:0.5px solid var(--purple-border);margin-bottom:4px;">
+              <span style="flex:1;font-size:13px;font-weight:500;color:var(--t1);">${esc(name)}</span>
+              ${addedStr ? `<span style="font-size:11px;color:var(--t3);flex-shrink:0;">${addedStr}</span>` : ''}
+            </div>`;
+          }).join('') : '<div style="font-size:12px;color:var(--t3);padding:6px 0;">No dances yet.</div>';
+
+          // ---- Nights ----
+          const nightDates = Object.keys(u.rawNights).sort((a,b) => b.localeCompare(a));
+          const nightsHtml = nightDates.length ? nightDates.map(date => {
+            const nd = u.rawNights[date];
+            const nightData = Array.isArray(nd) ? {dances: nd} : (nd || {});
+            const danceIds = nightData.dances || [];
+            const danceNames = danceIds.map(id => {
+              const match = u.rawKnow.find(d => d.id === id);
+              return match ? match.name : id;
+            }).filter(Boolean);
+            const highlights = (nightData.highlights || []).filter(Boolean).map(id => {
+              const match = u.rawKnow.find(d => d.id === id);
+              return match ? match.name : id;
+            });
+            const dj = nightData.dj || '';
+            const arrive = nightData.arriveTime || '';
+            const leave = nightData.leaveTime || '';
+            const timeStr = arrive || leave ? `${arrive || '?'} – ${leave || '?'}` : '';
+            return `<div style="padding:8px 12px;border-radius:var(--radius-md);background:var(--bg);border:0.5px solid var(--b3);margin-bottom:6px;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+                <span style="font-size:13px;font-weight:600;color:var(--t1);">${formatDate(date)}</span>
+                ${dj ? `<span style="font-size:11px;padding:1px 7px;border-radius:20px;background:var(--pink-bg);border:0.5px solid var(--pink-border);color:var(--pink-text);">DJ: ${esc(dj)}</span>` : ''}
+                ${timeStr ? `<span style="font-size:11px;color:var(--t3);">⏱ ${esc(timeStr)}</span>` : ''}
+                <span style="font-size:11px;color:var(--t3);margin-left:auto;">${danceNames.length} dance${danceNames.length !== 1 ? 's' : ''}</span>
+              </div>
+              ${highlights.length ? `<div style="margin-bottom:5px;display:flex;flex-wrap:wrap;gap:4px;">${highlights.map(n=>`<span style="font-size:11px;padding:1px 7px;border-radius:20px;background:var(--amber-bg);border:0.5px solid var(--amber-border);color:var(--amber-text);">⭐ ${esc(n)}</span>`).join('')}</div>` : ''}
+              ${danceNames.length ? `<div style="display:flex;flex-wrap:wrap;gap:4px;">${danceNames.map(n=>`<span style="font-size:11px;padding:1px 7px;border-radius:20px;background:var(--bg2);border:0.5px solid var(--b3);color:var(--t2);">${esc(n)}</span>`).join('')}</div>` : ''}
+            </div>`;
+          }).join('') : '<div style="font-size:12px;color:var(--t3);padding:6px 0;">No nights logged.</div>';
+
+          // ---- Section helper ----
+          const section = (title, color, bg, border, content) => `
+          <div style="padding:12px 15px;border-bottom:0.5px solid var(--b3);">
+            <div style="font-size:11px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">${title}</div>
+            <div style="max-height:260px;overflow-y:auto;padding-right:2px;">${content}</div>
+          </div>`;
+
+          return activityHtml
+            + section('Dances I Know (' + knowSorted.length + ')', 'var(--green-text)', 'var(--green-bg)', 'var(--green-border)', knowHtml)
+            + section('Want to Learn (' + learnSorted.length + ')', 'var(--purple-text)', 'var(--purple-bg)', 'var(--purple-border)', learnHtml)
+            + section('Nights Attended (' + nightDates.length + ')', 'var(--pink-text)', 'var(--pink-bg)', 'var(--pink-border)', nightsHtml);
+        })()}
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty">No users yet.</div>';
+
+  // ---- Top dances known ----
+  const topKnow = Object.entries(knowCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  const topKnowEl = document.getElementById('aa-top-dances');
+  topKnowEl.innerHTML = topKnow.length ? topKnow.map(([name, count], i) => {
+    const pct = totalUsers ? Math.round((count / totalUsers) * 100) : 0;
+    return `
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 14px;border:0.5px solid var(--b3);border-radius:var(--radius-md);background:var(--bg);margin-bottom:6px;">
+      <span style="font-size:16px;font-weight:700;color:var(--t3);font-family:'Playfair Display',serif;min-width:24px">${i + 1}</span>
+      <span style="flex:1;font-size:13px;font-weight:500">${esc(name)}</span>
+      <div style="width:100px;background:var(--bg3);border-radius:20px;height:6px;flex-shrink:0;">
+        <div style="height:100%;width:${pct}%;background:var(--green-dark);border-radius:20px;"></div>
+      </div>
+      <span style="font-size:12px;color:var(--t2);flex-shrink:0;min-width:70px;text-align:right">${count} / ${totalUsers} users</span>
+    </div>`;
+  }).join('') : '<div class="empty">No data yet.</div>';
+
+  // ---- Top dances wanted to learn ----
+  const topLearn = Object.entries(learnCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  const topLearnEl = document.getElementById('aa-top-learn');
+  topLearnEl.innerHTML = topLearn.length ? topLearn.map(([name, count], i) => {
+    const pct = totalUsers ? Math.round((count / totalUsers) * 100) : 0;
+    return `
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 14px;border:0.5px solid var(--purple-border);border-radius:var(--radius-md);background:var(--purple-bg);margin-bottom:6px;">
+      <span style="font-size:16px;font-weight:700;color:var(--purple-text);font-family:'Playfair Display',serif;min-width:24px">${i + 1}</span>
+      <span style="flex:1;font-size:13px;font-weight:500;color:var(--t1)">${esc(name)}</span>
+      <div style="width:100px;background:var(--bg3);border-radius:20px;height:6px;flex-shrink:0;">
+        <div style="height:100%;width:${pct}%;background:var(--purple-border);border-radius:20px;"></div>
+      </div>
+      <span style="font-size:12px;color:var(--purple-text);flex-shrink:0;min-width:70px;text-align:right">${count} user${count !== 1 ? 's' : ''}</span>
+    </div>`;
+  }).join('') : '<div class="empty">No data yet.</div>';
+
+  // ---- Difficulty distribution ----
+  const diffOrder = ['Beginner', 'Improver', 'Intermediate', 'Advanced', ''];
+  const diffColors = {
+    'Beginner': 'var(--green-text)', 'Improver': 'var(--blue-text)',
+    'Intermediate': 'var(--amber-text)', 'Advanced': 'var(--red-text)', '': 'var(--t3)'
+  };
+  const diffBgs = {
+    'Beginner': 'var(--green-bg)', 'Improver': 'var(--blue-bg)',
+    'Intermediate': 'var(--amber-bg)', 'Advanced': 'var(--red-bg)', '': 'var(--bg3)'
+  };
+  const diffBorders = {
+    'Beginner': 'var(--green-border)', 'Improver': 'var(--blue-border)',
+    'Intermediate': 'var(--amber-border)', 'Advanced': 'var(--red-border)', '': 'var(--b3)'
+  };
+  const diffCounts = {};
+  diffOrder.forEach(d => { diffCounts[d] = bank.filter(b => (b.difficulty || '') === d).length; });
+  const maxDiff = Math.max(...Object.values(diffCounts), 1);
+  const diffEl = document.getElementById('aa-diff-bars');
+  diffEl.innerHTML = diffOrder.map(d => {
+    const count = diffCounts[d];
+    const label = d || 'Unspecified';
+    const pct = Math.round((count / bankSize) * 100) || 0;
+    const barPct = Math.round((count / maxDiff) * 100);
+    return `
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 14px;border:0.5px solid ${diffBorders[d]};border-radius:var(--radius-md);background:${diffBgs[d]};margin-bottom:6px;">
+      <span style="font-size:12px;font-weight:600;color:${diffColors[d]};min-width:90px">${label}</span>
+      <div style="flex:1;background:var(--bg3);border-radius:20px;height:8px;">
+        <div style="height:100%;width:${barPct}%;background:${diffColors[d]};border-radius:20px;transition:width 0.4s;"></div>
+      </div>
+      <span style="font-size:12px;color:var(--t2);flex-shrink:0;min-width:80px;text-align:right">${count} dances (${pct}%)</span>
+    </div>`;
+  }).join('');
+
+  // ---- Most active nights ----
+  const topNights = Object.entries(nightDateCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  const topNightsEl = document.getElementById('aa-top-nights');
+  topNightsEl.innerHTML = topNights.length ? topNights.map(([date, count], i) => {
+    const pct = totalUsers ? Math.round((count / totalUsers) * 100) : 0;
+    return `
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 14px;border:0.5px solid var(--b3);border-radius:var(--radius-md);background:var(--bg);margin-bottom:6px;">
+      <span style="font-size:16px;font-weight:700;color:var(--t3);font-family:'Playfair Display',serif;min-width:24px">${i + 1}</span>
+      <span style="flex:1;font-size:13px;font-weight:500">${formatDate(date)}</span>
+      <div style="width:100px;background:var(--bg3);border-radius:20px;height:6px;flex-shrink:0;">
+        <div style="height:100%;width:${pct}%;background:#0369a1;border-radius:20px;"></div>
+      </div>
+      <span style="font-size:12px;color:var(--t2);flex-shrink:0;min-width:70px;text-align:right">${count} user${count !== 1 ? 's' : ''}</span>
+    </div>`;
+  }).join('') : '<div class="empty">No nights logged yet.</div>';
+
+  loading.style.display = 'none';
+  content.style.display = 'block';
 }
 
 </script>
