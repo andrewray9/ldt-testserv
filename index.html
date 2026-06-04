@@ -955,6 +955,27 @@
   </div>
 </div>
 
+<!-- PASSWORD RESET MODAL (shown when user arrives via recovery email link) -->
+<div class="auth-modal-overlay" id="reset-password-wrap" style="display:none">
+  <div class="auth-modal-wrap">
+  <div class="auth-card">
+    <h1>Line Dance Tracker</h1>
+    <p class="sub">Choose a new password for your account</p>
+    <div class="auth-error" id="reset-error"></div>
+    <div class="auth-success" id="reset-success"></div>
+    <div class="field">
+      <label>New Password</label>
+      <input type="password" id="reset-password" placeholder="New password" autocomplete="new-password" onkeydown="if(event.key==='Enter')submitNewPassword()">
+    </div>
+    <div class="field">
+      <label>Confirm Password</label>
+      <input type="password" id="reset-password-confirm" placeholder="Confirm new password" autocomplete="new-password" onkeydown="if(event.key==='Enter')submitNewPassword()">
+    </div>
+    <button class="auth-btn" id="reset-btn" onclick="submitNewPassword()">Set new password</button>
+  </div>
+  </div>
+</div>
+
 <!-- APP -->
 <div class="app" id="app">
   <div class="app-header">
@@ -2698,7 +2719,7 @@ async function forgotPassword() {
     const res = await fetch(`${SUPABASE_URL}/auth/v1/recover`, {
       method: 'POST',
       headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
+      body: JSON.stringify({ email, redirect_to: window.location.origin + window.location.pathname })
     });
     // Supabase returns 200 regardless of whether the email exists (prevents enumeration)
     sucEl.textContent = 'If that email is registered, a password reset link has been sent. Check your inbox.';
@@ -8836,7 +8857,126 @@ function recAddToLearn() {
 window.recAddToLearn = recAddToLearn;
 window.recRefresh = recRefresh;
 
-tryAutoLogin();
+// ---- Password reset via email link ----
+// When Supabase sends a recovery email it redirects back to this page with
+// #access_token=...&type=recovery in the URL hash. We intercept that here,
+// show the "set new password" form, and clear the hash so it doesn't linger.
+(function checkRecoveryToken() {
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  if (hash.get('type') !== 'recovery') return;
+
+  const token = hash.get('access_token');
+  if (!token) return;
+
+  // Stash the token so submitNewPassword() can use it, then clear the hash.
+  window._recoveryToken = token;
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+
+  // Wait for DOM to be ready, then show the reset form instead of normal init.
+  function showResetForm() {
+    const splash = document.getElementById('splash-screen');
+    if (splash) splash.classList.add('hidden');
+    document.getElementById('reset-password-wrap').style.display = 'flex';
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', showResetForm);
+  } else {
+    showResetForm();
+  }
+
+  // Skip normal auto-login entirely when handling a recovery link.
+  window._skipAutoLogin = true;
+})();
+
+async function submitNewPassword() {
+  const token = window._recoveryToken;
+  const errEl = document.getElementById('reset-error');
+  const sucEl = document.getElementById('reset-success');
+  const btn   = document.getElementById('reset-btn');
+  const pw    = document.getElementById('reset-password').value;
+  const pw2   = document.getElementById('reset-password-confirm').value;
+
+  errEl.style.display = 'none';
+  sucEl.style.display = 'none';
+
+  if (!pw || pw.length < 6) {
+    errEl.textContent = 'Password must be at least 6 characters.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (pw !== pw2) {
+    errEl.textContent = 'Passwords do not match.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!token) {
+    errEl.textContent = 'Reset token missing. Please request a new password reset link.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Saving\u2026';
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method: 'PUT',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ password: pw })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error_description || data.msg || data.message || 'Failed to update password.');
+    }
+
+    // Store tokens so the user is automatically signed in after reset.
+    if (data.access_token) localStorage.setItem('sb_access_token', data.access_token);
+    if (data.refresh_token) localStorage.setItem('sb_refresh_token', data.refresh_token);
+    window._recoveryToken = null;
+
+    sucEl.textContent = 'Password updated! Signing you in\u2026';
+    sucEl.style.display = 'block';
+    btn.textContent = 'Done';
+
+    // Give the user a moment to read the success message, then log them in.
+    setTimeout(async () => {
+      document.getElementById('reset-password-wrap').style.display = 'none';
+      const username = data.user?.user_metadata?.username || localStorage.getItem('ld_user');
+      if (username) {
+        const r = await sbFetch(`/rest/v1/dances?username=eq.${enc(username)}&select=data`);
+        if (r.ok && r.data && r.data.length > 0) {
+          state = r.data[0].data || {know:[], learn:[], nights:{}, djFreestyles:{}, favorites:[], favoriteFriends:[]};
+          if (!state.djFreestyles) state.djFreestyles = {};
+          if (!state.favorites) state.favorites = [];
+          if (!state.danceLog) state.danceLog = [];
+          if (!state.favoriteFriends) state.favoriteFriends = {};
+          if (!state.drewsNights) state.drewsNights = {};
+          if (!state.nightColors) state.nightColors = {};
+        }
+        await loadSubmissions();
+        await loadModList();
+        localStorage.setItem('ld_user', username);
+        enterApp(username);
+      } else {
+        tryAutoLogin();
+      }
+    }, 1800);
+
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Set new password';
+  }
+}
+
+if (!window._skipAutoLogin) tryAutoLogin();
 
 // ---- Session keep-alive & stale-tab recovery ----
 // Track when the app was last active so we can detect long absences.
