@@ -6,7 +6,6 @@
   <title>Line Dance Tracker</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="icon" type="image/x-icon" href="https://i.imgur.com/WDByZ1N.png">
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1a1a18" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
@@ -67,6 +66,9 @@
     .auth-toggle{text-align:center;margin-top:1.25rem;font-size:13px;color:var(--t2);}
     .auth-toggle span{color:var(--t1);cursor:pointer;font-weight:500;text-decoration:underline;}
     .auth-error{font-size:13px;color:var(--red-text);background:var(--red-bg);border:0.5px solid var(--red-border);border-radius:var(--radius-md);padding:8px 12px;margin-bottom:14px;display:none;}
+    .auth-success{font-size:13px;color:var(--green-text);background:var(--green-bg);border:0.5px solid var(--green-border);border-radius:var(--radius-md);padding:8px 12px;margin-bottom:14px;display:none;}
+    .forgot-link{display:block;text-align:right;font-size:12px;color:var(--t2);cursor:pointer;margin-top:-8px;margin-bottom:12px;text-decoration:underline;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0;width:100%;}
+    .forgot-link:hover{color:var(--t1);}
 
     /* APP SHELL */
     .app{max-width:880px;margin:0 auto;padding:2rem 1.25rem 4rem;display:block;}
@@ -922,6 +924,7 @@
     <h1>Line Dance Tracker</h1>
     <p class="sub" id="auth-sub">Sign in to sync your dances across devices</p>
     <div class="auth-error" id="auth-error"></div>
+    <div class="auth-success" id="auth-success"></div>
     
     <div class="field" id="field-email">
       <label>Email</label>
@@ -937,6 +940,7 @@
       <label>Password</label>
       <input type="password" id="auth-password" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')authSubmit()">
     </div>
+    <button class="forgot-link" id="forgot-link" onclick="forgotPassword()" type="button">Forgot password?</button>
     
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;" id="remember-me-row">
       <input type="checkbox" id="remember-me" style="width:16px;height:16px;accent-color:var(--t1);cursor:pointer;flex-shrink:0;">
@@ -1388,36 +1392,6 @@
       </div>
     </div>
     <div id="nv-result"></div>
-
-    <!-- FREESTYLE TIMER -->
-    <div class="section-title" style="margin-top:2rem">⏱️ Freestyle Timer</div>
-    <p class="section-note">Time a freestyle section live, then submit it directly to that DJ's record.</p>
-    <div id="fs-timer-card" style="background:var(--bg);border:0.5px solid var(--b3);border-radius:var(--radius-lg);padding:1.5rem 1.5rem 1.25rem;">
-      <!-- DJ selector -->
-      <div style="margin-bottom:1.25rem;">
-        <label style="display:block;font-size:12px;font-weight:500;color:var(--t2);margin-bottom:6px;">DJ</label>
-        <select id="fs-dj-select" style="width:100%;padding:9px 13px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg2);color:var(--t1);font-size:14px;font-family:'DM Sans',sans-serif;">
-          <option value="">— Select DJ —</option>
-        </select>
-      </div>
-      <!-- Clock display -->
-      <div style="text-align:center;margin-bottom:1.25rem;">
-        <div id="fs-display" style="font-family:'Playfair Display',serif;font-size:56px;font-weight:700;color:var(--t1);letter-spacing:2px;line-height:1;">0:00</div>
-        <div id="fs-status-label" style="font-size:12px;color:var(--t3);margin-top:4px;">Ready</div>
-      </div>
-      <!-- Start / Stop -->
-      <div style="display:flex;gap:10px;justify-content:center;margin-bottom:1.25rem;">
-        <button id="fs-start-btn" onclick="fsStart()" style="padding:10px 28px;background:var(--green-dark);color:#fff;border:none;border-radius:999px;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity 0.12s;">▶ Start</button>
-        <button id="fs-stop-btn" onclick="fsStop()" style="padding:10px 28px;background:var(--bg3);color:var(--t1);border:0.5px solid var(--b2);border-radius:999px;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity 0.12s;" disabled>⏹ Stop</button>
-        <button id="fs-reset-btn" onclick="fsReset()" style="padding:10px 18px;background:var(--bg3);color:var(--t2);border:0.5px solid var(--b2);border-radius:999px;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity 0.12s;">↺</button>
-      </div>
-      <!-- Submit row — only visible after stopping with a time -->
-      <div id="fs-submit-row" style="display:none;border-top:0.5px solid var(--b3);padding-top:1rem;display:none;align-items:center;gap:12px;flex-wrap:wrap;">
-        <div id="fs-submit-summary" style="flex:1;font-size:13px;color:var(--t2);"></div>
-        <button onclick="fsSubmit()" style="padding:9px 20px;background:var(--t1);color:var(--bg);border:none;border-radius:999px;font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;">Submit to DJ record</button>
-      </div>
-      <div id="fs-submit-msg" style="display:none;font-size:13px;color:var(--green-dark);font-weight:500;text-align:center;margin-top:.75rem;"></div>
-    </div>
   </div>
 
   <!-- DREW'S PICKS -->
@@ -2694,9 +2668,48 @@ function toggleAuthMode() {
   document.getElementById('auth-btn').textContent = isSignUp ? 'Create account' : 'Sign in';
   document.getElementById('auth-toggle').innerHTML = isSignUp ? 'Already have an account? <span onclick="toggleAuthMode()">Sign in</span>' : 'No account? <span onclick="toggleAuthMode()">Create one</span>';
   document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('auth-success').style.display = 'none';
   document.getElementById('remember-me-row').style.display = isSignUp ? 'none' : 'flex';
   // Show username field only during sign up
   document.getElementById('field-username').style.display = isSignUp ? 'block' : 'none';
+  // Hide forgot link during sign up
+  document.getElementById('forgot-link').style.display = isSignUp ? 'none' : 'block';
+}
+
+async function forgotPassword() {
+  const email = document.getElementById('auth-email').value.trim();
+  const errEl = document.getElementById('auth-error');
+  const sucEl = document.getElementById('auth-success');
+  errEl.style.display = 'none';
+  sucEl.style.display = 'none';
+
+  if (!email) {
+    errEl.textContent = 'Please enter your email address first.';
+    errEl.style.display = 'block';
+    document.getElementById('auth-email').focus();
+    return;
+  }
+
+  const btn = document.querySelector('.forgot-link');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/recover`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    // Supabase returns 200 regardless of whether the email exists (prevents enumeration)
+    sucEl.textContent = 'If that email is registered, a password reset link has been sent. Check your inbox.';
+    sucEl.style.display = 'block';
+  } catch (e) {
+    errEl.textContent = 'Something went wrong. Please try again.';
+    errEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'Forgot password?';
+    btn.disabled = false;
+  }
 }
 
 function showAuthError(msg) {
@@ -9415,205 +9428,15 @@ async function renderAdminAnalytics() {
   content.style.display = 'block';
 }
 
-// ── FREESTYLE TIMER ────────────────────────────────────────────────────────
-(function(){
-  let _fsRunning = false;
-  let _fsElapsed = 0;      // ms
-  let _fsStart   = null;   // Date.now() when last started
-  let _fsTick    = null;
-  let _fsFinished = 0;     // final elapsed ms after stop
-
-  function fmt(ms) {
-    const total = Math.floor(ms / 1000);
-    const m = Math.floor(total / 60);
-    const s = total % 60;
-    return m + ':' + String(s).padStart(2, '0');
-  }
-
-  function updateDisplay() {
-    const el = document.getElementById('fs-display');
-    if (el) el.textContent = fmt(_fsElapsed);
-  }
-
-  window.fsStart = function() {
-    if (_fsRunning) return;
-    _fsRunning = true;
-    _fsStart = Date.now();
-    document.getElementById('fs-start-btn').disabled = true;
-    document.getElementById('fs-stop-btn').disabled  = false;
-    document.getElementById('fs-reset-btn').disabled = true;
-    document.getElementById('fs-status-label').textContent = 'Running…';
-    document.getElementById('fs-submit-row').style.display  = 'none';
-    document.getElementById('fs-submit-msg').style.display  = 'none';
-    _fsTick = setInterval(() => {
-      _fsElapsed = (Date.now() - _fsStart);
-      updateDisplay();
-    }, 100);
-  };
-
-  window.fsStop = function() {
-    if (!_fsRunning) return;
-    clearInterval(_fsTick);
-    _fsElapsed = Date.now() - _fsStart;
-    _fsRunning = false;
-    _fsFinished = _fsElapsed;
-    updateDisplay();
-    document.getElementById('fs-start-btn').disabled = false;
-    document.getElementById('fs-stop-btn').disabled  = true;
-    document.getElementById('fs-reset-btn').disabled = false;
-    document.getElementById('fs-status-label').textContent = 'Stopped';
-
-    const dj = document.getElementById('fs-dj-select').value;
-    const djLabel = dj ? document.getElementById('fs-dj-select').selectedOptions[0].text : null;
-    const row = document.getElementById('fs-submit-row');
-    const sum = document.getElementById('fs-submit-summary');
-    if (_fsFinished >= 1000) {
-      const total = Math.floor(_fsFinished / 1000);
-      const m = Math.floor(total / 60), s = total % 60;
-      sum.textContent = djLabel
-        ? `${fmt(_fsFinished)} recorded for ${djLabel}`
-        : `${fmt(_fsFinished)} recorded — select a DJ to submit`;
-      row.style.display = 'flex';
-    }
-  };
-
-  window.fsReset = function() {
-    if (_fsRunning) return;
-    clearInterval(_fsTick);
-    _fsRunning  = false;
-    _fsElapsed  = 0;
-    _fsFinished = 0;
-    updateDisplay();
-    document.getElementById('fs-start-btn').disabled = false;
-    document.getElementById('fs-stop-btn').disabled  = true;
-    document.getElementById('fs-reset-btn').disabled = false;
-    document.getElementById('fs-status-label').textContent = 'Ready';
-    document.getElementById('fs-submit-row').style.display = 'none';
-    document.getElementById('fs-submit-msg').style.display = 'none';
-  };
-
-  window.fsSubmit = function() {
-    const sel = document.getElementById('fs-dj-select');
-    const djName = sel.value;
-    if (!djName) {
-      document.getElementById('fs-submit-summary').textContent = '⚠️ Please select a DJ first.';
-      return;
-    }
-    if (_fsFinished < 1000) {
-      document.getElementById('fs-submit-summary').textContent = '⚠️ Timer is too short to submit.';
-      return;
-    }
-
-    const totalSec = Math.floor(_fsFinished / 1000);
-    const min = Math.floor(totalSec / 60);
-    const sec = totalSec % 60;
-
-    // Re-use the existing djAddSession logic by temporarily setting the DJ entry fields
-    const nameEl = document.getElementById('dj-entry-name');
-    const minEl  = document.getElementById('dj-entry-min');
-    const secEl  = document.getElementById('dj-entry-sec');
-
-    if (!nameEl || !minEl || !secEl) {
-      document.getElementById('fs-submit-msg').textContent = '⚠️ Could not find DJ entry fields.';
-      document.getElementById('fs-submit-msg').style.display = 'block';
-      return;
-    }
-
-    const prevName = nameEl.value, prevMin = minEl.value, prevSec = secEl.value;
-    nameEl.value = djName;
-    minEl.value  = min;
-    secEl.value  = sec;
-
-    if (typeof window.djAddSession === 'function') {
-      window.djAddSession();
-    }
-
-    nameEl.value = prevName; minEl.value = prevMin; secEl.value = prevSec;
-
-    document.getElementById('fs-submit-row').style.display = 'none';
-    const msg = document.getElementById('fs-submit-msg');
-    msg.textContent = `✓ ${fmt(_fsFinished)} submitted to ${sel.selectedOptions[0].text}!`;
-    msg.style.display = 'block';
-    setTimeout(() => { msg.style.display = 'none'; }, 3500);
-
-    // Reset timer
-    _fsElapsed = 0; _fsFinished = 0; updateDisplay();
-    document.getElementById('fs-status-label').textContent = 'Ready';
-  };
-
-  // Populate DJ dropdown whenever the tab becomes visible
-  function populateFsDjs() {
-    const sel = document.getElementById('fs-dj-select');
-    if (!sel) return;
-    const djSrc = document.getElementById('dj-entry-name');
-    if (!djSrc) return;
-    const current = sel.value;
-    sel.innerHTML = '<option value="">— Select DJ —</option>';
-    Array.from(djSrc.options).forEach(opt => {
-      if (!opt.value) return;
-      const o = document.createElement('option');
-      o.value = opt.value; o.textContent = opt.textContent;
-      if (opt.value === current) o.selected = true;
-      sel.appendChild(o);
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('[PWA] Service worker registered:', reg.scope))
+        .catch(err => console.warn('[PWA] Service worker registration failed:', err));
     });
   }
-
-  // Hook into tab switching to refresh the list
-  const _origSwitch = window.switchTab;
-  window.switchTab = function(tab) {
-    if (_origSwitch) _origSwitch(tab);
-    if (tab === 'dj') setTimeout(populateFsDjs, 120);
-  };
-  const _origMobile = window.mobileSwitch;
-  window.mobileSwitch = function(tab) {
-    if (_origMobile) _origMobile(tab);
-    if (tab === 'dj') setTimeout(populateFsDjs, 120);
-  };
-
-  // Also populate on page load in case the tab is already active
-  document.addEventListener('DOMContentLoaded', () => setTimeout(populateFsDjs, 800));
-})();
-
-</script>
-
-<!-- PWA Install Banner -->
-<div id="pwa-install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--bg);border-top:0.5px solid var(--b3);padding:12px 16px;align-items:center;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,0.08);">
-  <div style="flex:1;">
-    <div style="font-size:13px;font-weight:600;color:var(--t1);">Install Line Dance Tracker</div>
-    <div style="font-size:12px;color:var(--t2);">Add to your home screen for quick access</div>
-  </div>
-  <button onclick="pwaInstall()" style="padding:8px 16px;background:var(--t1);color:var(--bg);border:none;border-radius:20px;font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;">Install</button>
-  <button onclick="document.getElementById('pwa-install-banner').style.display='none'" style="padding:8px 10px;background:none;border:none;color:var(--t3);font-size:18px;cursor:pointer;line-height:1;">×</button>
-</div>
-
-<script>
-// PWA: Register service worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
-  });
-}
-
-// PWA: Install prompt banner
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  const banner = document.getElementById('pwa-install-banner');
-  if (banner) banner.style.display = 'flex';
-});
-window.addEventListener('appinstalled', () => {
-  const banner = document.getElementById('pwa-install-banner');
-  if (banner) banner.style.display = 'none';
-  deferredPrompt = null;
-});
-function pwaInstall() {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
-  const banner = document.getElementById('pwa-install-banner');
-  if (banner) banner.style.display = 'none';
-}
 </script>
 </body>
 </html>
