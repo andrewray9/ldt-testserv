@@ -1,54 +1,103 @@
 // Line Dance Tracker — Service Worker
-const CACHE = 'line-dance-v1';
-const PRECACHE = [
-  './',
-  './index.html'
+// Strategy: Network-first for HTML/JS (always fresh), cache-first for assets.
+// !! Bump this version string on every deploy to bust iOS's stubborn PWA cache !!
+
+const CACHE_VERSION = 'v2';
+const CACHE_NAME = `line-dance-${CACHE_VERSION}`;
+
+// Core shell files to pre-cache on install
+const PRECACHE_URLS = [
+  './index.html',
+  './manifest.json'
 ];
 
-// Install: pre-cache shell
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(PRECACHE)).then(() => self.skipWaiting())
+// ── Install: pre-cache the app shell ──────────────────────────────────────────
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(PRECACHE_URLS))
+      // skipWaiting forces this new SW to activate immediately,
+      // replacing the old one without waiting for all tabs to close.
+      .then(() => self.skipWaiting())
   );
 });
 
-// Activate: clear old caches
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
+// ── Activate: remove ALL old caches, then claim clients immediately ────────────
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => {
+            console.log('[SW] Deleting old cache:', key);
+            return caches.delete(key);
+          })
+      ))
+      // clients.claim() makes this SW take control of all open pages right away,
+      // including the iOS home screen launch — critical for getting fresh HTML.
+      .then(() => self.clients.claim())
   );
 });
 
-// Fetch: network-first for API/auth, cache-first for assets
-self.addEventListener('fetch', e => {
-  const url = new URL(e.request.url);
+// ── Message: allow the page to tell the SW to skip waiting ────────────────────
+// The page posts { type: 'SKIP_WAITING' } after detecting a new SW is waiting.
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
 
-  // Always go network-first for Firebase / external APIs
-  if (
-    url.hostname.includes('firebase') ||
-    url.hostname.includes('googleapis') ||
-    url.hostname.includes('imgur') ||
-    e.request.method !== 'GET'
-  ) {
-    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+// ── Fetch ─────────────────────────────────────────────────────────────────────
+self.addEventListener('fetch', event => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Only handle GET requests
+  if (request.method !== 'GET') return;
+
+  // Skip cross-origin requests (Supabase, Google Fonts, Imgur, etc.)
+  if (url.origin !== self.location.origin) return;
+
+  // Network-first for navigations (the HTML page itself)
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirst(request));
     return;
   }
 
-  // Cache-first for everything else (app shell, fonts, etc.)
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(response => {
-        if (!response || response.status !== 200 || response.type === 'opaque') return response;
-        const clone = response.clone();
-        caches.open(CACHE).then(c => c.put(e.request, clone));
-        return response;
-      }).catch(() => {
-        // Fallback to index.html for navigation requests
-        if (e.request.mode === 'navigate') return caches.match('./index.html');
-      });
-    })
-  );
+  // Cache-first for same-origin static assets (manifest, icons, etc.)
+  event.respondWith(cacheFirst(request));
 });
+
+// ── Strategies ────────────────────────────────────────────────────────────────
+
+async function networkFirst(request) {
+  const cache = await caches.open(CACHE_NAME);
+  try {
+    const response = await fetch(request, { cache: 'no-store' });
+    if (response.ok) {
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    // Offline — serve from cache
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    return cache.match('./index.html');
+  }
+}
+
+async function cacheFirst(request) {
+  const cache = await caches.open(CACHE_NAME);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
+  }
+}

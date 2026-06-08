@@ -103,7 +103,29 @@
     .tab[data-tab="feedback"].active{background:#F0FDF4;color:#166534;border-color:#86efac;}
     .tab[data-tab="changelog"].active{background:#F5F0FF;color:#5B21B6;border-color:#C4B5FD;}
 
-    /* FOOTER */
+    /* SETTINGS MODAL */
+    .settings-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity 0.18s;}
+    .settings-overlay.open{opacity:1;pointer-events:auto;}
+    .settings-card{background:var(--bg);border:0.5px solid var(--b3);border-radius:var(--radius-lg);width:100%;max-width:360px;overflow:hidden;transform:scale(0.95) translateY(8px);transition:transform 0.18s cubic-bezier(.34,1.3,.64,1);}
+    .settings-overlay.open .settings-card{transform:scale(1) translateY(0);}
+    .settings-head{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.4rem 0.9rem;border-bottom:0.5px solid var(--b3);}
+    .settings-head h2{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;}
+    .settings-close{background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:var(--t3);padding:0;font-family:inherit;}
+    .settings-close:hover{color:var(--t1);}
+    .settings-body{padding:1.1rem 1.4rem 1.4rem;}
+    .settings-row{display:flex;align-items:center;justify-content:space-between;padding:0.75rem 0;border-bottom:0.5px solid var(--b3);}
+    .settings-row:last-child{border-bottom:none;}
+    .settings-row-info{flex:1;}
+    .settings-row-label{font-size:14px;font-weight:500;color:var(--t1);}
+    .settings-row-sub{font-size:12px;color:var(--t2);margin-top:2px;}
+    .toggle-wrap{position:relative;width:42px;height:24px;flex-shrink:0;margin-left:12px;}
+    .toggle-wrap input{opacity:0;width:0;height:0;position:absolute;}
+    .toggle-track{position:absolute;inset:0;background:var(--b3);border-radius:12px;cursor:pointer;transition:background 0.2s;}
+    .toggle-wrap input:checked + .toggle-track{background:var(--t1);}
+    .toggle-thumb{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.2);transition:transform 0.2s cubic-bezier(.34,1.3,.64,1);pointer-events:none;}
+    .toggle-wrap input:checked ~ .toggle-thumb{transform:translateX(18px);}
+
+        /* FOOTER */
     .app-footer{max-width:880px;margin:0 auto;padding:1.5rem 1.25rem 2.5rem;border-top:0.5px solid var(--b3);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
     .app-footer .footer-brand{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--t2);}
     .app-footer .footer-version{font-size:12px;color:var(--t3);cursor:pointer;transition:color 0.15s;}
@@ -836,7 +858,7 @@
       font-family:'DM Sans',sans-serif;
       font-size:10px;font-weight:500;
       color:var(--t3);
-      padding:0 4px;
+      padding:0 14px;
       height:100%;
       box-sizing:border-box;
       transition:color 0.18s;
@@ -913,6 +935,29 @@
 <canvas id="bnav-lens-canvas" style="display:none" width="200" height="58"></canvas>
 
 <!-- BOTTOM NAV BAR -->
+<!-- SETTINGS MODAL -->
+<div class="settings-overlay" id="settings-overlay" onclick="if(event.target===this)closeSettings()">
+  <div class="settings-card">
+    <div class="settings-head">
+      <h2>Settings</h2>
+      <button class="settings-close" onclick="closeSettings()">&#215;</button>
+    </div>
+    <div class="settings-body">
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label">Bottom Navigation Bar</div>
+          <div class="settings-row-sub">Enable/disable the nav bar at the bottom of the screen</div>
+        </div>
+        <label class="toggle-wrap">
+          <input type="checkbox" id="settings-bnav-toggle" onchange="applyBnavSetting(this.checked)">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
 <nav id="bottom-nav" aria-label="Main navigation">
   <div class="bnav-items" id="bnav-items">
     <div class="bnav-glass-track">
@@ -928,7 +973,7 @@
       <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
         <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
       </svg>
-      Dance Bank
+      Dances
     </button>
     <button class="bnav-btn" id="bnav-night-btn" data-tab="night" onclick="switchTab('night')" aria-label="My Night">
       <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
@@ -1129,7 +1174,7 @@
       <!-- Guest sign-in button (shown when not logged in) -->
       <button id="guest-signin-btn" onclick="openAuthModal('signin')" style="font-size:13px;font-weight:500;padding:5px 14px;border:1.5px solid var(--b2);border-radius:20px;background:var(--bg2);color:var(--t1);cursor:pointer;font-family:'DM Sans',sans-serif;display:none;">Sign in</button>
       <!-- User pill (shown when logged in) -->
-      <div class="user-pill" id="user-pill-wrap" style="display:none;">
+      <div class="user-pill" id="user-pill-wrap" style="display:none;" title="Double-tap to open settings">
         <span id="user-label"></span>
         <span class="admin-badge" id="admin-badge" style="display:none">Admin</span>
         <span class="mod-badge" id="mod-badge" style="display:none">Mod</span>
@@ -10265,6 +10310,78 @@ async function renderAdminAnalytics() {
       if(active){ snapPillTo(active.dataset.tab); }
     }, 250);
   });
+})();
+</script>
+
+<script>
+// ── SETTINGS ──────────────────────────────────────────────────────────────
+(function(){
+  const STORAGE_KEY = 'ld_settings_bnav_enabled';
+
+  function getBnavEnabled(){
+    const val = localStorage.getItem(STORAGE_KEY);
+    // Default is disabled (false)
+    return val === 'true';
+  }
+
+  function applyBnavSetting(enabled){
+    localStorage.setItem(STORAGE_KEY, enabled ? 'true' : 'false');
+    const nav = document.getElementById('bottom-nav');
+    if(!nav) return;
+    if(enabled){
+      nav.style.setProperty('display', 'flex', 'important');
+    } else {
+      nav.style.setProperty('display', 'none', 'important');
+    }
+    const toggle = document.getElementById('settings-bnav-toggle');
+    if(toggle) toggle.checked = enabled;
+  }
+  window.applyBnavSetting = applyBnavSetting;
+
+  function openSettings(){
+    const overlay = document.getElementById('settings-overlay');
+    if(!overlay) return;
+    // Sync toggle state
+    const toggle = document.getElementById('settings-bnav-toggle');
+    if(toggle) toggle.checked = getBnavEnabled();
+    overlay.classList.add('open');
+  }
+  window.openSettings = openSettings;
+
+  function closeSettings(){
+    const overlay = document.getElementById('settings-overlay');
+    if(overlay) overlay.classList.remove('open');
+  }
+  window.closeSettings = closeSettings;
+
+  // Double-tap detection on user pill
+  let lastTap = 0;
+  function initDoubleTap(){
+    const pill = document.getElementById('user-pill-wrap');
+    if(!pill) return;
+    function handleTap(e){
+      const now = Date.now();
+      if(now - lastTap < 350){
+        e.preventDefault();
+        openSettings();
+      }
+      lastTap = now;
+    }
+    pill.addEventListener('touchend', handleTap, {passive: false});
+    pill.addEventListener('dblclick', handleTap);
+  }
+
+  // Apply initial setting on load
+  function init(){
+    applyBnavSetting(getBnavEnabled());
+    initDoubleTap();
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
 </script>
 </body>
