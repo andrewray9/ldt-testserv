@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Line Dance Tracker</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="icon" type="image/x-icon" href="https://i.imgur.com/WDByZ1N.png">
@@ -756,25 +756,20 @@
 
     /* ── BOTTOM NAV BAR (mobile only) ── */
     @media(max-width:640px){
-      /* extra room: nav height (70px) + bottom gap (12px) + safe area */
-      .app{padding-bottom:calc(70px + 12px + env(safe-area-inset-bottom, 20px) + 16px);}
+      /* extra room: nav height (58px) + bottom gap (10px) + safe area */
+      .app{padding-bottom:calc(58px + 10px + env(safe-area-inset-bottom, 20px) + 16px);}
     }
     #bottom-nav{
       display:none;
       position:fixed;
-      /* float above the home indicator */
-      bottom:calc(12px + env(safe-area-inset-bottom, 20px));
-      /* inset from screen edges so it never touches the sides */
-      left:14px;right:14px;
+      bottom:calc(10px + env(safe-area-inset-bottom, 20px));
+      left:12px;right:12px;
       z-index:500;
-      height:70px;
-      /* pill shape */
-      border-radius:22px;
-      /* frosted glass */
+      height:58px;
+      border-radius:20px;
       background:rgba(255,255,255,0.62);
       backdrop-filter:blur(24px) saturate(200%);
       -webkit-backdrop-filter:blur(24px) saturate(200%);
-      /* all-around border instead of just top */
       border:0.5px solid rgba(255,255,255,0.75);
       box-shadow:
         0 8px 32px rgba(0,0,0,0.13),
@@ -801,6 +796,7 @@
     .bnav-items{
       display:flex;flex:1;align-items:stretch;
       position:relative;
+      height:100%;
     }
     .bnav-glass-track{
       position:absolute;inset:0;pointer-events:none;overflow:hidden;
@@ -808,8 +804,8 @@
     /* The glass pill that slides behind the active icon */
     .bnav-pill{
       position:absolute;
-      top:7px;bottom:7px;
-      border-radius:16px;
+      top:6px;bottom:6px;
+      border-radius:14px;
       /* Glass pill uses SVG filter for refraction */
       filter:url(#bnav-glass-filter);
       background:rgba(255,255,255,0.35);
@@ -834,27 +830,27 @@
     }
     .bnav-btn{
       flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-      gap:3px;
+      gap:2px;
       background:none;border:none;cursor:pointer;
       font-family:'DM Sans',sans-serif;
       font-size:10px;font-weight:500;
       color:var(--t3);
       padding:0 4px;
+      height:100%;
+      box-sizing:border-box;
       transition:color 0.18s;
       position:relative;z-index:2;
       -webkit-tap-highlight-color:transparent;
-      /* Always centered — pill is a sibling layer beneath, never affects layout */
       pointer-events:auto;
     }
     .bnav-btn:active{transform:scale(0.93);}
     .bnav-btn.active{color:var(--t1);}
     .bnav-icon{
-      width:22px;height:22px;
+      width:20px;height:20px;
       transition:transform 0.3s cubic-bezier(.34,1.56,.64,1);
-      /* Icons never shift — only scale up on active */
       display:block;
     }
-    .bnav-btn.active .bnav-icon{transform:scale(1.18) translateY(-1px);}
+    .bnav-btn.active .bnav-icon{transform:scale(1.15) translateY(-1px);}
     /* colored active states */
     .bnav-btn[data-tab="home"].active{color:#7e22ce;}
     .bnav-btn[data-tab="bank"].active{color:#0C447C;}
@@ -872,13 +868,13 @@
     }
     /* specular highlight on pill */
     .bnav-pill::before{
-      content:'';position:absolute;inset:1px;border-radius:15px;
+      content:'';position:absolute;inset:1px;border-radius:13px;
       background:linear-gradient(170deg,rgba(255,255,255,0.55) 0%,rgba(255,255,255,0) 55%);
       pointer-events:none;
     }
     /* SWIPE NAVIGATION */
     #swipe-toast{
-      position:fixed;bottom:calc(70px + 12px + env(safe-area-inset-bottom, 20px) + 10px);left:50%;transform:translateX(-50%) translateY(12px);
+      position:fixed;bottom:calc(58px + 10px + env(safe-area-inset-bottom, 20px) + 10px);left:50%;transform:translateX(-50%) translateY(12px);
       background:var(--t1);color:var(--bg);
       font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;
       padding:8px 18px;border-radius:999px;
