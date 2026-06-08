@@ -763,7 +763,8 @@
       display:none;
       position:fixed;
       bottom:calc(10px + env(safe-area-inset-bottom, 20px));
-      left:12px;right:12px;
+      left:calc(12px + env(safe-area-inset-left, 0px));
+      right:calc(12px + env(safe-area-inset-right, 0px));
       z-index:500;
       height:58px;
       border-radius:20px;
@@ -1556,6 +1557,29 @@
       </div>
     </div>
     <div id="nv-result"></div>
+
+    <!-- MONTHLY STATS CARD -->
+    <div class="section-title" style="margin-top:2rem">&#127881; Monthly Stats Card</div>
+    <p class="section-note">Generate a shareable card for any month — your data is pulled in automatically</p>
+    <div id="monthly-card-section">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:1rem;">
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <label style="font-size:12px;font-weight:500;color:var(--t2);">Month</label>
+          <select id="msc-month-select" style="padding:9px 13px;border:0.5px solid var(--b2);border-radius:var(--radius-md);background:var(--bg);color:var(--t1);font-size:14px;font-family:'DM Sans',sans-serif;" onchange="renderMonthlyStatsCard()">
+          </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <label style="font-size:12px;font-weight:500;color:var(--t2);">Theme</label>
+          <div id="msc-theme-row" style="display:flex;gap:8px;padding:6px 0;"></div>
+        </div>
+        <button class="btn primary" onclick="mscDownload()" style="align-self:flex-end;padding:9px 18px;font-size:13px;">Download PNG</button>
+      </div>
+      <div id="msc-empty" class="empty" style="display:none">No nights logged in this month yet.</div>
+      <div id="msc-canvas-wrap" style="max-width:420px;border-radius:12px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,0.35);">
+        <canvas id="msc-canvas" width="760" height="1020" style="display:block;width:100%;border-radius:12px;"></canvas>
+      </div>
+      <p style="font-size:11px;color:var(--t3);margin-top:8px;max-width:420px;text-align:center;">Click "Download PNG" to save your card</p>
+    </div>
   </div>
 
   <!-- DREW'S PICKS -->
@@ -4191,7 +4215,8 @@ async function addDance(type){
   if(requireLogin('Sign in to add dances to your list')) return;
   const inp=document.getElementById(type+'-input');
   const name=inp.value.trim();if(!name)return;
-  const newDance={id:Date.now()+'',name,added:new Date().toISOString()};
+  const now=new Date().toISOString();
+  const newDance={id:Date.now()+'',name,added:now,...(type==='know'?{learnedAt:now}:{})};
   state[type].push(newDance);
   inp.value='';renderList(type);
   const ok=await saveToCloud();
@@ -4223,7 +4248,7 @@ async function removeDance(type,id){
 async function moveToKnow(id){
   if(requireLogin('Sign in to track your progress')) return;
   const d=state.learn.find(x=>x.id===id);if(!d)return;
-  state.learn=state.learn.filter(x=>x.id!==id);state.know.push({...d});
+  state.learn=state.learn.filter(x=>x.id!==id);state.know.push({...d,learnedAt:new Date().toISOString()});
   launchConfetti();
   renderList('learn');renderList('know');renderBank();
   const ok=await saveToCloud();
@@ -7163,6 +7188,7 @@ function renderTFAnalytics(){
   renderTFNightPatterns();
   renderTFLearnTimeline();
   renderTFNeverDanced();
+  mscInit();
 }
 
 // ---- helpers ----
@@ -7868,6 +7894,316 @@ function renderTFNeverDanced(){
       </div>
       <div style="font-size:12px;color:var(--t2);margin-top:.75rem;">${sorted.length} dance${sorted.length!==1?'s':''} waiting to be logged</div>
     </div>`;
+}
+
+// ============================================================
+// MONTHLY STATS CARD
+// ============================================================
+const MSC_THEMES = [
+  { id:'midnight', label:'Midnight', bg:['#0f0f12','#1a1a2e'], accent:'#a09cf5', accent2:'#6a63e0', text:'#f0efe9', sub:'rgba(240,239,233,0.55)', tag:'rgba(160,156,245,0.18)', tagBorder:'rgba(160,156,245,0.45)', tagText:'#c8c4fa', dot:'#a09cf5' },
+  { id:'forest',   label:'Forest',  bg:['#0a1a10','#0f2a18'], accent:'#9fd870', accent2:'#5bab20', text:'#f0efe9', sub:'rgba(240,239,233,0.55)', tag:'rgba(91,171,32,0.15)',  tagBorder:'rgba(91,171,32,0.4)',  tagText:'#9fd870', dot:'#9fd870' },
+  { id:'rose',     label:'Rose',    bg:['#1a0a12','#2a1020'], accent:'#f07ab0', accent2:'#c0406a', text:'#f0efe9', sub:'rgba(240,239,233,0.55)', tag:'rgba(192,64,106,0.18)', tagBorder:'rgba(192,64,106,0.45)',tagText:'#f07ab0', dot:'#f07ab0' },
+  { id:'amber',    label:'Amber',   bg:['#1a0e00','#2a1a04'], accent:'#f0a840', accent2:'#b06010', text:'#f0efe9', sub:'rgba(240,239,233,0.55)', tag:'rgba(176,96,16,0.2)',   tagBorder:'rgba(176,96,16,0.5)',  tagText:'#f0a840', dot:'#f0a840' },
+  { id:'sky',      label:'Sky',     bg:['#040e1a','#081c30'], accent:'#6ab4f5', accent2:'#1a6abf', text:'#f0efe9', sub:'rgba(240,239,233,0.55)', tag:'rgba(26,106,191,0.18)', tagBorder:'rgba(26,106,191,0.45)',tagText:'#6ab4f5', dot:'#6ab4f5' },
+  { id:'mono',     label:'Mono',    bg:['#111110','#1c1c1a'], accent:'#f0efe9', accent2:'#888580', text:'#f0efe9', sub:'rgba(240,239,233,0.5)',  tag:'rgba(240,239,233,0.1)', tagBorder:'rgba(240,239,233,0.3)',tagText:'#d0cfc9', dot:'#f0efe9' },
+];
+const MSC_THEME_COLORS = { midnight:'#6a63e0', forest:'#3b8a10', rose:'#c0406a', amber:'#b06010', sky:'#1a6abf', mono:'#555452' };
+let mscActiveTheme = MSC_THEMES[0];
+
+function mscHexAlpha(hex, a){
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function mscRoundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+}
+
+function mscInit(){
+  const sel=document.getElementById('msc-month-select');
+  if(!sel) return;
+
+  // Populate month dropdown from all nights that have data
+  const monthSet={};
+  Object.keys(state.nights||{}).forEach(date=>{
+    const val=state.nights[date];
+    const nd=Array.isArray(val)?{dances:val}:val;
+    if((nd.dances||[]).length>0) monthSet[date.slice(0,7)]=true;
+  });
+  const months=Object.keys(monthSet).sort().reverse();
+  const prevVal=sel.value;
+  sel.innerHTML='';
+  if(!months.length){
+    sel.innerHTML='<option value="">No nights logged yet</option>';
+    const wrap=document.getElementById('msc-canvas-wrap');
+    const empty=document.getElementById('msc-empty');
+    if(wrap) wrap.style.display='none';
+    if(empty){empty.style.display='';empty.textContent='No nights logged yet.';}
+    return;
+  }
+  months.forEach(m=>{
+    const d=new Date(m+'-15');
+    const label=d.toLocaleDateString([],{month:'long',year:'numeric'});
+    const opt=document.createElement('option');
+    opt.value=m; opt.textContent=label;
+    sel.appendChild(opt);
+  });
+  if(months.includes(prevVal)) sel.value=prevVal;
+
+  // Build theme buttons (only once)
+  const row=document.getElementById('msc-theme-row');
+  if(row&&!row.children.length){
+    MSC_THEMES.forEach(t=>{
+      const btn=document.createElement('button');
+      btn.style.cssText=`width:26px;height:26px;border-radius:50%;border:2px solid ${t.id===mscActiveTheme.id?'#fff':'transparent'};background:${MSC_THEME_COLORS[t.id]};cursor:pointer;transition:transform .15s;flex-shrink:0;`;
+      btn.title=t.label;
+      btn.onclick=()=>{
+        mscActiveTheme=t;
+        row.querySelectorAll('button').forEach(b=>b.style.borderColor='transparent');
+        btn.style.borderColor='#fff';
+        renderMonthlyStatsCard();
+      };
+      row.appendChild(btn);
+    });
+  }
+
+  renderMonthlyStatsCard();
+}
+
+function mscGetMonthData(ym){
+  // ym = 'YYYY-MM'
+  const nights=[];
+  Object.entries(state.nights||{}).forEach(([date,val])=>{
+    if(!date.startsWith(ym)) return;
+    const nd=Array.isArray(val)?{dances:val,dj:'',arriveTime:'',leaveTime:''}:{arriveTime:'',leaveTime:'',...val};
+    if((nd.dances||[]).length>0) nights.push({date,...nd});
+  });
+  nights.sort((a,b)=>a.date.localeCompare(b.date));
+
+  // Nights attended
+  const nightsAttended=nights.length;
+
+  // New dances learned this month (learnedAt starts with ym)
+  const newDances=state.know.filter(d=>d.learnedAt&&d.learnedAt.startsWith(ym));
+
+  // Most dances in a single night this month
+  let bestNight={dances:[],date:''};
+  nights.forEach(n=>{if((n.dances||[]).length>(bestNight.dances||[]).length) bestNight=n;});
+
+  // Top 10 dances this month by times logged
+  const danceCounts={};
+  nights.forEach(n=>(n.dances||[]).forEach(id=>{danceCounts[id]=(danceCounts[id]||0)+1;}));
+  const sorted=Object.entries(danceCounts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const topDances=sorted.map(([id,count])=>{
+    const name=state.know.find(d=>d.id===id)?.name||bank.find(d=>d.id===id)?.name||id;
+    return{id,name,count};
+  });
+
+  return{nightsAttended,newDances,bestNight,topDances};
+}
+
+function renderMonthlyStatsCard(){
+  const sel=document.getElementById('msc-month-select');
+  const canvas=document.getElementById('msc-canvas');
+  const wrap=document.getElementById('msc-canvas-wrap');
+  const emptyEl=document.getElementById('msc-empty');
+  if(!sel||!canvas) return;
+
+  const ym=sel.value;
+  if(!ym){if(wrap)wrap.style.display='none';if(emptyEl){emptyEl.style.display='';emptyEl.textContent='No month selected.';}return;}
+
+  const data=mscGetMonthData(ym);
+
+  if(data.nightsAttended===0){
+    if(wrap) wrap.style.display='none';
+    if(emptyEl){emptyEl.style.display='';emptyEl.textContent='No nights logged in this month yet.';}
+    return;
+  }
+  if(emptyEl) emptyEl.style.display='none';
+  if(wrap) wrap.style.display='';
+
+  const myCard=friendCards.find(c=>c.username===currentUser)||null;
+  const displayName=myCard?.displayName||currentUser||'Dancer';
+  const username=currentUser?('@'+currentUser):'';
+
+  const monthLabel=new Date(ym+'-15').toLocaleDateString([],{month:'long',year:'numeric'});
+
+  mscDraw(canvas, data, displayName, username, monthLabel, mscActiveTheme);
+
+  // Fit canvas display size
+  const displayW=wrap.clientWidth;
+  canvas.style.width=displayW+'px';
+  canvas.style.height=Math.round(displayW*(canvas.height/canvas.width))+'px';
+}
+
+function mscDraw(canvas, data, displayName, username, monthLabel, T){
+  const W=760, H=1020;
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+
+  // Background gradient
+  const grad=ctx.createLinearGradient(0,0,W,H);
+  grad.addColorStop(0,T.bg[0]); grad.addColorStop(1,T.bg[1]);
+  ctx.fillStyle=grad;
+  mscRoundRect(ctx,0,0,W,H,24); ctx.fill();
+
+  // Subtle grid
+  ctx.save();
+  ctx.strokeStyle='rgba(255,255,255,0.025)'; ctx.lineWidth=0.5;
+  for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  ctx.restore();
+
+  // Glows
+  const glow=ctx.createRadialGradient(W-60,80,0,W-60,80,280);
+  glow.addColorStop(0,mscHexAlpha(T.accent,0.14)); glow.addColorStop(1,'transparent');
+  ctx.fillStyle=glow; ctx.beginPath(); ctx.arc(W-60,80,280,0,Math.PI*2); ctx.fill();
+  const glow2=ctx.createRadialGradient(80,H-80,0,80,H-80,200);
+  glow2.addColorStop(0,mscHexAlpha(T.accent2,0.1)); glow2.addColorStop(1,'transparent');
+  ctx.fillStyle=glow2; ctx.beginPath(); ctx.arc(80,H-80,200,0,Math.PI*2); ctx.fill();
+
+  const px=56;
+
+  // Month pill
+  ctx.font='500 14px "DM Sans"';
+  const pillText=monthLabel+' · Monthly Card';
+  const pillW=ctx.measureText(pillText).width+32, pillH=36, pillX=px, pillY=52;
+  ctx.fillStyle=mscHexAlpha(T.accent,0.15);
+  mscRoundRect(ctx,pillX,pillY,pillW,pillH,18); ctx.fill();
+  ctx.strokeStyle=mscHexAlpha(T.accent,0.4); ctx.lineWidth=0.5;
+  mscRoundRect(ctx,pillX,pillY,pillW,pillH,18); ctx.stroke();
+  ctx.fillStyle=T.tagText; ctx.textAlign='left';
+  ctx.fillText(pillText,pillX+16,pillY+23);
+
+  // Name
+  ctx.font='700 54px "Playfair Display"'; ctx.fillStyle=T.text; ctx.textAlign='left';
+  // Clamp long names
+  let nameText=displayName;
+  while(ctx.measureText(nameText).width>W-px*2-40 && nameText.length>4) nameText=nameText.slice(0,-1);
+  if(nameText!==displayName) nameText=nameText.trim()+'…';
+  ctx.fillText(nameText,px,pillY+pillH+60);
+
+  if(username){
+    ctx.font='400 18px "DM Sans"'; ctx.fillStyle=T.sub;
+    ctx.fillText(username,px,pillY+pillH+60+32);
+  }
+
+  // Divider
+  const divY=pillY+pillH+116;
+  ctx.strokeStyle=mscHexAlpha(T.accent,0.3); ctx.lineWidth=0.5;
+  ctx.beginPath(); ctx.moveTo(px,divY); ctx.lineTo(W-px,divY); ctx.stroke();
+
+  // ── STATS GRID (2×2) ──
+  const statY=divY+32;
+  const stats=[
+    {label:'Nights Attended',         value:String(data.nightsAttended)},
+    {label:'New Dances Learned',       value:String(data.newDances.length)},
+    {label:'Most Dances in One Night', value:String((data.bestNight.dances||[]).length)},
+    {label:'Best Night',               value:data.bestNight.date?new Date(data.bestNight.date+'T12:00:00').toLocaleDateString([],{month:'short',day:'numeric'}):'—'},
+  ];
+
+  const cols=2, cellW=(W-px*2)/cols, cellH=118;
+  stats.forEach((s,i)=>{
+    const col=i%cols, row=Math.floor(i/cols);
+    const cx=px+col*cellW, cy=statY+row*(cellH+10);
+
+    ctx.fillStyle=mscHexAlpha('#ffffff',0.04);
+    mscRoundRect(ctx,cx+4,cy,cellW-12,cellH,12); ctx.fill();
+    ctx.strokeStyle=mscHexAlpha(T.accent,0.18); ctx.lineWidth=0.5;
+    mscRoundRect(ctx,cx+4,cy,cellW-12,cellH,12); ctx.stroke();
+
+    ctx.fillStyle=T.dot; ctx.beginPath(); ctx.arc(cx+20,cy+22,4,0,Math.PI*2); ctx.fill();
+
+    ctx.font='700 40px "Playfair Display"'; ctx.fillStyle=T.text; ctx.textAlign='left';
+    ctx.fillText(s.value,cx+14,cy+72);
+    ctx.font='400 12px "DM Sans"'; ctx.fillStyle=T.sub;
+    ctx.fillText(s.label,cx+14,cy+96);
+  });
+
+  // ── TOP DANCES ──
+  const topY=statY+2*(cellH+10)+16;
+
+  ctx.font='500 12px "DM Sans"'; ctx.fillStyle=T.sub; ctx.textAlign='left';
+  ctx.letterSpacing='0.06em';
+  ctx.fillText('TOP DANCES THIS MONTH',px,topY);
+  ctx.letterSpacing='0em';
+  ctx.strokeStyle=mscHexAlpha(T.accent,0.5); ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(px,topY+8); ctx.lineTo(px+110,topY+8); ctx.stroke();
+
+  const topList=data.topDances.slice(0,10);
+  const rowH=44;
+  // Draw in two columns if more than 5
+  const leftCol=topList.slice(0,5);
+  const rightCol=topList.slice(5,10);
+  const colW=(W-px*2)/2;
+
+  [[leftCol,0],[rightCol,1]].forEach(([col,ci])=>{
+    col.forEach((dance,i)=>{
+      const rank=ci*5+i+1;
+      const dy=topY+22+i*rowH;
+      const bx=px+ci*colW;
+
+      // Number
+      ctx.font=`700 ${rank<=3?'22':'18'}px "Playfair Display"`;
+      ctx.fillStyle=rank===1?T.accent:rank<=3?mscHexAlpha(T.text,0.5):mscHexAlpha(T.text,0.3);
+      ctx.textAlign='right';
+      ctx.fillText(rank,bx+26,dy+20);
+
+      // Dance name
+      const nameX=bx+34;
+      const maxNameW=colW-50;
+      ctx.font=`500 ${rank===1?'17':'15'}px "DM Sans"`;
+      let danceName=dance.name;
+      while(ctx.measureText(danceName).width>maxNameW-40 && danceName.length>3) danceName=danceName.slice(0,-1);
+      if(danceName!==dance.name) danceName=danceName.trim()+'…';
+
+      if(rank===1){
+        const nameW=ctx.measureText(danceName).width;
+        ctx.fillStyle=T.tag;
+        mscRoundRect(ctx,nameX,dy+2,nameW+22,30,7); ctx.fill();
+        ctx.strokeStyle=T.tagBorder; ctx.lineWidth=0.5;
+        mscRoundRect(ctx,nameX,dy+2,nameW+22,30,7); ctx.stroke();
+        ctx.fillStyle=T.tagText; ctx.textAlign='left';
+        ctx.fillText(danceName,nameX+11,dy+21);
+      } else {
+        ctx.fillStyle=mscHexAlpha(T.text,rank<=3?0.9:rank<=6?0.75:0.6);
+        ctx.textAlign='left';
+        ctx.fillText(danceName,nameX,dy+20);
+      }
+
+      // Count badge (×N)
+      ctx.font='400 11px "DM Sans"'; ctx.fillStyle=mscHexAlpha(T.accent,0.7); ctx.textAlign='right';
+      ctx.fillText('×'+dance.count, bx+colW-8, dy+20);
+    });
+  });
+
+  // ── BRANDING ──
+  const botY=H-52;
+  ctx.strokeStyle=mscHexAlpha(T.accent,0.18); ctx.lineWidth=0.5;
+  ctx.beginPath(); ctx.moveTo(px,botY-16); ctx.lineTo(W-px,botY-16); ctx.stroke();
+
+  ctx.font='700 16px "Playfair Display"'; ctx.fillStyle=mscHexAlpha(T.text,0.5); ctx.textAlign='left';
+  ctx.fillText('Line Dance Tracker',px,botY+4);
+
+  for(let d=0;d<5;d++){
+    ctx.fillStyle=mscHexAlpha(T.accent,d===4?0.6:0.15+d*0.1);
+    ctx.beginPath(); ctx.arc(W-px-(4-d)*18,botY+2,4,0,Math.PI*2); ctx.fill();
+  }
+}
+
+function mscDownload(){
+  const canvas=document.getElementById('msc-canvas');
+  if(!canvas) return;
+  renderMonthlyStatsCard();
+  const sel=document.getElementById('msc-month-select');
+  const ym=sel?.value||'month';
+  const name=(currentUser||'dancer').replace(/\s+/g,'-').toLowerCase();
+  const link=document.createElement('a');
+  link.download=`linedance-${name}-${ym}.png`;
+  link.href=canvas.toDataURL('image/png');
+  link.click();
 }
 
 function flushPendingSaves(){
