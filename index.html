@@ -756,8 +756,8 @@
 
     /* ── BOTTOM NAV BAR (mobile only) ── */
     @media(max-width:640px){
-      /* extra room: nav height (62px) + bottom gap (12px) + safe area */
-      .app{padding-bottom:calc(62px + 12px + env(safe-area-inset-bottom, 20px) + 16px);}
+      /* extra room: nav height (70px) + bottom gap (12px) + safe area */
+      .app{padding-bottom:calc(70px + 12px + env(safe-area-inset-bottom, 20px) + 16px);}
     }
     #bottom-nav{
       display:none;
@@ -767,7 +767,7 @@
       /* inset from screen edges so it never touches the sides */
       left:14px;right:14px;
       z-index:500;
-      height:62px;
+      height:70px;
       /* pill shape */
       border-radius:22px;
       /* frosted glass */
@@ -859,11 +859,15 @@
     .bnav-btn[data-tab="home"].active{color:#7e22ce;}
     .bnav-btn[data-tab="bank"].active{color:#0C447C;}
     .bnav-btn[data-tab="night"].active{color:#72243E;}
+    .bnav-btn[data-tab="drewsnight"].active{color:#8B3A00;}
+    .bnav-btn[data-tab="log"].active{color:#633806;}
     .bnav-btn[data-tab="friends"].active{color:#0369a1;}
     @media(prefers-color-scheme:dark){
       .bnav-btn[data-tab="home"].active{color:#c084fc;}
       .bnav-btn[data-tab="bank"].active{color:#6ab4f5;}
       .bnav-btn[data-tab="night"].active{color:#f07ab0;}
+      .bnav-btn[data-tab="drewsnight"].active{color:#ffaa66;}
+      .bnav-btn[data-tab="log"].active{color:#f0a840;}
       .bnav-btn[data-tab="friends"].active{color:#38bdf8;}
     }
     /* specular highlight on pill */
@@ -874,7 +878,7 @@
     }
     /* SWIPE NAVIGATION */
     #swipe-toast{
-      position:fixed;bottom:calc(62px + 12px + env(safe-area-inset-bottom, 20px) + 10px);left:50%;transform:translateX(-50%) translateY(12px);
+      position:fixed;bottom:calc(70px + 12px + env(safe-area-inset-bottom, 20px) + 10px);left:50%;transform:translateX(-50%) translateY(12px);
       background:var(--t1);color:var(--bg);
       font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;
       padding:8px 18px;border-radius:999px;
@@ -929,11 +933,17 @@
       </svg>
       Dance Bank
     </button>
-    <button class="bnav-btn" data-tab="night" onclick="switchTab('night')" aria-label="My Night">
+    <button class="bnav-btn" id="bnav-night-btn" data-tab="night" onclick="switchTab('night')" aria-label="My Night">
       <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/>
       </svg>
       My Night
+    </button>
+    <button class="bnav-btn" data-tab="log" onclick="switchTab('log')" aria-label="Analytics">
+      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+      </svg>
+      Analytics
     </button>
     <button class="bnav-btn" data-tab="friends" onclick="switchTab('friends')" aria-label="Friends">
       <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
@@ -2779,6 +2789,23 @@ function applyTabVisibility(){
   } else {
     if(nightCard) nightCard.style.display='';
     // drewsnight home card visibility for regular users handled by registry above
+  }
+  // For admin: swap My Night nav button to Drew's Night
+  const bnavNightBtn = document.getElementById('bnav-night-btn');
+  if(bnavNightBtn){
+    if(isAdmin){
+      bnavNightBtn.dataset.tab = 'drewsnight';
+      bnavNightBtn.setAttribute('aria-label', 'Night');
+      bnavNightBtn.onclick = function(){ switchTab('drewsnight'); };
+      Array.from(bnavNightBtn.childNodes).forEach(n=>{ if(n.nodeType===3&&n.textContent.trim()) n.textContent=' Night '; });
+      if(window.bnavSetNightTab) window.bnavSetNightTab('drewsnight');
+    } else {
+      bnavNightBtn.dataset.tab = 'night';
+      bnavNightBtn.setAttribute('aria-label', 'My Night');
+      bnavNightBtn.onclick = function(){ switchTab('night'); };
+      Array.from(bnavNightBtn.childNodes).forEach(n=>{ if(n.nodeType===3&&n.textContent.trim()) n.textContent=' My Night '; });
+      if(window.bnavSetNightTab) window.bnavSetNightTab('night');
+    }
   }
 }
 
@@ -9561,7 +9588,13 @@ async function renderAdminAnalytics() {
 <!-- ── LIQUID GLASS BOTTOM NAV ── -->
 <script>
 (function(){
-  const NAV_TABS = ['home','bank','night','friends'];
+  const NAV_TABS = ['home','bank','night','log','friends'];
+
+  // Allow external code (e.g. applyTabVisibility) to swap the night tab for admins
+  window.bnavSetNightTab = function(tab){
+    const idx = NAV_TABS.indexOf('night') !== -1 ? NAV_TABS.indexOf('night') : NAV_TABS.indexOf('drewsnight');
+    if(idx !== -1) NAV_TABS[idx] = tab;
+  };
 
   // ─────────────────────────────────────────────────────────────
   // DISPLACEMENT MAP GENERATOR  (Aave feDisplacementMap technique)
