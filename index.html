@@ -756,29 +756,42 @@
 
     /* ── BOTTOM NAV BAR (mobile only) ── */
     @media(max-width:640px){
-      .app{padding-bottom:90px;}
+      /* extra room: nav height (62px) + bottom gap (12px) + safe area */
+      .app{padding-bottom:calc(62px + 12px + env(safe-area-inset-bottom, 20px) + 16px);}
     }
     #bottom-nav{
       display:none;
-      position:fixed;bottom:0;left:0;right:0;z-index:500;
-      height:72px;
-      /* frosted base */
-      background:rgba(255,255,255,0.55);
-      backdrop-filter:blur(18px) saturate(180%);
-      -webkit-backdrop-filter:blur(18px) saturate(180%);
-      border-top:0.5px solid rgba(0,0,0,0.09);
-      box-shadow:0 -4px 24px rgba(0,0,0,0.07);
-      /* layout */
-      display:none;
+      position:fixed;
+      /* float above the home indicator */
+      bottom:calc(12px + env(safe-area-inset-bottom, 20px));
+      /* inset from screen edges so it never touches the sides */
+      left:14px;right:14px;
+      z-index:500;
+      height:62px;
+      /* pill shape */
+      border-radius:22px;
+      /* frosted glass */
+      background:rgba(255,255,255,0.62);
+      backdrop-filter:blur(24px) saturate(200%);
+      -webkit-backdrop-filter:blur(24px) saturate(200%);
+      /* all-around border instead of just top */
+      border:0.5px solid rgba(255,255,255,0.75);
+      box-shadow:
+        0 8px 32px rgba(0,0,0,0.13),
+        0 2px 8px rgba(0,0,0,0.07),
+        inset 0 1px 0 rgba(255,255,255,0.9);
       align-items:stretch;
       padding:0;
-      padding-bottom:env(safe-area-inset-bottom,0px);
+      overflow:hidden;
     }
     @media(prefers-color-scheme:dark){
       #bottom-nav{
-        background:rgba(28,28,26,0.72);
-        border-top:0.5px solid rgba(255,255,255,0.08);
-        box-shadow:0 -4px 24px rgba(0,0,0,0.28);
+        background:rgba(28,28,26,0.78);
+        border:0.5px solid rgba(255,255,255,0.11);
+        box-shadow:
+          0 8px 32px rgba(0,0,0,0.38),
+          0 2px 8px rgba(0,0,0,0.22),
+          inset 0 1px 0 rgba(255,255,255,0.07);
       }
     }
     @media(max-width:640px){
@@ -861,7 +874,7 @@
     }
     /* SWIPE NAVIGATION */
     #swipe-toast{
-      position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(12px);
+      position:fixed;bottom:calc(62px + 12px + env(safe-area-inset-bottom, 20px) + 10px);left:50%;transform:translateX(-50%) translateY(12px);
       background:var(--t1);color:var(--bg);
       font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;
       padding:8px 18px;border-radius:999px;
