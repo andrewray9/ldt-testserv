@@ -841,12 +841,12 @@
 <div class="modal-overlay" id="venue-setup-modal" style="display:none">
   <div class="modal-card" style="max-width:420px;">
     <h2>Set Up My Night</h2>
-    <div class="modal-date" style="margin-bottom:1rem;">Where do you dance? If it's the Nashville Palace, just type that in and you'll use the main DJ list automatically. Otherwise, add your own venue and DJs — only you will see them.</div>
+    <div class="modal-date" style="margin-bottom:1rem;">Where do you primarily dance?</div>
     <div class="field">
       <label>Venue Name</label>
       <input type="text" id="venue-setup-name" placeholder="e.g. The Nashville Palace, or your local bar" oninput="updateVenueSetupPalaceNote()">
     </div>
-    <div id="venue-setup-palace-note" style="display:none;font-size:12px;color:var(--t2);background:var(--bg2);border-radius:6px;padding:8px 10px;margin-bottom:14px;">You'll see the main Nashville Palace DJ list too — it can't be edited here, but you can still add your own DJs below.</div>
+    <div id="venue-setup-palace-note" style="display:none;font-size:12px;color:var(--t2);background:var(--bg2);border-radius:6px;padding:8px 10px;margin-bottom:14px;">You'll see the main Nashville Palace DJ list too, and you can still add your own DJs below.</div>
     <div id="venue-setup-dj-section">
       <div class="field">
         <label>Your DJs (optional)</label>
@@ -1022,7 +1022,11 @@
       <label>Password</label>
       <input type="password" id="auth-password" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')authSubmit()">
     </div>
-    
+
+    <div style="text-align:right;margin:-8px 0 12px;" id="forgot-password-row">
+      <span onclick="openForgotPassword()" style="font-size:12px;color:var(--t2);cursor:pointer;text-decoration:underline;">Forgot password?</span>
+    </div>
+
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;" id="remember-me-row">
       <input type="checkbox" id="remember-me" style="width:16px;height:16px;accent-color:var(--t1);cursor:pointer;flex-shrink:0;">
       <label for="remember-me" style="font-size:13px;color:var(--t2);cursor:pointer;margin:0;">Remember me</label>
@@ -1032,6 +1036,50 @@
     <div style="text-align:center;margin-top:1rem;" id="auth-dismiss-row">
       <button onclick="dismissAuthModal()" style="background:none;border:none;font-size:13px;color:var(--t2);cursor:pointer;text-decoration:underline;font-family:'DM Sans',sans-serif;">Continue browsing as guest</button>
     </div>
+  </div>
+  </div>
+</div>
+
+<!-- FORGOT PASSWORD MODAL -->
+<div class="auth-modal-overlay" id="forgot-password-wrap" style="display:none">
+  <div class="auth-modal-wrap">
+  <div class="auth-card">
+    <h1>Reset Password</h1>
+    <p class="sub">Enter your account email and we'll send you a link to reset your password.</p>
+    <div class="auth-error" id="forgot-password-error"></div>
+    <div class="auth-error" id="forgot-password-success" style="color:var(--green-text);background:var(--green-bg);border-color:var(--green-border);"></div>
+
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="forgot-password-email" placeholder="you@example.com" autocomplete="email" onkeydown="if(event.key==='Enter')sendPasswordResetEmail()">
+    </div>
+
+    <button class="auth-btn" id="forgot-password-btn" onclick="sendPasswordResetEmail()">Send reset link</button>
+    <div style="text-align:center;margin-top:1rem;">
+      <button onclick="closeForgotPassword()" style="background:none;border:none;font-size:13px;color:var(--t2);cursor:pointer;text-decoration:underline;font-family:'DM Sans',sans-serif;">Back to sign in</button>
+    </div>
+  </div>
+  </div>
+</div>
+
+<!-- SET NEW PASSWORD MODAL (shown when the user arrives via the emailed reset link) -->
+<div class="auth-modal-overlay" id="reset-password-wrap" style="display:none">
+  <div class="auth-modal-wrap">
+  <div class="auth-card">
+    <h1>Set New Password</h1>
+    <p class="sub">Choose a new password for your account.</p>
+    <div class="auth-error" id="reset-password-error"></div>
+
+    <div class="field">
+      <label>New Password</label>
+      <input type="password" id="reset-password-new" placeholder="New password" autocomplete="new-password" onkeydown="if(event.key==='Enter')submitNewPassword()">
+    </div>
+    <div class="field">
+      <label>Confirm Password</label>
+      <input type="password" id="reset-password-confirm" placeholder="Confirm new password" autocomplete="new-password" onkeydown="if(event.key==='Enter')submitNewPassword()">
+    </div>
+
+    <button class="auth-btn" id="reset-password-btn" onclick="submitNewPassword()">Update password</button>
   </div>
   </div>
 </div>
@@ -2757,6 +2805,8 @@ function toggleAuthMode() {
   document.getElementById('remember-me-row').style.display = isSignUp ? 'none' : 'flex';
   // Show username field only during sign up
   document.getElementById('field-username').style.display = isSignUp ? 'block' : 'none';
+  // Forgot-password only makes sense when signing in
+  document.getElementById('forgot-password-row').style.display = isSignUp ? 'none' : 'block';
 }
 
 function showAuthError(msg) {
@@ -2908,6 +2958,136 @@ function openAuthModal(mode){
 
 function dismissAuthModal(){
   document.getElementById('auth-wrap').style.display='none';
+}
+
+// ---- Forgot password ----
+function openForgotPassword(){
+  document.getElementById('forgot-password-email').value = document.getElementById('auth-email').value.trim();
+  document.getElementById('forgot-password-error').style.display='none';
+  document.getElementById('forgot-password-success').style.display='none';
+  document.getElementById('auth-wrap').style.display='none';
+  document.getElementById('forgot-password-wrap').style.display='flex';
+}
+
+function closeForgotPassword(){
+  document.getElementById('forgot-password-wrap').style.display='none';
+  document.getElementById('auth-wrap').style.display='flex';
+}
+
+async function sendPasswordResetEmail(){
+  const email = document.getElementById('forgot-password-email').value.trim();
+  const errEl = document.getElementById('forgot-password-error');
+  const okEl = document.getElementById('forgot-password-success');
+  errEl.style.display='none';
+  okEl.style.display='none';
+
+  if(!email){
+    errEl.textContent='Please enter your email address.';
+    errEl.style.display='block';
+    return;
+  }
+
+  const btn = document.getElementById('forgot-password-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  try {
+    // Supabase will email a link back to this same page with a recovery
+    // token in the URL fragment (#access_token=...&type=recovery)
+    const redirectTo = window.location.origin + window.location.pathname;
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/recover?redirect_to=${encodeURIComponent(redirectTo)}`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email })
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(()=>({}));
+      throw new Error(data.error_description || data.msg || data.message || 'Could not send reset email.');
+    }
+    okEl.textContent = 'Check your email for a link to reset your password.';
+    okEl.style.display = 'block';
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Send reset link';
+  }
+}
+
+// ---- Set new password (user arrives via the emailed recovery link) ----
+let recoveryAccessToken = null;
+
+// Call this once on page load, before tryAutoLogin(). Returns true if a
+// recovery link was detected, in which case the "set new password" modal
+// takes over the screen.
+function checkForPasswordRecovery(){
+  const hash = window.location.hash;
+  if (!hash || hash.indexOf('type=recovery') === -1) return false;
+
+  const params = new URLSearchParams(hash.substring(1));
+  const accessToken = params.get('access_token');
+  if (!accessToken) return false;
+
+  recoveryAccessToken = accessToken;
+  // Strip the token out of the address bar so it isn't left visible/bookmarked
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+
+  document.getElementById('reset-password-error').style.display = 'none';
+  document.getElementById('reset-password-new').value = '';
+  document.getElementById('reset-password-confirm').value = '';
+  document.getElementById('reset-password-wrap').style.display = 'flex';
+  hideSplash();
+  return true;
+}
+
+async function submitNewPassword(){
+  const pw = document.getElementById('reset-password-new').value;
+  const pw2 = document.getElementById('reset-password-confirm').value;
+  const errEl = document.getElementById('reset-password-error');
+  errEl.style.display = 'none';
+
+  if (!pw || pw.length < 6) {
+    errEl.textContent = 'Password must be at least 6 characters.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (pw !== pw2) {
+    errEl.textContent = 'Passwords do not match.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!recoveryAccessToken) {
+    errEl.textContent = 'This reset link has expired. Please request a new one.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('reset-password-btn');
+  btn.disabled = true;
+  btn.textContent = 'Updating...';
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method: 'PUT',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${recoveryAccessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+    const data = await res.json().catch(()=>({}));
+    if (!res.ok) throw new Error(data.error_description || data.msg || data.message || 'Could not update password.');
+
+    recoveryAccessToken = null;
+    document.getElementById('reset-password-wrap').style.display = 'none';
+    openAuthModal('signin');
+    const sub = document.getElementById('auth-sub');
+    if (sub) sub.textContent = 'Password updated! Please sign in with your new password.';
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Update password';
+  }
 }
 
 // Call this whenever a guest tries to do something that requires being logged in
@@ -9163,7 +9343,9 @@ function recAddToLearn() {
 window.recAddToLearn = recAddToLearn;
 window.recRefresh = recRefresh;
 
-tryAutoLogin();
+if (!checkForPasswordRecovery()) {
+  tryAutoLogin();
+}
 
 // ---- Session keep-alive & stale-tab recovery ----
 // Track when the app was last active so we can detect long absences.
