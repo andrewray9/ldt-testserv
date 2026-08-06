@@ -3038,6 +3038,26 @@ function checkForPasswordRecovery(){
   document.getElementById('reset-password-confirm').value = '';
   document.getElementById('reset-password-wrap').style.display = 'flex';
   hideSplash();
+
+  // We're intentionally skipping tryAutoLogin() during recovery (there's no
+  // session to restore yet), but tryAutoLogin() is also the thing that loads
+  // all the shared/public cloud data (dance bank, home card colors, DJ list,
+  // custom lists, etc). Without it, the app has nothing to show once the
+  // person signs back in below — so load that data here instead.
+  (async () => {
+    try {
+      await loadBank();
+      await loadPicks();
+      await loadFriendCards();
+      await loadDJList();
+      await loadHomeConfig();
+      await loadCustomLists();
+      await loadDrewDJFreestyles();
+      await clLoad();
+    } catch (e) {
+      console.warn('Public data load error during password recovery:', e);
+    }
+  })();
   return true;
 }
 
