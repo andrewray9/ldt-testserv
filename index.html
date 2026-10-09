@@ -2044,14 +2044,14 @@
     <div class="set-section">Home screen</div>
     <div class="set-row">
       <div class="set-row-text">
-        <div class="set-title">Rearrange home buttons</div>
-        <div class="set-desc">Drag to reorder your home buttons, and hide the ones you don't use.</div>
+        <div class="set-title">Rearrange Home Buttons</div>
+        <div class="set-desc">Drag to reorder your home buttons, and hide the ones you don't want/use.</div>
       </div>
       <label class="switch"><input type="checkbox" id="set-rearrange-toggle" onchange="settingsRearrangeToggled(this.checked)"><span class="slider"></span></label>
     </div>
     <div class="set-row">
       <div class="set-row-text">
-        <div class="set-title">Reset home layout</div>
+        <div class="set-title">Reset Home Layout</div>
         <div class="set-desc">Restore the default order, show all buttons, and remove custom colors and background.</div>
       </div>
       <button class="btn sm" onclick="resetHomeLayout()">Reset</button>
@@ -2059,7 +2059,7 @@
     <div class="set-row">
       <div class="set-row-text">
         <div class="set-title">Background</div>
-        <div class="set-desc">Choose a preset, build a gradient, or pick any color.</div>
+        <div class="set-desc">Choose a preset, make a gradient, or pick any solid color.</div>
       </div>
       <button id="set-bg-swatch" onclick="openBgPicker()" aria-label="Choose background" style="width:40px;height:34px;border-radius:8px;border:1.5px solid var(--b2);cursor:pointer;padding:0;flex-shrink:0;background:var(--bg3);"></button>
       <button class="btn sm" onclick="resetBgColor()">Default</button>
@@ -2131,7 +2131,7 @@
     <div class="modal-date" id="color-picker-for" style="margin-bottom:1rem;"></div>
     <div class="cp-grid" id="cp-grid"></div>
     <div style="display:flex;align-items:center;gap:8px;margin-top:1rem;">
-      <span style="font-size:13px;color:var(--t2);flex:1;">Custom blend</span>
+      <span style="font-size:13px;color:var(--t2);flex:1;">Custom Gradient</span>
       <input type="color" id="cp-c1" value="#667eea" style="width:40px;height:34px;border:none;background:none;padding:0;cursor:pointer;">
       <input type="color" id="cp-c2" value="#764ba2" style="width:40px;height:34px;border:none;background:none;padding:0;cursor:pointer;">
       <button class="btn" onclick="hePickCustomColor()">Set</button>
@@ -10094,7 +10094,7 @@ function openSettings(){
     if(isGuest||!currentUser){
       acc.innerHTML=`<div class="set-row"><div class="set-row-text"><div class="set-title">Browsing as guest</div><div class="set-desc">Sign in to save your data across devices.</div></div><button class="btn sm primary" onclick="closeSettings();openAuthModal('signin')">Sign in</button></div>`;
     } else {
-      acc.innerHTML=`<div class="set-row"><div class="set-row-text"><div class="set-title">Signed in as ${esc(currentUser)}</div><div class="set-desc">Your settings sync to your account.</div></div><button class="btn sm danger" onclick="closeSettings();if(confirm('Sign out?'))logout()">Sign out</button></div>`;
+      acc.innerHTML=`<div class="set-row"><div class="set-row-text"><div class="set-title">Signed in as ${esc(currentUser)}</div><div class="set-desc"></div></div><button class="btn sm danger" onclick="closeSettings();if(confirm('Sign out?'))logout()">Sign out</button></div>`;
     }
   }
   document.getElementById('settings-modal').style.display='flex';
@@ -10139,7 +10139,7 @@ function openHomeEditor(mode){
     const layout=getHomeLayout();
     heDraft={order:getAvailableHomeCards(),hidden:new Set(layout.hidden),colors:{...layout.colors}};
     if(t) t.textContent='Rearrange Home';
-    if(d) d.textContent="Drag the handle to move a button. Tap Hide to remove a button and its tab, or tap the palette button to change its color. You can bring hidden ones back anytime.";
+    if(d) d.textContent="Tap and hold the handle in the top left corner to move a button. Tap Hide to remove a button and its card, or tap the palette emoji to change its color. You can bring hidden cards back anytime.";
     if(b) b.textContent='Save';
   }
   renderHomeEditor();
