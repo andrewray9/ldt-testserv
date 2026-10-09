@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Line Dance Tracker</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="icon" type="image/x-icon" href="https://i.imgur.com/rPssxgh.png">
@@ -10,7 +10,7 @@
   <meta name="theme-color" content="#1a1a18" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Line Dance">
   <link rel="apple-touch-icon" href="https://i.imgur.com/rPssxgh.png">
   <style>
@@ -42,7 +42,10 @@
         --pink-bg:#2a1020;--pink-border:#8a2050;--pink-text:#f07ab0;
       }
     }
-    html,body{min-height:100vh;background:var(--bg3);color:var(--t1);font-family:'DM Sans',sans-serif;overflow-x:hidden;}
+    html,body{min-height:100vh;min-height:100dvh;color:var(--t1);font-family:'DM Sans',sans-serif;overflow-x:hidden;}
+    html{background:var(--bg3);}
+    body{background:transparent;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
+    #bg-layer{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;z-index:-1;pointer-events:none;background:var(--bg3);}
     @media(max-width:640px){
       input,select,textarea{font-size:16px!important;}
       .app{padding:1rem 1rem 5rem;}
@@ -239,7 +242,7 @@
     .hamburger-btn.open span:nth-child(2){opacity:0;}
     .hamburger-btn.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg);}
     .mobile-menu-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.3);}
-    .mobile-menu{position:fixed;top:0;right:0;bottom:0;width:260px;background:var(--bg);border-left:0.5px solid var(--b3);z-index:201;padding:1.25rem 1rem;display:flex;flex-direction:column;gap:4px;overflow-y:auto;transform:translateX(100%);transition:transform 0.22s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 24px rgba(0,0,0,0.12);}
+    .mobile-menu{position:fixed;top:0;right:0;bottom:0;width:260px;background:var(--bg);border-left:0.5px solid var(--b3);z-index:201;padding:calc(1.25rem + env(safe-area-inset-top)) 1rem calc(1.25rem + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:4px;overflow-y:auto;transform:translateX(100%);transition:transform 0.22s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 24px rgba(0,0,0,0.12);}
     .mobile-menu.open{transform:translateX(0);}
     .mobile-menu-header{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:0.5px solid var(--b3);display:flex;align-items:center;justify-content:space-between;}
     .mobile-menu-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--t2);line-height:1;padding:0;}
@@ -1191,9 +1194,9 @@
     <button class="mobile-tab active" data-tab="home" onclick="mobileSwitch('home')"><span class="mtab-dot"></span>Home</button>
     <button class="mobile-tab" data-tab="bank" onclick="setBankView('all',document.getElementById('bank-view-all-pill'));mobileSwitch('bank')"><span class="mtab-dot"></span>Dance Bank</button>
     <button class="mobile-tab" data-tab="know" onclick="mobileSwitch('know')" style="display:none"><span class="mtab-dot"></span>Dances I Know</button>
-    <button class="mobile-tab" data-tab="learning" onclick="mobileSwitch('learning')" style="display:none"><span class="mtab-dot"></span>Learning</button>
     <button class="mobile-tab" data-tab="learn" onclick="mobileSwitch('learn')" style="display:none"><span class="mtab-dot"></span>Want to Learn</button>
     <button class="mobile-tab" data-tab="night" onclick="mobileSwitch('night')"><span class="mtab-dot"></span>My Night</button>
+    <button class="mobile-tab" data-tab="learning" onclick="mobileSwitch('learning')" style="display:none"><span class="mtab-dot"></span>Learning</button>
     <button class="mobile-tab" data-tab="log" onclick="mobileSwitch('log')"><span class="mtab-dot"></span>Analytics</button>
     <button class="mobile-tab" data-tab="friends" onclick="mobileSwitch('friends')"><span class="mtab-dot"></span>Friends</button>
     <button class="mobile-tab" data-tab="feedback" onclick="mobileSwitch('feedback')"><span class="mtab-dot"></span>Suggestions &amp; Bugs</button>
@@ -1212,9 +1215,9 @@
     <button class="tab active" data-tab="home" onclick="switchTab('home')">Home</button>
     <button class="tab" data-tab="bank" onclick="setBankView('all',document.getElementById('bank-view-all-pill'));switchTab('bank')">Dance Bank</button>
     <button class="tab" data-tab="know" onclick="switchTab('know')" style="display:none">Dances I Know</button>
-    <button class="tab" data-tab="learning" onclick="switchTab('learning')" style="display:none">Learning</button>
     <button class="tab" data-tab="learn" onclick="switchTab('learn')" style="display:none">Want to Learn</button>
     <button class="tab" data-tab="night" onclick="switchTab('night')">My Night</button>
+    <button class="tab" data-tab="learning" onclick="switchTab('learning')" style="display:none">Learning</button>
     <button class="tab" data-tab="log" onclick="switchTab('log')">Analytics</button>
     <button class="tab" data-tab="drewsnight" id="drewsnight-tab-btn" style="display:none" onclick="switchTab('drewsnight')">Night</button>
     <button class="tab" data-tab="dj" id="dj-tab-btn" style="display:none" onclick="switchTab('dj')">Test Features</button>
@@ -1245,12 +1248,6 @@
         <span class="home-card-desc">Your personal repertoire & favorites</span>
         <span class="home-card-arrow">→</span>
       </button>
-      <button class="home-card hc-orchid" id="home-card-learning" onclick="setBankView('learning',document.getElementById('bank-view-learning-pill'));switchTab('bank')">
-        <span class="home-card-icon">🎯</span>
-        <span class="home-card-title">Learning</span>
-        <span class="home-card-desc">Dances you're working on right now</span>
-        <span class="home-card-arrow">→</span>
-      </button>
       <button class="home-card hc-purple" id="home-card-learn" onclick="setBankView('learn',document.getElementById('bank-view-learn-pill'));switchTab('bank')">
         <span class="home-card-icon">📚</span>
         <span class="home-card-title">Want to Learn</span>
@@ -1261,6 +1258,12 @@
         <span class="home-card-icon">🌙</span>
         <span class="home-card-title">My Night</span>
         <span class="home-card-desc">Log tonight's dances as you go</span>
+        <span class="home-card-arrow">→</span>
+      </button>
+      <button class="home-card hc-orchid" id="home-card-learning" onclick="setBankView('learning',document.getElementById('bank-view-learning-pill'));switchTab('bank')">
+        <span class="home-card-icon">🎯</span>
+        <span class="home-card-title">Learning</span>
+        <span class="home-card-desc">Dances you're working on right now</span>
         <span class="home-card-arrow">→</span>
       </button>
       <button class="home-card hc-amber" id="home-card-log" onclick="switchTab('log')">
@@ -1738,6 +1741,17 @@
         <div id="admin-home-gradients"></div>
       </div>
     </div>
+    <div class="admin-form collapsed" id="admin-default-layout-form">
+      <div class="admin-form-title" onclick="toggleAdminSection('admin-default-layout-form')">&#127968; Default Home Layout <span class="admin-caret">&#9660;</span></div>
+      <div class="admin-form-body">
+        <p style="font-size:13px;color:var(--t2);margin-bottom:1rem;">Set the default order and visibility of the home page buttons. Users who haven't customized their own layout will see this one. Users who have rearranged their home screen keep their own layout until they tap Reset in Settings.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <button class="btn amber" onclick="openHomeEditor('admin')">Edit default layout</button>
+          <button class="btn danger" onclick="clearDefaultHomeLayout()">Clear default</button>
+        </div>
+        <p id="default-layout-status" style="font-size:12px;color:var(--t2);margin-top:10px;"></p>
+      </div>
+    </div>
     <div class="admin-form collapsed" id="admin-conntest-form">
       <div class="admin-form-title" onclick="toggleAdminSection('admin-conntest-form')">&#128268; Connection Testing <span class="admin-caret">&#9660;</span></div>
       <div class="admin-form-body">
@@ -2069,12 +2083,12 @@
 <!-- HOME EDITOR (temporary rearrange window) -->
 <div class="modal-overlay" id="home-editor-modal" style="display:none">
   <div class="modal-card" style="max-width:440px;">
-    <h2>Rearrange Home</h2>
-    <div class="modal-date" style="margin-bottom:1rem;">Drag the handle to move a button. Tap Hide to remove a button and its tab, or tap the palette button to change its color. You can bring hidden ones back anytime.</div>
+    <h2 id="he-title">Rearrange Home</h2>
+    <div class="modal-date" id="he-desc" style="margin-bottom:1rem;">Drag the handle to move a button. Tap Hide to remove a button and its tab, or tap the palette button to change its color. You can bring hidden ones back anytime.</div>
     <div class="he-list" id="he-list"></div>
     <div class="modal-actions">
       <button class="btn" onclick="closeHomeEditor()">Cancel</button>
-      <button class="btn primary" onclick="saveHomeEditor()">Save</button>
+      <button class="btn primary" id="he-save-btn" onclick="saveHomeEditor()">Save</button>
     </div>
   </div>
 </div>
@@ -2198,6 +2212,7 @@ let djList=[]; // shared list of DJs managed by admin
 let djColors={}; // admin-set default gradient per DJ name
 let modList=[]; // shared list of moderator usernames
 let homeConfig={}; // admin-configurable home card gradients
+let defaultHomeLayout=null; // admin-set default {order:[],hidden:[]} for the home buttons
 let tabVisibilityConfig={}; // admin-configurable tab visibility per role
 let customLists=[]; // admin-created custom dance lists
 
@@ -2289,8 +2304,18 @@ function setSyncStatus(t,l){
     }
   }
   // Show / hide the connection popup
-  if(t==='error' && !isGuest) showConnPopup('pending');
-  else if(t==='synced') hideConnPopup(true);
+  if(t==='error' && !isGuest){
+    // Only show the popup once syncing has been failing for 2 seconds
+    if(!window._connPopupTimer){
+      window._connPopupTimer=setTimeout(()=>{
+        window._connPopupTimer=null;
+        if(!isGuest) showConnPopup('pending');
+      },2000);
+    }
+  } else {
+    clearTimeout(window._connPopupTimer);window._connPopupTimer=null;
+    if(t==='synced') hideConnPopup(true);
+  }
   // Start polling when we have pending changes; stop when we don't
   if(t==='error' && retryQueued){
     startPendingPoll();
@@ -2853,12 +2878,14 @@ async function loadHomeConfig(){
   const data=(r.ok&&r.data&&r.data.length>0)?r.data[0].data:{};
   homeConfig=data.cards||{};
   tabVisibilityConfig=data.tabVisibility||{};
+  defaultHomeLayout=(data.defaultLayout&&Array.isArray(data.defaultLayout.order))?data.defaultLayout:null;
   applyHomeCardGradients();
+  try{ applyTabVisibility(); }catch(e){}
 }
 async function saveHomeConfigToCloud(){
   setSyncStatus('syncing','Syncing...');
   const check=await sbFetch(`/rest/v1/dances?username=eq.__homeconfig__&select=username`);
-  const payload={cards:homeConfig,tabVisibility:tabVisibilityConfig};
+  const payload={cards:homeConfig,tabVisibility:tabVisibilityConfig,defaultLayout:defaultHomeLayout};
   if(check.ok&&check.data&&check.data.length>0){
     await sbFetch(`/rest/v1/dances?username=eq.__homeconfig__`,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({data:payload,updated_at:new Date().toISOString()})});
   } else {
@@ -2905,6 +2932,22 @@ function applyHomeCardGradients(){
     const grad=uc||homeConfig[id]||HOME_CARD_DEFAULTS[id];
     el.style.background=grad;
   });
+}
+async function clearDefaultHomeLayout(){
+  if(!isAdmin) return;
+  if(!confirm('Clear the default home layout? Users without a custom layout will go back to the built-in order.')) return;
+  defaultHomeLayout=null;
+  await saveHomeConfigToCloud();
+  applyTabVisibility();
+  updateDefaultLayoutStatus();
+  homeToast('Default layout cleared');
+}
+function updateDefaultLayoutStatus(){
+  const el=document.getElementById('default-layout-status');
+  if(!el) return;
+  if(!defaultHomeLayout){el.textContent='No default set — using the built-in order.';return;}
+  const h=(defaultHomeLayout.hidden||[]).length;
+  el.textContent='Default layout is set'+(h?' ('+h+' button'+(h!==1?'s':'')+' hidden by default).':'.');
 }
 function renderAdminHomeGradients(){
   const el=document.getElementById('admin-home-gradients');
@@ -3744,12 +3787,12 @@ function switchTab(tab,_fromSwipe=false,_noSave=false){
   if(tab==='drewsnight') renderDrewsNight();
   if(tab==='log'){renderHistoryStats();renderTop5();renderLog();renderDJAnalytics();renderTFDJFavs();}
   if(tab==='admin'){
-    ['admin-gradients-form','admin-dj-form','admin-add-dance-form','admin-bank-section','admin-users-section','admin-mods-section','admin-tab-visibility-section'].forEach(id=>{
+    ['admin-gradients-form','admin-default-layout-form','admin-dj-form','admin-add-dance-form','admin-bank-section','admin-users-section','admin-mods-section','admin-tab-visibility-section'].forEach(id=>{
       const s=document.getElementById(id);if(s) s.classList.add('collapsed');
     });
     const bs=document.getElementById('admin-bank-search');if(bs) bs.value='';
     const us=document.getElementById('admin-users-search');if(us) us.value='';
-    renderAdminBank();renderAdminDJList();loadAdminUsers();renderAdminHomeGradients();
+    renderAdminBank();renderAdminDJList();loadAdminUsers();renderAdminHomeGradients();updateDefaultLayoutStatus();
   }
   if(tab==='bank') renderBank();
   if(tab==='home') recRefresh();
@@ -9834,9 +9877,11 @@ function getHomeLayout(){
   let l=null;
   if(!isGuest&&state&&state.homeLayout) l=state.homeLayout;
   else{ try{ l=JSON.parse(localStorage.getItem('ld_home_layout')||'null'); }catch(e){} }
+  const hasPersonal=!!(l&&Array.isArray(l.order)&&l.order.length);
+  const def=(!hasPersonal&&defaultHomeLayout)?defaultHomeLayout:null;
   return{
-    order:(l&&Array.isArray(l.order))?l.order:[],
-    hidden:(l&&Array.isArray(l.hidden))?l.hidden:[],
+    order:hasPersonal?l.order:(def?def.order:[]),
+    hidden:hasPersonal?((l&&Array.isArray(l.hidden))?l.hidden:[]):(def&&Array.isArray(def.hidden)?def.hidden:((l&&Array.isArray(l.hidden))?l.hidden:[])),
     colors:(l&&l.colors&&typeof l.colors==='object')?l.colors:{},
     bgColor:(l&&isValidBg(l.bgColor))?l.bgColor:''
   };
@@ -9846,11 +9891,14 @@ function isValidBg(v){
 }
 function applyBgColor(c){
   const v=isValidBg(c)?c:'';
-  [document.documentElement,document.body].forEach(el=>{
-    el.style.background=v;
-    el.style.backgroundAttachment=v?'fixed':'';
-    el.style.backgroundSize=v&&v[0]!=='#'?'cover':'';
-  });
+  let bl=document.getElementById('bg-layer');
+  if(!bl){bl=document.createElement('div');bl.id='bg-layer';document.body.insertBefore(bl,document.body.firstChild);}
+  bl.style.background=v;
+  bl.style.backgroundSize=v&&v[0]!=='#'?'cover':'';
+  const firstCol=(v.match(/#[0-9a-fA-F]{6}/)||[''])[0];
+  document.documentElement.style.background=firstCol;
+  document.body.style.background='';
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m=>{if(!m.dataset.orig)m.dataset.orig=m.content;m.content=firstCol||m.dataset.orig;});
   const r=document.documentElement.style;
   if(v){
     const lin=x=>{x/=255;return x<=0.03928?x/12.92:Math.pow((x+0.055)/1.055,2.4);};
@@ -10010,14 +10058,31 @@ function resetHomeLayout(){
 (function(){try{const c=JSON.parse(localStorage.getItem('ld_home_layout')||'null');if(c&&isValidBg(c.bgColor)) applyBgColor(c.bgColor);}catch(e){}})();
 // ---- Home editor ----
 let heDraft={order:[],hidden:new Set(),colors:{}};
+let heMode='user';
 function heCardBg(id){
   const el=document.getElementById(id);
   if(heDraft.colors&&heDraft.colors[id]) return heDraft.colors[id];
   return (typeof homeConfig!=='undefined'&&homeConfig[id])||(typeof HOME_CARD_DEFAULTS!=='undefined'&&HOME_CARD_DEFAULTS[id])||(el&&el.style.background)||'var(--bg3)';
 }
-function openHomeEditor(){
-  const layout=getHomeLayout();
-  heDraft={order:getAvailableHomeCards(),hidden:new Set(layout.hidden),colors:{...layout.colors}};
+function openHomeEditor(mode){
+  heMode=(mode==='admin'&&isAdmin)?'admin':'user';
+  const t=document.getElementById('he-title'),d=document.getElementById('he-desc'),b=document.getElementById('he-save-btn');
+  if(heMode==='admin'){
+    const def=defaultHomeLayout||{order:[],hidden:[]};
+    const order=[];
+    (def.order||[]).forEach(id=>{if(HOME_DEFAULT_ORDER.includes(id)&&!order.includes(id)) order.push(id);});
+    HOME_DEFAULT_ORDER.forEach(id=>{if(!order.includes(id)) order.push(id);});
+    heDraft={order,hidden:new Set(def.hidden||[]),colors:{}};
+    if(t) t.textContent='Default Home Layout';
+    if(d) d.textContent='Drag the handle to move a button, or tap Hide to hide it by default. This is what users see until they customize their own home screen.';
+    if(b) b.textContent='Save default';
+  } else {
+    const layout=getHomeLayout();
+    heDraft={order:getAvailableHomeCards(),hidden:new Set(layout.hidden),colors:{...layout.colors}};
+    if(t) t.textContent='Rearrange Home';
+    if(d) d.textContent="Drag the handle to move a button. Tap Hide to remove a button and its tab, or tap the palette button to change its color. You can bring hidden ones back anytime.";
+    if(b) b.textContent='Save';
+  }
   renderHomeEditor();
   document.getElementById('home-editor-modal').style.display='flex';
 }
@@ -10030,7 +10095,7 @@ function renderHomeEditor(){
       <span class="he-handle" title="Drag to move">&#10021;</span>
       <button class="he-eye" onclick="heToggleHidden('${id}')">${hidden?'Show':'Hide'}</button>
       <span class="he-tile-title">${esc(HOME_CARD_NAMES[id]||id)}</span>
-      <div class="he-actions"><button class="he-icon-btn" onclick="openColorPicker('${id}')" title="Change color">&#127912;</button></div>
+      ${heMode==='admin'?'':`<div class="he-actions"><button class="he-icon-btn" onclick="openColorPicker('${id}')" title="Change color">&#127912;</button></div>`}
     </div>`;
   }).join('');
 }
@@ -10045,11 +10110,22 @@ function heToggleHidden(id){
 }
 function closeHomeEditor(){
   document.getElementById('home-editor-modal').style.display='none';
+  heMode='user';
   const tog=document.getElementById('set-rearrange-toggle');
   if(tog) tog.checked=false;
 }
-function saveHomeEditor(){
+async function saveHomeEditor(){
   heSyncOrderFromDOM();
+  if(heMode==='admin'){
+    if(!isAdmin) return;
+    defaultHomeLayout={order:[...heDraft.order],hidden:[...heDraft.hidden]};
+    closeHomeEditor();
+    await saveHomeConfigToCloud();
+    applyTabVisibility();
+    updateDefaultLayoutStatus();
+    homeToast('Default home layout saved');
+    return;
+  }
   // Keep unavailable (role-hidden) cards' relative placement at the end
   const rest=HOME_DEFAULT_ORDER.filter(id=>!heDraft.order.includes(id));
   const colors={};
